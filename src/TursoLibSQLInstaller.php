@@ -29,7 +29,7 @@ class TursoLibSQLInstaller
         $this->arch = php_uname('m');
         $this->home = trim(shell_exec('echo $HOME'));
         $this->currentVersion = implode('.', array_slice(explode('.', PHP_VERSION), 0, -1));
-        $this->minimalVersion = "8.2";
+        $this->minimalVersion = "8.0";
         $this->binaryName = "liblibsql_php.so";
         $this->destination = "$this->home/.turso-client-php";
         $this->herdPath = "$this->home/Library/Application Support/Herd";

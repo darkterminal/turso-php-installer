@@ -17,7 +17,7 @@
     ],
     "extra": {
         "phar-builder": {
-            "name": "turso-php",
+            "name": "turso-php.phar",
             "output": "./dist/",
             "dev": false,
             "shebang": true,
