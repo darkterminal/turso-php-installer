@@ -72,10 +72,13 @@ class TursoLibSQLInstaller
 
     public function uninstall(): void
     {
-        shell_exec("sudo -k");
-        $command = "sudo sed -i '/". str_replace('/', '\/', $this->moduleFile) ."/d' {$this->phpIni}' && sudo -k";
+        echo "Please enter your sudo password (sudo)";
+        $escapedModuleFile = str_replace('/', '\/', $this->moduleFile);
+        $command = "sudo -S sed -i '/$escapedModuleFile/d' {$this->phpIni}";
         shell_exec($command);
+
         $this->removeDirectory($this->destination);
+
         echo "Removed extension line from {$this->phpIni}\n";
         echo "THANK YOU FOR USING TURSO libSQL Extension for PHP\n";
     }
