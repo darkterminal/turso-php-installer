@@ -73,14 +73,7 @@ class TursoLibSQLInstaller
     public function uninstall(): void
     {
         shell_exec("sudo -k");
-
-        echo "Please enter your sudo password: ";
-        shell_exec('stty -echo');
-        $sudoPassword = trim(fgets(STDIN));
-        shell_exec('stty echo');
-        echo "\n\n";
-
-        $command = "echo '$sudoPassword' | sudo -S bash -c 'sed -i '/". str_replace('/', '\/', $this->moduleFile) ."/d' {$this->phpIni}' && sudo -k";
+        $command = "sudo sed -i '/". str_replace('/', '\/', $this->moduleFile) ."/d' {$this->phpIni}' && sudo -k";
         shell_exec($command);
         $this->removeDirectory($this->destination);
         echo "Removed extension line from {$this->phpIni}\n";
