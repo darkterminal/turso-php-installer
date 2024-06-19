@@ -1,0 +1,32 @@
+{
+    "name": "darkterminal/turso-php-installer",
+    "description": "Turso libSQL Extension PHP Installer",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Darkterminal\\TursoLibSQLInstaller\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Imam Ali Mustofa",
+            "email": "darkterminal@duck.com",
+            "role": "Software Freestyle Engineer"
+        }
+    ],
+    "extra": {
+        "phar-builder": {
+            "name": "turso-php",
+            "output": "./dist/",
+            "dev": false,
+            "shebang": true,
+            "entry-point": "turso-php",
+            "included": ["README.md"],
+            "compression": "bz2"
+        }
+    },
+    "require-dev": {
+        "macfja/phar-builder": "^0.2.8"
+    }
+}
