@@ -30,6 +30,7 @@ jobs:
           composer install
           composer run release
 
+          git checkout main
           git add $GITHUB_WORKSPACE/dist/turso-php.phar
           git commit -m "build(phar): new phar version ${{ env.VERSION }}"
           git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
