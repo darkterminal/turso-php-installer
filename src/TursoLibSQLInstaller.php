@@ -67,20 +67,30 @@ class TursoLibSQLInstaller
 
     public function update(): void
     {
-        $this->downloadAndExtractBinary(true);
+        $isFound = $this->checkIsAlreadyExists();
+        if ($isFound) {
+            $this->downloadAndExtractBinary(true);
+            exit(1);
+        }
+        echo "You doesn't have Turso libSQL Extension installed before.\n";
     }
 
     public function uninstall(): void
     {
-        echo "Please enter your sudo password (sudo)";
-        $escapedModuleFile = str_replace('/', '\/', $this->moduleFile);
-        $command = "sudo -S sed -i '/$escapedModuleFile/d' {$this->phpIni}";
-        shell_exec($command);
-
-        $this->removeDirectory($this->destination);
-
-        echo "Removed extension line from {$this->phpIni}\n";
-        echo "THANK YOU FOR USING TURSO libSQL Extension for PHP\n";
+        $isFound = $this->checkIsAlreadyExists();
+        if ($isFound) {
+            echo "Please enter your sudo password ";
+            $escapedModuleFile = str_replace('/', '\/', $this->moduleFile);
+            $command = "sudo -S sed -i '/$escapedModuleFile/d' {$this->phpIni}";
+            shell_exec($command);
+    
+            $this->removeDirectory($this->destination);
+    
+            echo "Removed extension line from {$this->phpIni}\n";
+            echo "THANK YOU FOR USING TURSO libSQL Extension for PHP\n";
+            exit(1);
+        }
+        echo "You doesn't have Turso libSQL Extension installed before.\n";
     }
 
     private function removeDirectory(string $dir): bool
@@ -173,10 +183,10 @@ class TursoLibSQLInstaller
         }
     }
 
-    private function checkIsAlreadyExists(): ?string
+    private function checkIsAlreadyExists(): string|false
     {
         $searchLibsql = shell_exec('php -m | grep libsql');
-        return $searchLibsql ? trim($searchLibsql) : null;
+        return $searchLibsql ? trim($searchLibsql) : false;
     }
 
     private function checkIsPhpIniExists(): void
