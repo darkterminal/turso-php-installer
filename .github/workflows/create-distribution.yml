@@ -1,0 +1,37 @@
+name: Create Phar Distribution File
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  name: Build Phar
+  runs-on: ubuntu-latest
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Get the release version from the tag
+      shell: bash
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+    
+    - name: Create Phar File
+      shell: bash
+      run: |
+        composer install
+        composer run release
+
+        dirname="turso-php-installer-${{ env.VERSION }}"
+        mkdir "$dirname"
+        tar -czf "$dirname.tar.gz" "$dirname"
+        echo "ASSET=$dirname.tar.gz" >> $GITHUB_ENV
+        
+    - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ${{ env.ASSET }}
