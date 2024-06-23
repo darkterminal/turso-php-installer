@@ -8,39 +8,31 @@ This is the Turso/libSQL Extension for PHP installer script for Linux and MacOS.
 ## Installation
 
 ```bash
-curl -s https://darkterminal.github.io/turso-php-installer/dist/turso-php.phar -o turso-php-installer
-chmod +x turso-php-installer
-php turso-php-installer
+curl --proto '=https' --tlsv1.2 -sSf "https://darkterminal.github.io/turso-php-installer/dist/turso-php-installer.phar"
+./turso-php-installer.phar
+```
 
-_ _ _    ____   ___  _       ____  _   _ ____    ___           _        _ _           
-| (_) |__/ ___| / _ \| |     |  _ \| | | |  _ \  |_ _|_ __  ___| |_ __ _| | | ___ _ __ 
-| | | '_ \___ \| | | | |     | |_) | |_| | |_) |  | || '_ \/ __| __/ _` | | |/ _ \ '__|
-| | | |_) |__) | |_| | |___  |  __/|  _  |  __/   | || | | \__ \ || (_| | | |  __/ |   
-|_|_|_.__/____/ \__\_\_____| |_|   |_| |_|_|     |___|_| |_|___/\__\__,_|_|_|\___|_|   
+Add as a global executable script:
 
-Turso libSQL Installer (version: 1.0.0)
-commands:
-    - help          Display all command
-    - install       Install libSQL Extension for PHP
-    - update        Update libSQL Extension for PHP
-    - uninstall     Uninstall libSQL Extension for PHP
+```bash
+sudo mv turso-php-installer.phar /usr/local/bin/turso-php-installer
 ```
 
 ## Usage
 
 Install Turso Client PHP / libSQL Extension without worry:
 ```bash
-php turso-php-installer install
+turso-php-installer install
 ```
 
 Update Turso Client PHP / libSQL Extension without worry:
 ```bash
-php turso-php-installer update
+turso-php-installer update
 ```
 
 Uninstall Turso Client PHP / libSQL Extension without worry:
 ```bash
-php turso-php-installer uninstall
+turso-php-installer uninstall
 ```
 
 That's it!

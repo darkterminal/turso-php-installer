@@ -1,0 +1,50 @@
+{
+  "commit-msg": {
+    "enabled": true,
+    "actions": []
+  },
+  "pre-push": {
+    "enabled": false,
+    "actions": [
+      {
+        "action": "git add dist/ && git commit -m 'build(dist): update new distribution'"
+      }
+    ]
+  },
+  "pre-commit": {
+    "enabled": true,
+    "actions": [
+      {
+        "action": "\\CaptainHook\\App\\Hook\\PHP\\Action\\Linting"
+      }
+    ]
+  },
+  "prepare-commit-msg": {
+    "enabled": false,
+    "actions": []
+  },
+  "post-commit": {
+    "enabled": false,
+    "actions": [
+      {
+        "action": "box validate && box compile"
+      }
+    ]
+  },
+  "post-merge": {
+    "enabled": false,
+    "actions": []
+  },
+  "post-checkout": {
+    "enabled": false,
+    "actions": []
+  },
+  "post-rewrite": {
+    "enabled": false,
+    "actions": []
+  },
+  "post-change": {
+    "enabled": false,
+    "actions": []
+  }
+}
