@@ -1,0 +1,56 @@
+{
+    "banner": [
+        "This file is part of the PPCRE.",
+        "",
+        "(c) Imam Ali Mustofa <darkterminal@duck.com>",
+        "",
+        "For the full copyright and license information, please view",
+        "the LICENSE file that was distributed with this source code."
+    ],
+    "directories": [
+       "src",
+       "vendor"
+    ],
+    "files": [
+        "LICENSE"
+    ],
+    "blacklist": [
+        "tests"
+    ],
+    "finder": [
+        {
+            "in": "src",
+            "name": "*.*"
+        },
+        {
+            "in": "vendor",
+            "name": "*.php",
+            "exclude": [
+                "CHANGELOG",
+                "CONTRIBUTING",
+                "README",
+                "Tests",
+                "behat",
+                "ext",
+                "bin",
+                "build",
+                "doc",
+                "docs",
+                "doc-template",
+                "fixtures",
+                "test",
+                "tests",
+                "test_old",
+                "vendor-bin"
+            ]
+        }
+    ],
+    "compression": "GZ",
+    "compactors": [
+	"KevinGH\\Box\\Compactor\\Json",
+        "KevinGH\\Box\\Compactor\\Php"
+    ],
+    "replacement-sigil": "$",
+    "git-commit-short": "Id",
+    "output": "dist/turso-php-installer.phar"
+}

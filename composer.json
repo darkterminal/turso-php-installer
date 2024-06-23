@@ -15,22 +15,16 @@
             "role": "Software Freestyle Engineer"
         }
     ],
-    "bin": ["turso-php"],
-    "extra": {
-        "phar-builder": {
-            "name": "turso-php.phar",
-            "output": "./dist/",
-            "dev": false,
-            "shebang": true,
-            "entry-point": "turso-php",
-            "included": ["README.md"],
-            "compression": "bz2"
-        }
-    },
-    "scripts": {
-        "release": "@php -d phar.readonly=0 vendor/bin/phar-builder package composer.json -o ./dist"
+    "bin": ["turso-php-installer"],
+    "require": {
+        "laravel/prompts": "^0.1.24"
     },
     "require-dev": {
-        "macfja/phar-builder": "^0.2.8"
+        "captainhook/captainhook-phar": "^5.23"
+    },
+    "config": {
+        "allow-plugins": {
+            "captainhook/captainhook-phar": true
+        }
     }
 }

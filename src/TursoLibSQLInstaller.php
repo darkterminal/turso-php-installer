@@ -4,6 +4,15 @@ namespace Darkterminal\TursoLibSQLInstaller;
 
 use Exception;
 
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\error;
+use function Laravel\Prompts\info;
+use function Laravel\Prompts\password;
+use function Laravel\Prompts\select;
+use function Laravel\Prompts\spin;
+use function Laravel\Prompts\table;
+use function Laravel\Prompts\warning;
+
 class TursoLibSQLInstaller
 {
     public const VERSION = '1.0.0';
@@ -12,7 +21,7 @@ class TursoLibSQLInstaller
     private string $arch;
     private string $home;
     private string $currentVersion;
-    private string $minimalVersion;
+    private string $selectedPhpVersion;
     private string $binaryName;
     private string $destination;
     private string $herdPath;
@@ -29,7 +38,7 @@ class TursoLibSQLInstaller
         $this->arch = php_uname('m');
         $this->home = trim(shell_exec('echo $HOME'));
         $this->currentVersion = implode('.', array_slice(explode('.', PHP_VERSION), 0, -1));
-        $this->minimalVersion = "8.0";
+        $this->selectedPhpVersion = $this->currentVersion;
         $this->binaryName = "liblibsql_php.so";
         $this->destination = "$this->home/.turso-client-php";
         $this->herdPath = "$this->home/Library/Application Support/Herd";
@@ -72,25 +81,33 @@ class TursoLibSQLInstaller
             $this->downloadAndExtractBinary(true);
             exit(1);
         }
-        echo "You doesn't have Turso libSQL Extension installed before.\n";
+        error("You doesn't have Turso libSQL Extension installed before.");
     }
 
     public function uninstall(): void
     {
         $isFound = $this->checkIsAlreadyExists();
         if ($isFound) {
-            echo "Please enter your sudo password ";
+            echo "To uninstall the extension, turso need your sudo permission.\n";
             $escapedModuleFile = str_replace('/', '\/', $this->moduleFile);
-            $command = "sudo -S sed -i '/$escapedModuleFile/d' {$this->phpIni}";
+
+            shell_exec("sudo -k");
+            echo "Type your ";
+            $command = "sudo -S bash -c \"sed -i '/$escapedModuleFile/d' {$this->phpIni}\" && sudo -k";
             shell_exec($command);
-    
+
             $this->removeDirectory($this->destination);
-    
-            echo "Removed extension line from {$this->phpIni}\n";
-            echo "THANK YOU FOR USING TURSO libSQL Extension for PHP\n";
+
+            $message = <<<UNINSTALL_MESSAGE
+            [INFO]
+
+            Removed extension line from {$this->phpIni}
+            echo "THANK YOU FOR USING TURSO libSQL Extension for PHP
+            UNINSTALL_MESSAGE;
+            info($message);
             exit(1);
         }
-        echo "You doesn't have Turso libSQL Extension installed before.\n";
+        error("You doesn't have Turso libSQL Extension installed before.");
     }
 
     private function removeDirectory(string $dir): bool
@@ -118,32 +135,38 @@ class TursoLibSQLInstaller
 
         if ($isWindows) {
             $message = <<<WINDOWS_ERR
-            Sorry, Turso Database is only support for Linux and MacOS.
+            [WARNING]
+
+            Sorry, Turso Installer is only support for Linux and MacOS.
             
             You are using Windows, you try our alternative using Dev Containers
             visit: https://github.com/darkterminal/turso-docker-php
             
             Thank you!
+
             WINDOWS_ERR;
-            echo $message . PHP_EOL;
+            warning($message);
             exit(1);
         }
     }
 
     private function checkPhpVersion(): void
     {
-        $phpVersionChecker = version_compare(PHP_VERSION, $this->minimalVersion, '>=');
-        if (!$phpVersionChecker) {
-            echo "Oops! Your PHP version environment does not meet the requirements.\n";
-            echo "Need a minimal PHP {$this->minimalVersion} installed on your environment.\n";
-            exit(1);
-        }
+        $phpVersions = ['8.0', '8.1', '8.2', '8.3'];
+        $versionSelected = select(
+            label: 'Select libSQL for PHP Version',
+            options: $phpVersions,
+            default: $this->currentVersion,
+        );
+        $this->selectedPhpVersion = $versionSelected;
     }
 
     private function checkFunctionRequirements(): void
     {
         if (!function_exists('shell_exec') && !function_exists('curl_version')) {
             $message = <<<ERR_FUNC_NOT_FOUND
+            [ERROR]
+
             It looks like the 'shell_exec' and 'curl_version' functions are disabled in your PHP environment. These functions are essential for this script to work properly.
             To enable them, follow these steps:
             1. Open your 'php.ini' file. You can find the location of your 'php.ini' file by running the command 'php --ini' in your terminal or command prompt.
@@ -159,9 +182,11 @@ class TursoLibSQLInstaller
             If you are using a web hosting service, you might need to contact your hosting provider to enable these functions for you.
             For more information on 'shell_exec', visit: https://www.php.net/manual/en/function.shell-exec.php
             For more information on 'curl_version', visit: https://www.php.net/manual/en/function.curl-version.php
+
             Thank you!
+
             ERR_FUNC_NOT_FOUND;
-            echo $message . PHP_EOL;
+            error($message);
             exit(1);
         }
     }
@@ -169,8 +194,13 @@ class TursoLibSQLInstaller
     private function checkIsLaravelHerd(): void
     {
         if (is_dir($this->herdPath)) {
-            echo "Your're using Laravel Herd\n";
-            echo "Sorry, Laravel Herd is not supported yet.\n";
+            $message = <<<HERD_WARNING
+            [WARNING]
+
+            Your're using Laravel Herd
+            Sorry, Laravel Herd is not supported yet.
+            HERD_WARNING;
+            warning($message);
             exit(0);
         }
     }
@@ -178,7 +208,12 @@ class TursoLibSQLInstaller
     private function checkIfAlreadyExists(): void
     {
         if (!empty($this->isAlreadyExists)) {
-            echo "Turso Client PHP is already installed and configured!\n";
+            $message = <<<INFO_ALREADY_INSTALL
+            [INFO]
+            
+            Turso/libSQL Client PHP is already installed and configured!
+            INFO_ALREADY_INSTALL;
+            info($message);
             exit(0);
         }
     }
@@ -192,8 +227,13 @@ class TursoLibSQLInstaller
     private function checkIsPhpIniExists(): void
     {
         if (empty($this->configIni['loaded_configuration_file'])) {
-            echo "You don't have PHP install globaly in your environment\n";
-            echo "Turso Client PHP lookup php.ini file and it's not found\n";
+            $message = <<<ERROR_PHP_INI
+            [ERROR]
+
+            You don't have PHP install globaly in your environment
+            Turso/libSQL Client PHP lookup php.ini file and it's not found
+            ERROR_PHP_INI;
+            error($message);
             exit(1);
         }
     }
@@ -220,37 +260,49 @@ class TursoLibSQLInstaller
                     closedir($dir);
 
                     if ($found) {
-                        echo "Turso Client is Ready!\n";
+                        info('Turso Client is Ready!');
                         if ($isUpdateCommand === false) {
                             die();
                         }
                     } else {
-                        echo "Extension is not found!\n";
+                        info('Extension is not found!');
                         if (!$is_dir_exists) {
+                            info("Creating directory at {$this->destination}");
                             shell_exec("mkdir {$this->destination}");
                         }
                     }
                 } else {
-                    echo "Failed to open directory {$this->destination}\n";
+                    error("Failed to open directory {$this->destination}");
                     exit(1);
                 }
             } else {
-                echo "{$this->destination} is not a valid directory\n";
+                error("{$this->destination} is not a valid directory");
                 exit(1);
             }
         } else {
+            info("Creating directory at {$this->destination}");
             shell_exec("mkdir {$this->destination}");
         }
     }
 
     private function askInstallPermission(): void
     {
-        echo "Turso need to install the client extension in your PHP environment.\n";
-        echo "This script will ask your sudo password to modify your php.ini file:\n";
-        $answer = readline("Are you ok? [y/N]: ");
+        $brief = <<<BRIEF_MESSAGE
+        Turso need to install the client extension in your PHP environment.
+        This script will ask your sudo password to modify your php.ini file:
 
-        if (strtolower(trim($answer)) !== 'y') {
-            echo "Ok... no problem, see you later!\n";
+        BRIEF_MESSAGE;
+        echo $brief . PHP_EOL;
+        $confirmed = confirm(
+            label: 'Do you accept the permission?',
+            default: true,
+            yes: 'Yes',
+            no: 'No',
+            hint: 'The terms must be accepted to continue.'
+        );
+
+        if (!$confirmed) {
+            info("Ok.. no problem, see you later!");
             exit(0);
         }
     }
@@ -259,18 +311,10 @@ class TursoLibSQLInstaller
     {
         if ($update === false) {
             shell_exec("sudo -k");
-
-            echo "Please enter your sudo password: ";
-            shell_exec('stty -echo');
-            $sudoPassword = trim(fgets(STDIN));
-            shell_exec('stty echo');
-            echo "\n\n";
-
-            $command = "echo '$sudoPassword' | sudo -S bash -c 'echo \"$this->moduleFile\" >> $this->phpIni' && sudo -k";
-
+            echo "Type your ";
+            $command = "sudo -S bash -c 'echo \"$this->moduleFile\" >> $this->phpIni' && sudo -k";
             shell_exec($command);
         }
-        echo "\n\n";
         $this->sayThankYou();
     }
 
@@ -296,9 +340,9 @@ class TursoLibSQLInstaller
         switch ($this->os) {
             case 'darwin':
                 if ($this->arch == "x86_64") {
-                    $this->extensionArchive = "php-{$this->currentVersion}-x86_64-apple-darwin";
+                    $this->extensionArchive = "php-{$this->selectedPhpVersion}-x86_64-apple-darwin";
                 } else if ($this->arch == "arm64") {
-                    $this->extensionArchive = "php-{$this->currentVersion}-aarch64-apple-darwin";
+                    $this->extensionArchive = "php-{$this->selectedPhpVersion}-aarch64-apple-darwin";
                 } else {
                     echo "Unsupported architecture: {$this->arch} for Darwin\n";
                     exit(1);
@@ -306,7 +350,7 @@ class TursoLibSQLInstaller
                 break;
             case 'linux':
                 if ($this->arch == "x86_64") {
-                    $this->extensionArchive = "php-{$this->currentVersion}-x86_64-unknown-linux-gnu";
+                    $this->extensionArchive = "php-{$this->selectedPhpVersion}-x86_64-unknown-linux-gnu";
                 } else {
                     echo "Unsupported architecture: {$this->arch} for Linux\n";
                     exit(1);
@@ -345,10 +389,9 @@ class TursoLibSQLInstaller
         return $text;
     }
 
-    private function getAssetReleases(): array|null
+    private function getAssetReleases(): array|null|Exception
     {
-        try {
-            echo "Downloading...\n";
+        $gettingRelease = spin(function () {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $this->repo);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -372,9 +415,9 @@ class TursoLibSQLInstaller
             }
 
             return $assets;
-        } catch (Exception $e) {
-            throw new Exception('Error: ' . $e->getMessage());
-        }
+        }, 'Get the lastest version of the extension...');
+
+        return $gettingRelease;
     }
 
     private function downloadAndExtractBinary($update = false): void
@@ -384,58 +427,81 @@ class TursoLibSQLInstaller
         $assets = $this->getAssetReleases();
         $download_url = null;
 
-        foreach ($assets as $asset) {
-            if (strpos($asset['name'], $this->extensionArchive) !== false) {
-                $download_url = $asset['browser_download_url'];
+        $output_file = spin(function () use ($assets, $download_url) {
+
+            foreach ($assets as $asset) {
+                if (strpos($asset['name'], $this->extensionArchive) !== false) {
+                    $download_url = $asset['browser_download_url'];
+                }
             }
-        }
 
-        if ($download_url === null) {
-            echo "Download URL is not found!\n";
-            exit(1);
-        }
+            if ($download_url === null) {
+                echo "Download URL is not found!\n";
+                exit(1);
+            }
 
-        $output_file = basename($download_url);
-        shell_exec("curl -L $download_url -o $output_file");
+            $output_file = basename($download_url);
+            shell_exec("curl -L $download_url -o $output_file");
 
-        sleep(2);
+            return $output_file;
+        }, 'Downloading the extesion...');
+        
+        $output_file = spin(function () use ($output_file) {
 
-        shell_exec("tar -xzf $output_file");
+            shell_exec("tar -xzf $output_file");
 
-        sleep(2);
+            $directory = str_replace('.tar.gz', '', $output_file);
 
-        $directory = str_replace('.tar.gz', '', $output_file);
+            shell_exec("mv $directory/* {$this->destination}/");
 
-        shell_exec("mv $directory/* {$this->destination}/");
+            shell_exec("rm $output_file");
+            rmdir($directory);
 
-        shell_exec("rm $output_file");
-        rmdir($directory);
+            $message = <<<SETTING_MESSAGE
+            [INFO]
 
-        echo "Downloaded release asset to $output_file\n";
-        echo "Your extension is already downloaded!\n";
-        echo "store at {$this->destination}.\n";
+            Downloaded release asset to $output_file
+            Turso/libSQL Client PHP is downloaded!
+            store at {$this->destination}
+            SETTING_MESSAGE;
+            info($message);
+            echo "\n\n";
+
+            return $output_file;
+        }, 'Extract and move the extension...');
         $this->askWritePermission($update);
     }
 
     private function sayThankYou(): void
     {
         $finish_message = <<<FINISH_MESSAGE
-TURSO CLIENT PHP SUCCESSFULLY INSTALLED!
-To get extension class autocompletion you need to modify your IDE Settings
-in this case VSCode Settings:
-- Open your VSCode setting (cmd/ctrl+,) then search "intelephense.stubs"
-- add this: {$this->destination} value on the lists
-Thank you for using Turso Database!
-FINISH_MESSAGE;
-        echo $finish_message . PHP_EOL;
+
+        TURSO CLIENT PHP SUCCESSFULLY INSTALLED!
+        To get extension class autocompletion you need to modify your IDE Settings
+        in this case VSCode Settings:
+        - Open your VSCode setting (cmd/ctrl+,) then search "intelephense.stubs"
+        - add this: {$this->destination} value on the lists
+        Thank you for using Turso Database!
+        FINISH_MESSAGE;
+        info($finish_message);
     }
 
     private function displayInfo(): void
     {
-        echo "Detected OS           : $this->os\n";
-        echo "Detected Architecture : $this->arch\n";
-        echo "PHP Version           : $this->currentVersion / " . PHP_VERSION . "\n";
-        echo "Home Directory        : $this->home\n";
-        echo "PHP INI Location      : $this->phpIni\n";
+        $message = <<<DISPLAY_INFO
+        Here your detail system information that meet our requirements:
+
+        DISPLAY_INFO;
+        echo $message . PHP_EOL;
+        table(
+            ['Detector', 'Result'],
+            [
+                ['Operating System', $this->os],
+                ['Architecture', $this->arch],
+                ['PHP Version', $this->currentVersion . " / " . PHP_VERSION],
+                ['Home Directory', $this->home],
+                ['PHP INI Location', $this->phpIni]
+            ],
+        );
     }
 }

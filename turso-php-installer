@@ -1,0 +1,33 @@
+#!/usr/bin/env php
+<?php
+
+use Darkterminal\TursoLibSQLInstaller\TursoLibSQLInstaller;
+
+ini_set('display_errors', false);
+if (file_exists(__DIR__.'/../../autoload.php')) {
+    require __DIR__.'/../../autoload.php';
+} else {
+    require __DIR__.'/vendor/autoload.php';
+}
+
+$app = new TursoLibSQLInstaller();
+
+$hero = <<<LOGO
+_ _ _    ____   ___  _       ____  _   _ ____    ___           _        _ _           
+| (_) |__/ ___| / _ \| |     |  _ \| | | |  _ \  |_ _|_ __  ___| |_ __ _| | | ___ _ __ 
+| | | '_ \___ \| | | | |     | |_) | |_| | |_) |  | || '_ \/ __| __/ _` | | |/ _ \ '__|
+| | | |_) |__) | |_| | |___  |  __/|  _  |  __/   | || | | \__ \ || (_| | | |  __/ |   
+|_|_|_.__/____/ \__\_\_____| |_|   |_| |_|_|     |___|_| |_|___/\__\__,_|_|_|\___|_|   
+LOGO;
+
+echo "$hero\n";
+echo PHP_EOL;
+
+$command = $argv[1] ?? null;
+match ($command) {
+    'help'      => $app->help(),
+    'install'   => $app->install(),
+    'update'    => $app->update(),
+    'uninstall' => $app->uninstall(),
+    default     => $app->help(),
+};
