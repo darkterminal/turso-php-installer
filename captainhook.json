@@ -1,28 +1,21 @@
 {
   "commit-msg": {
     "enabled": true,
-    "actions": [
-      {
-        "action": "\\CaptainHook\\App\\Hook\\Message\\Action\\Beams",
-        "options": {
-          "subjectLength": 15,
-          "bodyLineLength": 72
-        }
-      }
-    ]
+    "actions": []
   },
   "pre-push": {
     "enabled": false,
-    "actions": []
+    "actions": [
+      {
+        "action": "git add dist/ && git commit -m 'build(dist): update new distribution'"
+      }
+    ]
   },
   "pre-commit": {
     "enabled": true,
     "actions": [
       {
         "action": "\\CaptainHook\\App\\Hook\\PHP\\Action\\Linting"
-      },
-      {
-        "action": "box validate && box compile"
       }
     ]
   },
@@ -32,7 +25,11 @@
   },
   "post-commit": {
     "enabled": false,
-    "actions": []
+    "actions": [
+      {
+        "action": "box validate && box compile"
+      }
+    ]
   },
   "post-merge": {
     "enabled": false,
