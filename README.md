@@ -8,8 +8,7 @@ This is the Turso/libSQL Extension for PHP installer script for Linux and MacOS.
 ## Installation
 
 ```bash
-curl --proto '=https' --tlsv1.2 -sSf "https://darkterminal.github.io/turso-php-installer/dist/turso-php-installer.phar"
-./turso-php-installer.phar
+curl https://darkterminal.github.io/turso-php-installer/dist/turso-php-installer.phar -o ./turso-php-installer.phar
 ```
 
 Add as a global executable script:
