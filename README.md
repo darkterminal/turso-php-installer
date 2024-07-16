@@ -14,6 +14,7 @@ curl https://darkterminal.github.io/turso-php-installer/dist/turso-php-installer
 Add as a global executable script:
 
 ```bash
+sudo chmod +x turso-php-installer.phar
 sudo mv turso-php-installer.phar /usr/local/bin/turso-php-installer
 ```
 
