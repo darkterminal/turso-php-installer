@@ -14,7 +14,7 @@ use function Laravel\Prompts\warning;
 
 class TursoLibSQLInstaller
 {
-    public const VERSION = '1.0.0';
+    public const VERSION = '1.1.0';
     private string $repo;
     private string $os;
     private string $arch;
