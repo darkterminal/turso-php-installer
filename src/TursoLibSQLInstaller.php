@@ -7,7 +7,6 @@ use Exception;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
-use function Laravel\Prompts\password;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
@@ -53,23 +52,42 @@ class TursoLibSQLInstaller
         echo "Turso libSQL Installer (version: " . self::VERSION . ")\n";
         $commands = <<<COMMANDS
         commands:
-            - help          Display all command
-            - install       Install libSQL Extension for PHP
-            - update        Update libSQL Extension for PHP
-            - uninstall     Uninstall libSQL Extension for PHP
+            - help                          Display all command
+            - install                       Install libSQL Extension for PHP
+            - update                        Update libSQL Extension for PHP
+            - uninstall                     Uninstall libSQL Extension for PHP
+            - add:tenancy-for-laravel       Add tenancy for laravel package + turso driver laravel (Laravel Project only) Experimental
         COMMANDS;
         echo $commands . PHP_EOL;
     }
 
-    public function install(): void
+    public function install(bool $autoConfirm = false, string|null $specifiedVersion = null): void
     {
         $this->checkIsWindows();
         $this->checkIsLaravelHerd();
-        $this->checkIfAlreadyExists();
-        $this->checkPhpVersion();
+
+        if (!$autoConfirm) {
+            $this->checkIfAlreadyExists();
+        }
+
+        if ($specifiedVersion !== null) {
+            if (in_array($specifiedVersion, ['8.0', '8.1', '8.2', '8.3'])) {
+                $this->selectedPhpVersion = $specifiedVersion;
+            } else {
+                error("Specified version $specifiedVersion is not supported.");
+                exit;
+            }
+        } else {
+            $this->checkPhpVersion();
+        }
+
         $this->checkIsPhpIniExists();
         $this->checkFunctionRequirements();
-        $this->askInstallPermission();
+
+        if (!$autoConfirm) {
+            $this->askInstallPermission();
+        }
+
         $this->displayInfo();
         $this->downloadAndExtractBinary();
     }
@@ -79,7 +97,7 @@ class TursoLibSQLInstaller
         $isFound = $this->checkIsAlreadyExists();
         if ($isFound) {
             $this->downloadAndExtractBinary(true);
-            exit(1);
+            exit;
         }
         error("You doesn't have Turso libSQL Extension installed before.");
     }
@@ -105,7 +123,7 @@ class TursoLibSQLInstaller
             echo "THANK YOU FOR USING TURSO libSQL Extension for PHP
             UNINSTALL_MESSAGE;
             info($message);
-            exit(1);
+            exit;
         }
         error("You doesn't have Turso libSQL Extension installed before.");
     }
@@ -146,7 +164,7 @@ class TursoLibSQLInstaller
 
             WINDOWS_ERR;
             warning($message);
-            exit(1);
+            exit;
         }
     }
 
@@ -187,7 +205,7 @@ class TursoLibSQLInstaller
 
             ERR_FUNC_NOT_FOUND;
             error($message);
-            exit(1);
+            exit;
         }
     }
 
@@ -201,7 +219,7 @@ class TursoLibSQLInstaller
             Sorry, Laravel Herd is not supported yet.
             HERD_WARNING;
             warning($message);
-            exit(0);
+            exit;
         }
     }
 
@@ -214,7 +232,7 @@ class TursoLibSQLInstaller
             Turso/libSQL Client PHP is already installed and configured!
             INFO_ALREADY_INSTALL;
             info($message);
-            exit(0);
+            exit;
         }
     }
 
@@ -234,7 +252,7 @@ class TursoLibSQLInstaller
             Turso/libSQL Client PHP lookup php.ini file and it's not found
             ERROR_PHP_INI;
             error($message);
-            exit(1);
+            exit;
         }
     }
 
@@ -273,11 +291,11 @@ class TursoLibSQLInstaller
                     }
                 } else {
                     error("Failed to open directory {$this->destination}");
-                    exit(1);
+                    exit;
                 }
             } else {
                 error("{$this->destination} is not a valid directory");
-                exit(1);
+                exit;
             }
         } else {
             info("Creating directory at {$this->destination}");
@@ -303,7 +321,7 @@ class TursoLibSQLInstaller
 
         if (!$confirmed) {
             info("Ok.. no problem, see you later!");
-            exit(0);
+            exit;
         }
     }
 
@@ -345,7 +363,7 @@ class TursoLibSQLInstaller
                     $this->extensionArchive = "php-{$this->selectedPhpVersion}-aarch64-apple-darwin";
                 } else {
                     echo "Unsupported architecture: {$this->arch} for Darwin\n";
-                    exit(1);
+                    exit;
                 }
                 break;
             case 'linux':
@@ -353,12 +371,12 @@ class TursoLibSQLInstaller
                     $this->extensionArchive = "php-{$this->selectedPhpVersion}-x86_64-unknown-linux-gnu";
                 } else {
                     echo "Unsupported architecture: {$this->arch} for Linux\n";
-                    exit(1);
+                    exit;
                 }
                 break;
             default:
                 echo "Unsupported OS: {$this->os}\n";
-                exit(1);
+                exit;
         }
     }
 
@@ -437,7 +455,7 @@ class TursoLibSQLInstaller
 
             if ($download_url === null) {
                 echo "Download URL is not found!\n";
-                exit(1);
+                exit;
             }
 
             $output_file = basename($download_url);
