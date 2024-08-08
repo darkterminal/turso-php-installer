@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 
+use Darkterminal\TursoLibSQLInstaller\Services\TenancyForLaravel\TenancyForLaravelProvider;
 use Darkterminal\TursoLibSQLInstaller\TursoLibSQLInstaller;
 
 ini_set('display_errors', false);
@@ -24,10 +25,23 @@ echo "$hero\n";
 echo PHP_EOL;
 
 $command = $argv[1] ?? null;
+
+$autoConfirm = false;
+$specifiedVersion = null;
+
+foreach ($argv as $arg) {
+    if ($arg === '-y') {
+        $autoConfirm = true;
+    } elseif (strpos($arg, '--version=') === 0) {
+        $specifiedVersion = substr($arg, strlen('--version='));
+    }
+}
+
 match ($command) {
     'help'      => $app->help(),
-    'install'   => $app->install(),
+    'install'   => $app->install($autoConfirm, $specifiedVersion),
     'update'    => $app->update(),
     'uninstall' => $app->uninstall(),
+    'add:tenancy-for-laravel' => (new TenancyForLaravelProvider(getcwd()))->installTenancy(),
     default     => $app->help(),
 };
