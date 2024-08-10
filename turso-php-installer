@@ -1,28 +1,19 @@
 #!/usr/bin/env php
 <?php
 
+use Darkterminal\TursoLibSQLInstaller\Services\Generators\CertificateGenerator;
+use Darkterminal\TursoLibSQLInstaller\Services\Generators\DatabaseTokenGenerator;
 use Darkterminal\TursoLibSQLInstaller\Services\TenancyForLaravel\TenancyForLaravelProvider;
 use Darkterminal\TursoLibSQLInstaller\TursoLibSQLInstaller;
 
 ini_set('display_errors', false);
-if (file_exists(__DIR__.'/../../autoload.php')) {
-    require __DIR__.'/../../autoload.php';
+if (file_exists(__DIR__ . '/../../autoload.php')) {
+    require __DIR__ . '/../../autoload.php';
 } else {
-    require __DIR__.'/vendor/autoload.php';
+    require __DIR__ . '/vendor/autoload.php';
 }
 
 $app = new TursoLibSQLInstaller();
-
-$hero = <<<LOGO
-_ _ _    ____   ___  _       ____  _   _ ____    ___           _        _ _           
-| (_) |__/ ___| / _ \| |     |  _ \| | | |  _ \  |_ _|_ __  ___| |_ __ _| | | ___ _ __ 
-| | | '_ \___ \| | | | |     | |_) | |_| | |_) |  | || '_ \/ __| __/ _` | | |/ _ \ '__|
-| | | |_) |__) | |_| | |___  |  __/|  _  |  __/   | || | | \__ \ || (_| | | |  __/ |   
-|_|_|_.__/____/ \__\_\_____| |_|   |_| |_|_|     |___|_| |_|___/\__\__,_|_|_|\___|_|   
-LOGO;
-
-echo "$hero\n";
-echo PHP_EOL;
 
 $command = $argv[1] ?? null;
 
@@ -37,11 +28,17 @@ foreach ($argv as $arg) {
     }
 }
 
-match ($command) {
-    'help'      => $app->help(),
-    'install'   => $app->install($autoConfirm, $specifiedVersion),
-    'update'    => $app->update(),
-    'uninstall' => $app->uninstall(),
-    'add:tenancy-for-laravel' => (new TenancyForLaravelProvider(getcwd()))->installTenancy(),
-    default     => $app->help(),
+$command = strtolower($command);
+
+match (true) {
+    in_array($command, ['version', '-v', '--version']) => $app->version(),
+    in_array($command, ['help', '-h', '--help']) => $app->help(),
+    $command === 'install' => $app->install($autoConfirm, $specifiedVersion),
+    $command === 'update' => $app->update(),
+    $command === 'uninstall' => $app->uninstall(),
+    $command === 'token:create-to-json' => (new DatabaseTokenGenerator())->generete()->toJSON(true),
+    $command === 'token:create-to-archive' => (new DatabaseTokenGenerator())->generete()->toArchive(),
+    $command === 'generate:certs' => (new CertificateGenerator())->generate(),
+    $command === 'add:tenancy-for-laravel' => (new TenancyForLaravelProvider(getcwd()))->installTenancy(),
+    default => $app->help(),
 };
