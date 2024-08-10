@@ -3,6 +3,7 @@
 This is the Turso/libSQL Extension for PHP installer script for Linux and MacOS. Make sure you already have PHP minimal version 8.0.
 
 ## Not Support yet
+
 - Laravel Herd Dynamic Extension Installation
 
 ## Installation
@@ -21,16 +22,19 @@ sudo mv turso-php-installer.phar /usr/local/bin/turso-php-installer
 ## Usage
 
 Install Turso Client PHP / libSQL Extension without worry:
+
 ```bash
 turso-php-installer install
 ```
 
 Update Turso Client PHP / libSQL Extension without worry:
+
 ```bash
 turso-php-installer update
 ```
 
 Uninstall Turso Client PHP / libSQL Extension without worry:
+
 ```bash
 turso-php-installer uninstall
 ```
