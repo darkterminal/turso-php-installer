@@ -1,3 +1,13 @@
+<p align="center">
+  <a href="https://discord.gg/turso">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/UhuW3zm.png">
+      <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/vljWbfr.png">
+      <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="https://i.imgur.com/vGCC0I4.png">
+    </picture>
+  </a>
+</p>
+
 # Turso PHP Installer
 
 This is the Turso/libSQL Extension for PHP installer script for Linux and MacOS. Make sure you already have PHP minimal version 8.0.
