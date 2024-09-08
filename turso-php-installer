@@ -1,9 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-use Darkterminal\TursoLibSQLInstaller\Services\Generators\CertificateGenerator;
 use Darkterminal\TursoLibSQLInstaller\Services\Generators\DatabaseTokenGenerator;
-use Darkterminal\TursoLibSQLInstaller\Services\TenancyForLaravel\TenancyForLaravelProvider;
 use Darkterminal\TursoLibSQLInstaller\TursoLibSQLInstaller;
 
 ini_set('display_errors', false);
@@ -36,9 +34,6 @@ match (true) {
     $command === 'install' => $app->install($autoConfirm, $specifiedVersion),
     $command === 'update' => $app->update(),
     $command === 'uninstall' => $app->uninstall(),
-    $command === 'token:create-to-json' => (new DatabaseTokenGenerator())->generete()->toJSON(true),
-    $command === 'token:create-to-archive' => (new DatabaseTokenGenerator())->generete()->toArchive(),
-    $command === 'generate:certs' => (new CertificateGenerator())->generate(),
-    $command === 'add:tenancy-for-laravel' => (new TenancyForLaravelProvider(getcwd()))->installTenancy(),
+    $command === 'token:create' => (new DatabaseTokenGenerator())->generete()->toJSON(true),
     default => $app->help(),
 };

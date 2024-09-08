@@ -18,7 +18,8 @@
     "bin": ["turso-php-installer"],
     "require": {
         "laravel/prompts": "^0.1.24",
-        "lcobucci/jwt": "^5.3"
+        "lcobucci/jwt": "^5.3",
+        "paragonie/sodium_compat": "^2.1"
     },
     "require-dev": {
         "captainhook/captainhook-phar": "^5.23"

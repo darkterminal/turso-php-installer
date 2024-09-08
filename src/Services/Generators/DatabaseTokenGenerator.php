@@ -3,20 +3,22 @@
 namespace Darkterminal\TursoLibSQLInstaller\Services\Generators;
 
 use DateTimeImmutable;
-use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\JwtFacade;
 use Lcobucci\JWT\Signer\Eddsa;
 use Lcobucci\JWT\Signer\Key\InMemory;
+use Lcobucci\JWT\Token\Builder;
 
 use function Laravel\Prompts\info;
 
 final class DatabaseTokenGenerator
 {
-    public int $token_expiration = 7;
+    public int $tokenExpiration = 7;
 
-    protected string|null $privateKey = null;
-    protected string|null $publicKey = null;
-    protected string|null $pubKeyPem = null;
-    protected string|null $pubKeyBase64 = null;
+    protected ?string $privateKey = null;
+    protected ?string $publicKeyPem = null;
+    protected ?string $pubKeyBase64 = null;
+    protected ?InMemory $key = null;
+    protected ?string $tempDir = null;
 
     protected array $results = [];
 
@@ -27,8 +29,19 @@ final class DatabaseTokenGenerator
      */
     public function __construct()
     {
-        $this->generateEd25519();
-        $this->encodePublicKey();
+        $requiredExtensions = ['openssl', 'sodium'];
+        foreach ($requiredExtensions as $ext) {
+            if (!extension_loaded($ext)) {
+                die("Error: PHP extension '$ext' is not installed or enabled." . PHP_EOL);
+            }
+        }
+
+        if (!shell_exec('which openssl')) {
+            die("Error: OpenSSL command-line tool is not installed or not in your PATH." . PHP_EOL);
+        }
+
+        $this->tempDir = sys_get_temp_dir();
+        $this->generatePublicAndPrivateKey();
     }
 
     /**
@@ -36,22 +49,25 @@ final class DatabaseTokenGenerator
      *
      * @return void
      */
-    protected function generateEd25519()
+    protected function generatePublicAndPrivateKey()
     {
-        $keyPair = sodium_crypto_sign_keypair();
-        $this->privateKey = sodium_crypto_sign_secretkey($keyPair);
-        $this->publicKey = sodium_crypto_sign_publickey($keyPair);
-    }
+        shell_exec("openssl genpkey -algorithm ed25519 -out {$this->tempDir}/jwt_private.pem");
+        shell_exec("openssl pkey -in {$this->tempDir}/jwt_private.pem -outform DER | tail -c 32 > {$this->tempDir}/jwt_private.binary");
+        shell_exec("openssl pkey -in {$this->tempDir}/jwt_private.pem -pubout -out {$this->tempDir}/jwt_public.pem");
 
-    /**
-     * Encodes the public key in PEM and Base64 formats.
-     *
-     * @return void
-     */
-    protected function encodePublicKey()
-    {
-        $this->pubKeyPem = "-----BEGIN PUBLIC KEY-----\n" . chunk_split(base64_encode($this->publicKey), 64, "\n") . "-----END PUBLIC KEY-----";
-        $this->pubKeyBase64 = rtrim(strtr(base64_encode($this->publicKey), '+/', '-_'), '=');
+        $this->privateKey = sodium_crypto_sign_secretkey(
+            sodium_crypto_sign_seed_keypair(
+                file_get_contents("{$this->tempDir}/jwt_private.binary")
+            )
+        );
+        unlink("{$this->tempDir}/jwt_private.binary");
+
+        $this->publicKeyPem = trim(file_get_contents("{$this->tempDir}/jwt_public.pem"));
+        $this->pubKeyBase64 = str_replace(["-----BEGIN PUBLIC KEY-----", "-----END PUBLIC KEY-----", "\n", "\r"], '', $this->publicKeyPem);
+
+        $this->key = InMemory::base64Encoded(
+            base64_encode($this->privateKey)
+        );
     }
 
     /**
@@ -65,28 +81,33 @@ final class DatabaseTokenGenerator
      */
     public function generete()
     {
-        $now = new DateTimeImmutable();
-        $exp = $now->modify("+{$this->token_expiration} days")->getTimestamp();
+        $tokenExpiration = $this->tokenExpiration;
+        $fullAccessToken = (new JwtFacade())->issue(
+            new Eddsa(),
+            $this->key,
+            static fn(
+            Builder $builder,
+            DateTimeImmutable $issuedAt
+        ): Builder => $builder
+                ->expiresAt($issuedAt->modify("+{$tokenExpiration} days"))
+        );
 
-        $signer = new Eddsa();
-        $key = InMemory::plainText($this->privateKey);
+        $readOnlyToken = (new JwtFacade())->issue(
+            new Eddsa(),
+            $this->key,
+            static fn(
+            Builder $builder,
+            DateTimeImmutable $issuedAt
+        ): Builder => $builder
+                ->withClaim('a', 'ro')
+                ->expiresAt($issuedAt->modify("+{$tokenExpiration} days"))
+        );
 
-        $config = Configuration::forSymmetricSigner($signer, $key);
-        $fullAccessToken = $config->builder()
-            ->issuedAt($now)
-            ->expiresAt((new DateTimeImmutable())->setTimestamp($exp))
-            ->getToken($config->signer(), $config->signingKey());
-
-        $readOnlyToken = $config->builder()
-            ->issuedAt($now)
-            ->expiresAt((new DateTimeImmutable())->setTimestamp($exp))
-            ->withClaim('a', 'ro')
-            ->getToken($config->signer(), $config->signingKey());
-
+        // Prepare response data
         $this->results = [
             'full_access_token' => $fullAccessToken->toString(),
             'read_only_token' => $readOnlyToken->toString(),
-            'public_key_pem' => $this->pubKeyPem,
+            'public_key_pem' => $this->publicKeyPem,
             'public_key_base64' => $this->pubKeyBase64,
         ];
 
@@ -107,7 +128,7 @@ final class DatabaseTokenGenerator
 
 Your database token successfully generated, now you can copy-and-paste
 + full_access_token or read_only_token - in your .env file
-+ public_key_pem or public_key_base64 - in your desire directory
++ public_key_pem - create a file jwt_public.pem in your desire directory and save this value
 And used with Turso DEV CLI, source explantion: https://gist.github.com/darkterminal/c272bf2a572bc5d7378f31cf4aea5f19
 -------------------------------------------------------------------------
 MSG;
@@ -115,60 +136,16 @@ MSG;
         echo $results . PHP_EOL;
     }
 
-    /**
-     * Archives the generated database token to a specified directory.
-     *
-     * If no directory is provided, it defaults to the current working directory.
-     * The archive includes a .env-example file with the full access token and read-only token,
-     * as well as jwt_key.pem and jwt_key.base64 files containing the public key.
-     *
-     * @param string|null $location_directory The directory where the archive will be created. Defaults to null.
-     * @return void
-     */
-    public function toArchive(string|null $location_directory = null)
+    public function __destruct()
     {
-        $location = is_null($location_directory) ? getcwd() : $location_directory;
-
-        if (is_null($location_directory)) {
-            $location = "$location/.archive";
-            mkdir($location);
-        }
-
-        if (!is_dir($location)) {
-            mkdir($location);
-        }
-
-        $env_file = "$location/.env-example";
-        if (!file_exists($env_file)) {
-            touch($env_file);
-        }
-
-        file_put_contents($env_file, "TURSO_AUTH_TOKEN={$this->results['full_access_token']}\n", FILE_APPEND);
-        file_put_contents($env_file, "TURSO_AUTH_TOKEN_READ_ONLY={$this->results['read_only_token']}\n", FILE_APPEND);
-
-        $pem_file = "$location/jwt_key.pem";
-        if (!file_exists($pem_file)) {
-            touch($pem_file);
-        }
-
-        $base64_file = "$location/jwt_key.base64";
-        if (!file_exists($base64_file)) {
-            touch($base64_file);
-        }
-
-        file_put_contents($pem_file, $this->results['public_key_pem'], FILE_APPEND);
-        file_put_contents($base64_file, $this->results['public_key_base64'], FILE_APPEND);
-
-        $message = <<<MSG
-[SUCCESS]
-
-Your database token successfully generated, now you can used in Turso DEV CLI
-+ full_access_token or read_only_token - in your .env file
-+ public_key_pem or public_key_base64 - in your desire directory
-source explantion: https://gist.github.com/darkterminal/c272bf2a572bc5d7378f31cf4aea5f19
------------------------------------------------------------------------------
-MSG;
-        info($message);
-        echo "Archive created at $location\n";
+        unlink("{$this->tempDir}/jwt_public.pem");
+        unlink("{$this->tempDir}/jwt_private.pem");
+        $this->tokenExpiration = 7;
+        $this->privateKey = null;
+        $this->publicKeyPem = null;
+        $this->pubKeyBase64 = null;
+        $this->key = null;
+        $this->tempDir = null;
+        $this->results = [];
     }
 }

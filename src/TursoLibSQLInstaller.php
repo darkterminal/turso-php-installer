@@ -89,13 +89,8 @@ class TursoLibSQLInstaller
             - update                        Update libSQL Extension for PHP
             - uninstall                     Uninstall libSQL Extension for PHP
 
-        [libSQL Services]
-            - token:create-to-json          Create libSQL Server Database token for Local Development return in JSON
-            - token:create-to-archive       Create libSQL Server Database token for Local Development return in Archive
-            - generate:certs                Create libSQL Server development certs
-
-        [Additional Packages]
-            - add:tenancy-for-laravel       Add tenancy for laravel package + turso driver laravel (Laravel Project only) Experimental
+        [libSQL DevTools]
+            - token:create                  Create libSQL Server Database token for Local Development return in JSON
         COMMANDS;
         echo $commands . PHP_EOL;
     }
