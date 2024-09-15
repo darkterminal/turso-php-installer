@@ -3,10 +3,9 @@
     "description": "Turso libSQL Extension PHP Installer",
     "type": "library",
     "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Darkterminal\\TursoLibSQLInstaller\\": "src/"
-        }
+    "support": {
+        "issues": "https://github.com/darkterminal/turso-php-installer/issues",
+        "source": "https://github.com/darkterminal/turso-php-installer"
     },
     "authors": [
         {
@@ -15,18 +14,42 @@
             "role": "Software Freestyle Engineer"
         }
     ],
-    "bin": ["turso-php-installer"],
     "require": {
-        "laravel/prompts": "^0.1.24",
+        "php": "^8.2.0",
+        "illuminate/http": "^11.5",
+        "laravel/prompts": "^0.1.25",
         "lcobucci/jwt": "^5.3",
         "paragonie/sodium_compat": "^2.1"
     },
     "require-dev": {
-        "captainhook/captainhook-phar": "^5.23"
+        "laravel-zero/framework": "^11.0.0",
+        "laravel/pint": "^1.15.2",
+        "mockery/mockery": "^1.6.11",
+        "pestphp/pest": "^2.34.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
     },
     "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true,
         "allow-plugins": {
-            "captainhook/captainhook-phar": true
+            "pestphp/pest-plugin": true
         }
-    }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "bin": [
+        "builds/turso-php-installer"
+    ]
 }

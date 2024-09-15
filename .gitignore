@@ -1,3 +1,5 @@
-vendor/
-.archive/
-.vscode/
+/vendor
+/.idea
+/.vscode
+/.vagrant
+.phpunit.result.cache
