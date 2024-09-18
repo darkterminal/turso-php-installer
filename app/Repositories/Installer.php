@@ -13,7 +13,7 @@ use function Laravel\Prompts\warning;
 
 class Installer
 {
-    public const VERSION = '2.0.1';
+    public const VERSION = '2.0.2';
     private string $repo;
     private string $os;
     private string $arch;
@@ -40,6 +40,7 @@ class Installer
      */
     public function __construct()
     {
+        $isDocker = file_exists('/.dockerenv');
         $this->repo = "https://raw.githubusercontent.com/tursodatabase/turso-client-php/main/release_metadata.json";
         $this->os = strtolower(php_uname('s'));
         $this->arch = php_uname('m');
@@ -47,7 +48,7 @@ class Installer
         $this->currentVersion = implode('.', array_slice(explode('.', PHP_VERSION), 0, -1));
         $this->selectedPhpVersion = $this->currentVersion;
         $this->binaryName = "liblibsql_php.so";
-        $this->destination = "$this->home/.turso-client-php";
+        $this->destination = $isDocker ? "/root/.turso-client-php" : "$this->home/.turso-client-php";
         $this->herdPath = "$this->home/Library/Application Support/Herd";
         $this->configIni = $this->getConfigIni();
         $this->isAlreadyExists = $this->checkIsAlreadyExists();
@@ -143,6 +144,7 @@ class Installer
     public function uninstall(): void
     {
         $isFound = $this->checkIsAlreadyExists();
+        $isDocker = file_exists('/.dockerenv');
         if ($isFound) {
             $confirmUninstall = confirm(
                 label: 'To uninstall the extension, Turso needs your sudo permission. Continue?',
@@ -151,11 +153,16 @@ class Installer
 
             if ($confirmUninstall) {
                 $escapedModuleFile = str_replace('/', '\/', $this->moduleFile);
-
                 $phpIni = $this->phpIni;
-                echo "Type your ";
-                $command = "sudo -S bash -c \"sed -i '/$escapedModuleFile/d' {$phpIni}\" && sudo -k";
-                shell_exec($command);
+
+                if ($isDocker) {
+                    $command = "bash -c \"sed -i '/$escapedModuleFile/d' {$phpIni}\"";
+                    shell_exec($command);
+                } else {
+                    echo "Type your ";
+                    $command = "sudo -S bash -c \"sed -i '/$escapedModuleFile/d' {$phpIni}\" && sudo -k";
+                    shell_exec($command);
+                }
 
                 $this->removeDirectory($this->destination);
 
