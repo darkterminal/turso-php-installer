@@ -438,13 +438,20 @@ class Installer
      */
     private function askWritePermission($update = false): void
     {
+        $isDocker = file_exists('/.dockerenv');
+        $moduleFile = $this->moduleFile;
+        $phpIni = $this->phpIni;
+        
         if ($update === false) {
-            shell_exec("sudo -k");
-            echo "Type your : ";
-            $moduleFile = $this->moduleFile;
-            $phpIni = $this->phpIni;
-            $command = "sudo -S bash -c 'echo \"$moduleFile\" >> $phpIni' && sudo -k";
-            shell_exec($command);
+            if ($isDocker) {
+                $command = "bash -c 'echo \"$moduleFile\" >> $phpIni'";
+                shell_exec($command);
+            } else {
+                shell_exec("sudo -k");
+                echo "Type your : ";
+                $command = "sudo -S bash -c 'echo \"$moduleFile\" >> $phpIni' && sudo -k";
+                shell_exec($command);
+            }
         }
         $this->sayThankYou();
     }
