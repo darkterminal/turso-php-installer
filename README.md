@@ -19,14 +19,15 @@ This is the Turso/libSQL Extension for PHP installer script for Linux and MacOS.
 ## Installation
 
 ```bash
-curl https://darkterminal.github.io/turso-php-installer/builds/turso-php-installer -o ./turso-php-installer
+composer global require darkterminal/turso-php-installer
 ```
 
-Add as a global executable script:
+make sure the installer is available in `PATH` environment variable:
 
 ```bash
-sudo chmod +x turso-php-installer.phar
-sudo mv turso-php-installer.phar /usr/local/bin/turso-php-installer
+export PATH="$HOME/.composer/vendor/bin;$PATH"
+# or
+export PATH="$HOME/.config/composer/vendor/bin;$PATH"
 ```
 
 ## Usage
