@@ -3,9 +3,11 @@
 namespace App\Repositories;
 
 use Illuminate\Support\Facades\Http;
+use ZipArchive;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
+use function Laravel\Prompts\info;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
@@ -44,15 +46,15 @@ class Installer
         $this->repo = "https://raw.githubusercontent.com/tursodatabase/turso-client-php/main/release_metadata.json";
         $this->os = strtolower(php_uname('s'));
         $this->arch = php_uname('m');
-        $this->home = trim(shell_exec('echo $HOME'));
-        $this->currentVersion = implode('.', array_slice(explode('.', PHP_VERSION), 0, -1));
+        $this->home = $this->checkIsWindows() ? $this->home = getenv('USERPROFILE') : trim(shell_exec('echo $HOME'));
+        $this->currentVersion = implode('.', array_slice(explode('.', string: PHP_VERSION), 0, -1));
         $this->selectedPhpVersion = $this->currentVersion;
-        $this->binaryName = "liblibsql_php.so";
-        $this->destination = $isDocker ? "/root/.turso-client-php" : "$this->home/.turso-client-php";
-        $this->herdPath = "$this->home/Library/Application Support/Herd";
+        $this->binaryName = $this->checkIsWindows() ? "libsql_php.dll" : "liblibsql_php.so";
+        $this->destination = $isDocker ? "/root/.turso-client-php" : "{$this->home}" . DIRECTORY_SEPARATOR . ".turso-client-php";
+        $this->herdPath = $this->checkIsWindows() ? "{$this->home}\\.config\\herd" : "{$this->home}/Library/Application Support/Herd";
         $this->configIni = $this->getConfigIni();
         $this->isAlreadyExists = $this->checkIsAlreadyExists();
-        $this->moduleFile = "extension=$this->destination/$this->binaryName";
+        $this->moduleFile = "extension={$this->destination}" . DIRECTORY_SEPARATOR . "{$this->binaryName}";
         $this->phpIni = $this->configIni['loaded_configuration_file'] ?? '';
     }
 
@@ -85,11 +87,10 @@ class Installer
      */
     public function install(bool $autoConfirm = false, string|null $specifiedVersion = null): void
     {
-        $this->checkIsWindows();
         $this->checkIsLaravelHerd();
 
         if (!$autoConfirm) {
-            $this->checkIfAlreadyExists();
+            $this->checkIsAlreadyExists();
         }
 
         if ($specifiedVersion !== null) {
@@ -146,29 +147,64 @@ class Installer
         $isFound = $this->checkIsAlreadyExists();
         $isDocker = file_exists('/.dockerenv');
         if ($isFound) {
+
             $confirmUninstall = confirm(
                 label: 'To uninstall the extension, Turso needs your sudo permission. Continue?',
                 default: true
             );
 
             if ($confirmUninstall) {
-                $escapedModuleFile = str_replace('/', '\/', $this->moduleFile);
-                $phpIni = $this->phpIni;
 
-                if ($isDocker) {
-                    $command = "bash -c \"sed -i '/$escapedModuleFile/d' {$phpIni}\"";
-                    shell_exec($command);
+                if ($this->checkIsWindows()) {
+                    $escapedModuleFile = str_replace(['/', '\\'], '\\', $this->moduleFile);
+                    $phpIni = $this->phpIni;
+                    // Check if the php.ini file exists
+                    if (file_exists($phpIni)) {
+                        // Read the content of the php.ini file
+                        $iniContents = file_get_contents($phpIni);
+
+                        // Escape special characters in $escapedModuleFile to avoid issues with preg_replace
+                        $escapedModuleFileSafe = preg_quote($escapedModuleFile, '/');
+
+                        // Check if the module file exists in the php.ini
+                        if (strpos($iniContents, $escapedModuleFile) !== false) {
+                            // Remove the line containing the module file
+                            $updatedContents = preg_replace("/^.*$escapedModuleFileSafe.*$/m", '', $iniContents);
+
+                            // Write the updated contents back to php.ini
+                            file_put_contents($phpIni, $updatedContents);
+
+                            $this->removeDirectory($this->destination);
+
+                            info(
+                                message: "Removed extension line from {$phpIni}\nTHANK YOU FOR USING TURSO libSQL Extension for PHP"
+                            );
+                        } else {
+                            error("No line found for $escapedModuleFile in $phpIni");
+                        }
+                    } else {
+                        error("php.ini file not found at $phpIni\n");
+                    }
                 } else {
-                    echo "Type your ";
-                    $command = "sudo -S bash -c \"sed -i '/$escapedModuleFile/d' {$phpIni}\" && sudo -k";
-                    shell_exec($command);
+                    $escapedModuleFile = str_replace('/', '\/', $this->moduleFile);
+                    $phpIni = $this->phpIni;
+
+                    if ($isDocker) {
+                        $command = "bash -c \"sed -i '/$escapedModuleFile/d' {$phpIni}\"";
+                        shell_exec($command);
+                    } else {
+                        echo "Type your ";
+                        $command = "sudo -S bash -c \"sed -i '/$escapedModuleFile/d' {$phpIni}\" && sudo -k";
+                        shell_exec($command);
+                    }
+
+                    $this->removeDirectory($this->destination);
+
+                    info(
+                        message: "Removed extension line from {$phpIni}\nTHANK YOU FOR USING TURSO libSQL Extension for PHP"
+                    );
                 }
 
-                $this->removeDirectory($this->destination);
-
-                info(
-                    message: "Removed extension line from {$phpIni}\nTHANK YOU FOR USING TURSO libSQL Extension for PHP"
-                );
             } else {
                 info(message: "Uninstallation cancelled.");
             }
@@ -205,27 +241,13 @@ class Installer
     /**
      * Checks if the current operating system is Windows and displays a warning message if true.
      *
-     * @return void
+     * @return bool
      */
-    private function checkIsWindows(): void
+    private function checkIsWindows(): bool
     {
         $isWindows = PHP_OS_FAMILY === 'Windows';
 
-        if ($isWindows) {
-            $message = <<<WINDOWS_ERR
-            [WARNING]
-
-            Sorry, Turso Installer is only support for Linux and MacOS.
-            
-            You are using Windows, you try our alternative using Dev Containers
-            visit: https://github.com/darkterminal/turso-docker-php
-            
-            Thank you!
-
-            WINDOWS_ERR;
-            warning($message);
-            exit;
-        }
+        return $isWindows;
     }
 
     /**
@@ -310,7 +332,7 @@ class Installer
      *
      * @return void
      */
-    private function checkIfAlreadyExists(): void
+    private function checkIfAlreadyInstalled(): void
     {
         if (!empty($this->isAlreadyExists)) {
             $message = <<<INFO_ALREADY_INSTALL
@@ -330,8 +352,13 @@ class Installer
      */
     private function checkIsAlreadyExists(): string|false
     {
-        $searchLibsql = shell_exec('php -m | grep libsql');
-        return $searchLibsql ? trim($searchLibsql) : false;
+        if ($this->checkIsWindows()) {
+            $searchLibsql = shell_exec('php -m | findstr libsql');
+            return $searchLibsql ? trim($searchLibsql) : false;
+        } else {
+            $searchLibsql = shell_exec('php -m | grep libsql');
+            return $searchLibsql ? trim($searchLibsql) : false;
+        }
     }
 
     /**
@@ -365,47 +392,63 @@ class Installer
         $is_dir_exists = false;
         $destination = $this->destination;
 
+        // Normalize the destination path (convert to the right separator for the OS)
+        $destination = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $destination);
+
+        // Check if the destination is a valid directory
         if (is_dir($destination)) {
             $is_dir_exists = true;
 
             $search_string = "libsql";
 
-            if (is_dir($destination)) {
-                $dir = opendir($destination);
-                if ($dir) {
-                    $found = false;
-                    while (($file = readdir($dir)) !== false) {
-                        if (strpos($file, $search_string) !== false) {
-                            $found = true;
-                            break;
-                        }
+            // Open the directory and search for files containing 'libsql'
+            $dir = opendir($destination);
+            if ($dir) {
+                $found = false;
+                while (($file = readdir($dir)) !== false) {
+                    if (strpos($file, $search_string) !== false) {
+                        $found = true;
+                        break;
                     }
-                    closedir($dir);
+                }
+                closedir($dir);
 
-                    if ($found) {
-                        info('Turso Client is Ready!');
-                        if ($isUpdateCommand === false) {
-                            die();
-                        }
-                    } else {
-                        info('Extension is not found!');
-                        if (!$is_dir_exists) {
-                            info("Creating directory at {$destination}");
-                            shell_exec("mkdir {$destination}");
-                        }
+                if ($found) {
+                    info('Turso Client is Ready!');
+                    if ($isUpdateCommand === false) {
+                        die();  // Exit the script if no update command is needed
                     }
                 } else {
-                    error("Failed to open directory {$destination}");
-                    exit;
+                    info('Extension is not found!');
+                    if (!$is_dir_exists) {
+                        info("Creating directory at {$destination}");
+                        // Create the directory (works for both Unix and Windows)
+                        $this->createDirectory($destination);
+                    }
                 }
             } else {
-                error("{$destination} is not a valid directory");
+                error("Failed to open directory {$destination}");
                 exit;
             }
         } else {
             info("Creating directory at {$destination}");
-            shell_exec("mkdir {$destination}");
+            // Create the directory if it does not exist
+            $this->createDirectory($destination);
         }
+    }
+
+    /**
+     * Creates a directory. This function works for both Unix and Windows.
+     *
+     * @param string $destination The directory path.
+     */
+    private function createDirectory(string $destination): void
+    {
+        // Use the correct command based on the operating system
+        $command = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? 'mkdir "' . $destination . '"' : "mkdir -p {$destination}";
+
+        // Execute the shell command to create the directory
+        shell_exec($command);
     }
 
     /**
@@ -417,9 +460,10 @@ class Installer
      */
     private function askInstallPermission(): void
     {
+        $warn = "This script will " . ($this->checkIsWindows() ? null : "ask your sudo password to ") . "modify your php.ini file:";
         $brief = <<<BRIEF_MESSAGE
         Turso need to install the client extension in your PHP environment.
-        This script will ask your sudo password to modify your php.ini file:
+        {$warn}
 
         BRIEF_MESSAGE;
         echo $brief . PHP_EOL;
@@ -448,16 +492,20 @@ class Installer
         $isDocker = file_exists('/.dockerenv');
         $moduleFile = $this->moduleFile;
         $phpIni = $this->phpIni;
-        
+
         if ($update === false) {
             if ($isDocker) {
                 $command = "bash -c 'echo \"$moduleFile\" >> $phpIni'";
                 shell_exec($command);
             } else {
-                shell_exec("sudo -k");
-                echo "Type your : ";
-                $command = "sudo -S bash -c 'echo \"$moduleFile\" >> $phpIni' && sudo -k";
-                shell_exec($command);
+                if ($this->checkIsWindows()) {
+                    file_put_contents($phpIni, "\n$moduleFile", FILE_APPEND);
+                } else {
+                    shell_exec("sudo -k");
+                    echo "Type your : ";
+                    $command = "sudo -S bash -c 'echo \"$moduleFile\" >> $phpIni' && sudo -k";
+                    shell_exec($command);
+                }
             }
         }
         $this->sayThankYou();
@@ -500,7 +548,7 @@ class Installer
         $arch = $this->arch;
         $selectedPhpVersion = $this->selectedPhpVersion;
 
-        switch ($os) {
+        switch (strtolower($os)) {
             case 'darwin':
                 switch ($arch) {
                     case "x86_64":
@@ -521,6 +569,17 @@ class Installer
                         break;
                     default:
                         echo "Unsupported architecture: {$arch} for Linux\n";
+                        exit;
+                }
+                break;
+            case str_contains($os, 'windows'):
+                switch ($arch) {
+                    case "x86_64":
+                    case "AMD64":
+                        $this->extensionArchive = "php-{$selectedPhpVersion}-x86_64-pc-windows-msvc";
+                        break;
+                    default:
+                        echo "Unsupported architecture: {$arch} for msvc\n";
                         exit;
                 }
                 break;
@@ -637,29 +696,152 @@ class Installer
 
         spin(function () use ($output_file) {
 
-            shell_exec("tar -xzf $output_file");
-
-            $directory = str_replace('.tar.gz', '', $output_file);
-
-            $destination = $this->destination;
-            shell_exec("mv $directory/* {$destination}/");
-
-            shell_exec("rm $output_file");
-            rmdir($directory);
+            $this->extractAndMoveFiles($output_file);
 
             $message = <<<SETTING_MESSAGE
             [INFO]
 
             Downloaded release asset to $output_file
             Turso/libSQL Client PHP is downloaded!
-            store at {$destination}
+            store at {$this->destination}
             SETTING_MESSAGE;
             info($message);
             echo "\n\n";
 
             return $output_file;
         }, 'Extract and move the extension...');
+
         $this->askWritePermission($update);
+    }
+
+    private function extractAndMoveFiles($output_file): void
+    {
+        // Normalize paths for Windows compatibility
+        $output_file = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $output_file);
+        $destination = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->destination);
+
+        $this->extractZipFile($output_file, $destination);
+
+        // Extract the file based on the platform (Windows uses .zip, Unix uses .tar.gz)
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            // For Windows: Use PowerShell to extract a .zip file
+            if (pathinfo($output_file, PATHINFO_EXTENSION) === 'zip') {
+                shell_exec("powershell -Command \"Expand-Archive -Path '$output_file' -DestinationPath '$destination'\"");
+            } else {
+                error("Unsupported file type for Windows. Only .zip files are supported.");
+                return;
+            }
+        } else {
+            // For Unix-based systems: Use tar to extract .tar.gz files
+            if (pathinfo($output_file, PATHINFO_EXTENSION) === 'gz') {
+                shell_exec("tar -xzf $output_file -C $destination");
+            } else {
+                error("Unsupported file type for Unix. Only .tar.gz files are supported.");
+                return;
+            }
+        }
+
+        // For both Windows and Unix, we assume the archive is extracted directly into the destination folder
+        // Clean up by removing the downloaded archive file
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            // For Windows: Use del to remove the .zip file
+            shell_exec("del $output_file");
+        } else {
+            // For Unix-based systems: Use rm to remove the .tar.gz file
+            shell_exec("rm $output_file");
+        }
+    }
+
+    /**
+     * Extracts a .zip file to the specified destination.
+     *
+     * @param string $output_file The path to the .zip file.
+     * @param string $destination The destination directory to extract the contents.
+     * @return bool True on success, false on failure.
+     */
+    private function extractZipFile($output_file, $destination): bool
+    {
+        // Ensure that the destination directory exists
+        if (!is_dir($destination)) {
+            // Try to create the destination directory if it doesn't exist
+            if (!mkdir($destination, 0755, true)) {
+                error("Failed to create directory: $destination");
+                return false;
+            }
+        }
+
+        // Initialize ZipArchive class
+        $zip = new ZipArchive();
+
+        // Open the .zip file
+        if ($zip->open($output_file) === TRUE) {
+            // Extract the contents to the destination directory
+            if ($zip->extractTo($destination)) {
+                // Close the zip file
+                $zip->close();
+                $fileinfo = pathinfo($output_file);
+                $outDir = $destination . DIRECTORY_SEPARATOR . $fileinfo['filename'];
+                $this->moveContentsOneLevelUp($outDir);
+                // Optionally, delete the zip file after extraction
+                rmdir($outDir);
+                unlink($output_file);
+                return true;
+            } else {
+                error("Failed to extract the .zip file to $destination");
+                $zip->close();
+                return false;
+            }
+        } else {
+            error("Failed to open the .zip file: $output_file");
+            return false;
+        }
+    }
+
+    public function moveContentsOneLevelUp(string $sourceDir)
+    {
+        // Ensure the source directory exists
+        if (!is_dir($sourceDir)) {
+            error("Source directory does not exist: $sourceDir");
+            return;
+        }
+
+        // Get the parent directory of the source directory
+        $parentDir = dirname($sourceDir);
+
+        // Open the source directory
+        $sourceDirHandle = opendir($sourceDir);
+        if ($sourceDirHandle === false) {
+            error("Failed to open source directory: $sourceDir");
+            return;
+        }
+
+        // Iterate over the contents of the source directory
+        while (($file = readdir($sourceDirHandle)) !== false) {
+            // Skip '.' and '..'
+            if ($file == '.' || $file == '..') {
+                continue;
+            }
+
+            $sourcePath = $sourceDir . DIRECTORY_SEPARATOR . $file;
+            $destinationPath = $parentDir . DIRECTORY_SEPARATOR . $file;
+
+            // Check if the item is a directory or a file
+            if (is_dir($sourcePath)) {
+                // If it's a directory, recursively move it
+                if (!is_dir($destinationPath)) {
+                    mkdir($destinationPath, 0755, true); // Create the directory in the parent folder
+                }
+                // Move the directory contents
+                $this->moveContentsOneLevelUp($sourcePath); // Recursively move subdirectories
+                rmdir($sourcePath); // Remove the now-empty source directory
+            } else {
+                // If it's a file, move it
+                rename($sourcePath, $destinationPath); // Move the file
+            }
+        }
+
+        // Close the source directory handle
+        closedir($sourceDirHandle);
     }
 
     /**
