@@ -15,7 +15,7 @@ use function Laravel\Prompts\warning;
 
 class Installer
 {
-    public const VERSION = '2.0.2';
+    public const VERSION = '2.0.3';
     private string $repo;
     private string $os;
     private string $arch;
@@ -24,7 +24,6 @@ class Installer
     private string $selectedPhpVersion;
     private string $binaryName;
     private string $destination;
-    private string $herdPath;
     private array $configIni;
     private ?string $isAlreadyExists;
     private string $moduleFile;
@@ -42,16 +41,20 @@ class Installer
      */
     public function __construct()
     {
-        $isDocker = file_exists('/.dockerenv');
         $this->repo = "https://raw.githubusercontent.com/tursodatabase/turso-client-php/main/release_metadata.json";
         $this->os = strtolower(php_uname('s'));
         $this->arch = php_uname('m');
         $this->home = $this->checkIsWindows() ? $this->home = getenv('USERPROFILE') : trim(shell_exec('echo $HOME'));
         $this->currentVersion = implode('.', array_slice(explode('.', string: PHP_VERSION), 0, -1));
         $this->selectedPhpVersion = $this->currentVersion;
+<<<<<<< HEAD
         $this->binaryName = $this->checkIsWindows() ? "libsql_php.dll" : "liblibsql_php.so";
         $this->destination = $isDocker ? "/root/.turso-client-php" : "{$this->home}" . DIRECTORY_SEPARATOR . ".turso-client-php";
         $this->herdPath = $this->checkIsWindows() ? "{$this->home}\\.config\\herd" : "{$this->home}/Library/Application Support/Herd";
+=======
+        $this->binaryName = "liblibsql_php.so";
+        $this->destination = "$this->home/.turso-client-php";
+>>>>>>> e289410 (feat: add new token:show command)
         $this->configIni = $this->getConfigIni();
         $this->isAlreadyExists = $this->checkIsAlreadyExists();
         $this->moduleFile = "extension={$this->destination}" . DIRECTORY_SEPARATOR . "{$this->binaryName}";
@@ -85,9 +88,23 @@ class Installer
      * @throws \Exception If the specified version is not supported.
      * @return void
      */
+<<<<<<< HEAD
     public function install(bool $autoConfirm = false, string|null $specifiedVersion = null): void
     {
         $this->checkIsLaravelHerd();
+=======
+    public function install(
+        bool $autoConfirm = false,
+        string|null $specifiedVersion = null,
+        string|null $phpIniFile = null,
+        string|null $extDestination = null
+    ): void {
+        $this->checkIsWindows();
+
+        $this->destination = $extDestination ?? $this->destination;
+        $this->phpIni = $phpIniFile ?? $this->phpIni;
+        $this->moduleFile = "extension={$this->destination}/{$this->binaryName}";
+>>>>>>> e289410 (feat: add new token:show command)
 
         if (!$autoConfirm) {
             $this->checkIsAlreadyExists();
@@ -145,7 +162,6 @@ class Installer
     public function uninstall(): void
     {
         $isFound = $this->checkIsAlreadyExists();
-        $isDocker = file_exists('/.dockerenv');
         if ($isFound) {
 
             $confirmUninstall = confirm(
@@ -153,7 +169,13 @@ class Installer
                 default: true
             );
 
+            $metadata = json_decode(file_get_contents("{$this->home}/.tursophpinstaller/metadata.json"), true);
+            $destination = $metadata['destination'] ?? '';
+            $iniFileLocation = $metadata['ini_file'] ?? '';
+            $this->moduleFile = "extension={$destination}/{$this->binaryName}";
+
             if ($confirmUninstall) {
+<<<<<<< HEAD
 
                 if ($this->checkIsWindows()) {
                     $escapedModuleFile = str_replace(['/', '\\'], '\\', $this->moduleFile);
@@ -205,6 +227,31 @@ class Installer
                     );
                 }
 
+=======
+                $escapedModuleFile = str_replace('/', '\/', $this->moduleFile);
+                $phpIni = $iniFileLocation;
+
+                if (empty($phpIni) || !file_exists($phpIni)) {
+                    error(message: "The PHP INI file location is invalid or does not exist.");
+                    exit;
+                }
+
+                $sedCommand = "sudo -S bash -c \"sed -i '/$escapedModuleFile/d' {$phpIni}\" && sudo -k";
+
+                try {
+                    shell_exec($sedCommand);
+                } catch (\Exception $e) {
+                    error(message: "Failed to remove extension line from {$phpIni}. Error: " . $e->getMessage());
+                    exit;
+                }
+
+                $this->removeDirectory("{$this->home}/.tursophpinstaller");
+                $this->removeDirectory($destination);
+
+                info(
+                    message: "Removed extension line from {$phpIni}\nTHANK YOU FOR USING TURSO libSQL Extension for PHP"
+                );
+>>>>>>> e289410 (feat: add new token:show command)
             } else {
                 info(message: "Uninstallation cancelled.");
             }
@@ -214,7 +261,7 @@ class Installer
     }
 
     /**
-     * Recursively removes a directory and all its contents.
+     * Recursively removes a directory and all its contents, including hidden files and subdirectories.
      *
      * @param string $dir The path to the directory to be removed.
      * @return bool True if the directory is successfully removed, false otherwise.
@@ -225,17 +272,24 @@ class Installer
             return false;
         }
 
-        $files = array_diff(scandir($dir), ['.', '..']);
-        foreach ($files as $file) {
-            $filePath = "$dir/$file";
+        $items = array_diff(scandir($dir, 1), ['.', '..']); // Exclude '.' and '..'
+        foreach ($items as $item) {
+            $filePath = $dir . DIRECTORY_SEPARATOR . $item;
             if (is_dir($filePath)) {
-                $this->removeDirectory($filePath);
+                // Recursive call for subdirectories
+                if (!$this->removeDirectory($filePath)) {
+                    return false;
+                }
             } else {
-                unlink($filePath);
+                // Delete file, including hidden ones
+                if (!unlink($filePath)) {
+                    return false;
+                }
             }
         }
 
-        return rmdir($dir);
+        // Remove the directory itself
+        return @rmdir($dir);
     }
 
     /**
@@ -303,26 +357,6 @@ class Installer
 
             ERR_FUNC_NOT_FOUND;
             error($message);
-            exit;
-        }
-    }
-
-    /**
-     * Checks if the Laravel Herd is being used and displays a warning message if it is.
-     *
-     * @throws \Exception if Laravel Herd is being used
-     * @return void
-     */
-    private function checkIsLaravelHerd(): void
-    {
-        if (is_dir($this->herdPath)) {
-            $message = <<<HERD_WARNING
-            [WARNING]
-
-            Your're using Laravel Herd
-            Sorry, Laravel Herd is not supported yet.
-            HERD_WARNING;
-            warning($message);
             exit;
         }
     }
@@ -696,7 +730,26 @@ class Installer
 
         spin(function () use ($output_file) {
 
+<<<<<<< HEAD
             $this->extractAndMoveFiles($output_file);
+=======
+            shell_exec("tar -xzf $output_file");
+
+            $directory = str_replace('.tar.gz', '', $output_file);
+
+            $destination = $this->destination;
+            shell_exec("mv $directory/* {$destination}/");
+            shell_exec("mkdir -p {$this->home}/.tursophpinstaller");
+            touch("{$this->home}/.tursophpinstaller/metadata.json");
+            $metadata = json_encode([
+                'destination' => $destination,
+                'ini_file' => $this->phpIni
+            ]);
+            file_put_contents("{$this->home}/.tursophpinstaller/metadata.json", $metadata);
+
+            shell_exec("rm $output_file");
+            rmdir($directory);
+>>>>>>> e289410 (feat: add new token:show command)
 
             $message = <<<SETTING_MESSAGE
             [INFO]

@@ -1,6 +1,7 @@
 {
     "name": "darkterminal/turso-php-installer",
     "description": "Turso libSQL Extension PHP Installer",
+    "version": "2.0.3",
     "type": "library",
     "license": "MIT",
     "support": {
@@ -50,6 +51,6 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "bin": [
-        "builds/turso-php-installer"
+        "turso-php-installer"
     ]
 }

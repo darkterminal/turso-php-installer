@@ -8,6 +8,7 @@ use Lcobucci\JWT\Signer\Eddsa;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Token\Builder;
 
+use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 
 final class DatabaseTokenGenerator
@@ -19,6 +20,8 @@ final class DatabaseTokenGenerator
     protected ?string $pubKeyBase64 = null;
     protected ?InMemory $key = null;
     protected ?string $tempDir = null;
+    protected string $home;
+    protected string $tokenStore;
 
     protected array $results = [];
 
@@ -41,6 +44,13 @@ final class DatabaseTokenGenerator
         }
 
         $this->tempDir = sys_get_temp_dir();
+        $this->home = trim(shell_exec('echo $HOME'));
+
+        if (!is_dir("{$this->home}/.tursophpinstaller")) {
+            mkdir("{$this->home}/.tursophpinstaller");
+        }
+
+        $this->tokenStore = "{$this->home}/.tursophpinstaller/token.json";
         $this->generatePublicAndPrivateKey();
     }
 
@@ -132,8 +142,37 @@ Your database token successfully generated, now you can copy-and-paste
 And used with Turso DEV CLI, source explantion: https://gist.github.com/darkterminal/c272bf2a572bc5d7378f31cf4aea5f19
 -------------------------------------------------------------------------
 MSG;
+        
+        touch($this->tokenStore);
+        file_put_contents($this->tokenStore, $results);
+
         info($message);
         echo $results . PHP_EOL;
+    }
+
+    /**
+     * Returns the generated database tokens.
+     *
+     * @param string|null $key If specified, returns the value of the given key from the token store. Otherwise, returns the entire token store.
+     *
+     * @return void
+     */
+    public function getToken(string $key = null)
+    {
+        if (!file_exists($this->tokenStore)) {
+            error("Not found: your're not generated token yet. Run 'turso-php-install token:create' command first");
+            exit;
+        }
+
+        $store = json_decode(file_get_contents($this->tokenStore), true);
+
+        if ($key) {
+            echo $store[$key] . PHP_EOL;
+            return;
+        }
+
+        $store = file_get_contents($this->tokenStore);
+        echo $store . PHP_EOL;
     }
 
     public function __destruct()

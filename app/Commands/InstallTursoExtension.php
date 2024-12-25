@@ -14,7 +14,9 @@ class InstallTursoExtension extends Command
      */
     protected $signature = 'install 
         {--y|--yes : Skip interactive installation process} 
-        {--php-version= : Define your chosen PHP Version: 8.0, 8.1, 8.2, or 8.3 default: Your Current PHP Version}
+        {--php-version= : Define your chosen PHP Version: 8.0, 8.1, 8.2, 8.3 default: Your Current PHP Version}
+        {--php-ini-file= : Define your PHP INI file location: eg: /etc/php/<version>/cli/php.ini default: /etc/php/<version>/cli/php.ini}
+        {--ext-destination= : Define your PHP Extension Destination: eg: /usr/local/lib/php/extensions/no-debug-non-zts-20190902/ default: /usr/local/lib/php/extensions/no-debug-non-zts-20190902/}
     ';
 
     /**
@@ -31,6 +33,14 @@ class InstallTursoExtension extends Command
     {
         $autoConfirm = $this->option('yes');
         $specifiedVersion = $this->option('php-version');
-        (new Installer())->install($autoConfirm, $specifiedVersion);
+        $phpIniFile = $this->option('php-ini-file');
+        $extDestination = $this->option('ext-destination');
+
+        (new Installer())->install(
+            $autoConfirm,
+            $specifiedVersion,
+            $phpIniFile,
+            $extDestination
+        );
     }
 }
