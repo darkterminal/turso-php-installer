@@ -24,9 +24,9 @@ class CreateDatabaseToken extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(DatabaseTokenGenerator $databaseTokenGenerator)
     {
-        $this->comment("Creating libSQL Server Database token for Local Development...");
-        $this->info((new DatabaseTokenGenerator())->generete()->toJSON(true));
+        $this->comment('Creating libSQL Server Database token for Local Development...');
+        $this->info($databaseTokenGenerator->generete()->toJSON(true));
     }
 }

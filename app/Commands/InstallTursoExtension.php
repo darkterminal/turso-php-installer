@@ -2,8 +2,10 @@
 
 namespace App\Commands;
 
-use App\Repositories\Installer;
+use App\Contracts\Installer;
 use LaravelZero\Framework\Commands\Command;
+
+use function Laravel\Prompts\info;
 
 class InstallTursoExtension extends Command
 {
@@ -12,10 +14,7 @@ class InstallTursoExtension extends Command
      *
      * @var string
      */
-    protected $signature = 'install 
-        {--y|--yes : Skip interactive installation process} 
-        {--php-version= : Define your chosen PHP Version: 8.0, 8.1, 8.2, or 8.3 default: Your Current PHP Version}
-    ';
+    protected $signature = 'install';
 
     /**
      * The console command description.
@@ -27,10 +26,10 @@ class InstallTursoExtension extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(Installer $installer)
     {
-        $autoConfirm = $this->option('yes');
-        $specifiedVersion = $this->option('php-version');
-        (new Installer())->install($autoConfirm, $specifiedVersion);
+        info('Installing libSQL Extension for PHP...');
+        $installer->install();
+        info('  ✨ libSQL Extension for PHP installed');
     }
 }
