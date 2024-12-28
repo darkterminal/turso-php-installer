@@ -12,7 +12,7 @@ class CreateDatabaseToken extends Command
      *
      * @var string
      */
-    protected $signature = 'token:create';
+    protected $signature = 'token:create {db-name}';
 
     /**
      * The console command description.
@@ -26,7 +26,7 @@ class CreateDatabaseToken extends Command
      */
     public function handle(DatabaseTokenGenerator $databaseTokenGenerator)
     {
-        $this->comment('Creating libSQL Server Database token for Local Development...');
-        $this->info($databaseTokenGenerator->generete()->toJSON(true));
+        $this->comment("Creating libSQL Server Database token for Local Development...");
+        $this->info((new DatabaseTokenGenerator())->generete()->toJSON(true));
     }
 }
