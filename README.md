@@ -30,30 +30,72 @@ export PATH="$HOME/.composer/vendor/bin;$PATH"
 export PATH="$HOME/.config/composer/vendor/bin;$PATH"
 ```
 
-## Usage
+## Usage & Overview
 
-Install Turso Client PHP / libSQL Extension without worry:
+```bash
+USAGE:  <command> [options] [arguments]
+
+install      Install Turso libSQL Extension for PHP
+uninstall    Uninstall Turso libSQL Extension for PHP
+update       Update Turso libSQL Extension for PHP
+version      Display Turso PHP Installer version
+
+token:create Create libSQL Server Database token for Local Development
+token:show   Show libSQL Server Database token for Local Development
+```
+
+## Install Extension
+
+**Interactive Mode**
 
 ```bash
 turso-php-installer install
 ```
 
-Update Turso Client PHP / libSQL Extension without worry:
-
+**Non Interactive Mode**
 ```bash
-turso-php-installer update
+turso-php-installer install -y --php-vesion=8.3 --php-ini-file=/etc/php/<version>/cli/php.ini --ext-destionation=/path/to/your-custom/extensions/directory
 ```
+> See `turso-php-installer install --help`
 
-Uninstall Turso Client PHP / libSQL Extension without worry:
+## Uninstall Extension
 
 ```bash
 turso-php-installer uninstall
 ```
 
-That's it!
+## Update Extension
+
+```bash
+turso-php-installer update
+```
+
+## Using Local LibSQL for Development
+
+**Create Database Token**
+
+Create libSQL Server Database token for Local Development
+```bash
+turso-php-installer token:create
+```
+
+**Show Database Token**
+
+Show libSQL Server Database token for Local Development
+```bash
+turso-php-installer token:show
+```
+This command will show all tokens and secrets. You can also see indivial token read at `turso-php-installer token:show --help`
+
+> [See detail explanation](https://gist.github.com/darkterminal/c272bf2a572bc5d7378f31cf4aea5f19)
 
 ## FAQ
 
-**I am using Windows**
+**The Extension Is Not Working in Windows**
 
 Please, download the official release extension binary from [Turso Client PHP](https://github.com/tursodatabase/turso-client-php/releases) GitHub Release Page. Or you can you WSL or you can use [Turso Docker PHP](https://github.com/darkterminal/turso-docker-php)
+
+## Give Me a Coffe
+
+- GitHub Sponsors
+- Direct Paypal

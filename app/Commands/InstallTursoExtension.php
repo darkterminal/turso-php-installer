@@ -16,7 +16,7 @@ class InstallTursoExtension extends Command
         {--y|--yes : Skip interactive installation process} 
         {--php-version= : Define your chosen PHP Version: 8.0, 8.1, 8.2, 8.3 default: Your Current PHP Version}
         {--php-ini-file= : Define your PHP INI file location: eg: /etc/php/<version>/cli/php.ini default: /etc/php/<version>/cli/php.ini}
-        {--ext-destination= : Define your PHP Extension Destination: eg: /usr/local/lib/php/extensions/no-debug-non-zts-20190902/ default: /usr/local/lib/php/extensions/no-debug-non-zts-20190902/}
+        {--ext-destination= : Define your PHP Extension Destination: eg: /your/custom/extensions/path default: $HOME/.turso-php-installer or %USERPROFILE%\\.turso-php-installer}
     ';
 
     /**

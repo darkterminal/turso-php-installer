@@ -51,6 +51,6 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "bin": [
-        "turso-php-installer"
+        "builds/turso-php-installer"
     ]
 }

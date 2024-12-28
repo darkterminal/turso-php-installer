@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use App\Repositories\DatabaseTokenGenerator;
+use App\Repositories\Installer;
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 
@@ -13,7 +14,7 @@ class ShowDatabaseToken extends Command
      *
      * @var string
      */
-    protected $signature = 'token:show
+    protected $signature = 'token:show {db-name} 
         {--fat : Display only full access token}
         {--roa : Display only read-only access token}
         {--pkp : Display only public key pem}
@@ -32,21 +33,28 @@ class ShowDatabaseToken extends Command
      */
     public function handle()
     {
+        if (!(new Installer())->checkIsAlreadyExists()) {
+            $this->error("Turso libSQL Extension for PHP is not installed. Please install it first.");
+            exit;
+        }
+
+        $dbName = $this->argument('db-name');
+        
         if ($this->option('fat')) {
             $this->comment("Your full access token is: \n");
-            $this->info((new DatabaseTokenGenerator())->getToken('full_access_token'));
+            $this->info((new DatabaseTokenGenerator())->getToken($dbName, 'full_access_token'));
         } elseif ($this->option('roa')) {
             $this->comment("Your read-only access token is: \n");
-            $this->info((new DatabaseTokenGenerator())->getToken('read_only_token'));
+            $this->info((new DatabaseTokenGenerator())->getToken($dbName, 'read_only_token'));
         } elseif ($this->option('pkp')) {
             $this->comment("Your public key pem is: \n");
-            $this->info((new DatabaseTokenGenerator())->getToken('public_key_pem'));
+            $this->info((new DatabaseTokenGenerator())->getToken($dbName, 'public_key_pem'));
         } elseif ($this->option('pkb')) {
             $this->comment("Your public key base64 is: \n");
-            $this->info((new DatabaseTokenGenerator())->getToken('public_key_base64'));
+            $this->info((new DatabaseTokenGenerator())->getToken($dbName, 'public_key_base64'));
         } else {
             $this->comment("Your database token is: \n");
-            $this->info((new DatabaseTokenGenerator())->getToken());
+            $this->info((new DatabaseTokenGenerator())->getToken($dbName));
         }
     }
 }

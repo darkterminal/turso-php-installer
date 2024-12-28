@@ -47,14 +47,10 @@ class Installer
         $this->home = $this->checkIsWindows() ? $this->home = getenv('USERPROFILE') : trim(shell_exec('echo $HOME'));
         $this->currentVersion = implode('.', array_slice(explode('.', string: PHP_VERSION), 0, -1));
         $this->selectedPhpVersion = $this->currentVersion;
-<<<<<<< HEAD
         $this->binaryName = $this->checkIsWindows() ? "libsql_php.dll" : "liblibsql_php.so";
-        $this->destination = $isDocker ? "/root/.turso-client-php" : "{$this->home}" . DIRECTORY_SEPARATOR . ".turso-client-php";
-        $this->herdPath = $this->checkIsWindows() ? "{$this->home}\\.config\\herd" : "{$this->home}/Library/Application Support/Herd";
-=======
+        $this->herdPath = $this->checkIsWindows() ? "{$this->home}". DIRECTORY_SEPARATOR .".config". DIRECTORY_SEPARATOR ."herd" : "{$this->home}". DIRECTORY_SEPARATOR ."Library". DIRECTORY_SEPARATOR ."Application Support". DIRECTORY_SEPARATOR ."Herd";
         $this->binaryName = "liblibsql_php.so";
-        $this->destination = "$this->home/.turso-client-php";
->>>>>>> e289410 (feat: add new token:show command)
+        $this->destination = $this->home. DIRECTORY_SEPARATOR .".config". DIRECTORY_SEPARATOR .".turso-client-php";
         $this->configIni = $this->getConfigIni();
         $this->isAlreadyExists = $this->checkIsAlreadyExists();
         $this->moduleFile = "extension={$this->destination}" . DIRECTORY_SEPARATOR . "{$this->binaryName}";
@@ -88,11 +84,6 @@ class Installer
      * @throws \Exception If the specified version is not supported.
      * @return void
      */
-<<<<<<< HEAD
-    public function install(bool $autoConfirm = false, string|null $specifiedVersion = null): void
-    {
-        $this->checkIsLaravelHerd();
-=======
     public function install(
         bool $autoConfirm = false,
         string|null $specifiedVersion = null,
@@ -103,8 +94,7 @@ class Installer
 
         $this->destination = $extDestination ?? $this->destination;
         $this->phpIni = $phpIniFile ?? $this->phpIni;
-        $this->moduleFile = "extension={$this->destination}/{$this->binaryName}";
->>>>>>> e289410 (feat: add new token:show command)
+        $this->moduleFile = "extension={$this->destination}" . DIRECTORY_SEPARATOR . "{$this->binaryName}";
 
         if (!$autoConfirm) {
             $this->checkIsAlreadyExists();
@@ -169,14 +159,11 @@ class Installer
                 default: true
             );
 
-            $metadata = json_decode(file_get_contents("{$this->home}/.tursophpinstaller/metadata.json"), true);
-            $destination = $metadata['destination'] ?? '';
-            $iniFileLocation = $metadata['ini_file'] ?? '';
-            $this->moduleFile = "extension={$destination}/{$this->binaryName}";
+            $metadata = $this->getMetadataFile();
+            $destination = $metadata['destination'] ?? $this->destination;
+            $this->moduleFile = "extension={$destination}" . DIRECTORY_SEPARATOR . "{$this->binaryName}";
 
             if ($confirmUninstall) {
-<<<<<<< HEAD
-
                 if ($this->checkIsWindows()) {
                     $escapedModuleFile = str_replace(['/', '\\'], '\\', $this->moduleFile);
                     $phpIni = $this->phpIni;
@@ -211,8 +198,9 @@ class Installer
                     $escapedModuleFile = str_replace('/', '\/', $this->moduleFile);
                     $phpIni = $this->phpIni;
 
-                    if ($isDocker) {
-                        $command = "bash -c \"sed -i '/$escapedModuleFile/d' {$phpIni}\"";
+                    $hasSudo = shell_exec("sudo -v");
+                    if ($hasSudo === 0) {
+                        $command = "sudo -S bash -c \"sed -i '/$escapedModuleFile/d' {$phpIni}\"";
                         shell_exec($command);
                     } else {
                         echo "Type your ";
@@ -220,38 +208,13 @@ class Installer
                         shell_exec($command);
                     }
 
-                    $this->removeDirectory($this->destination);
+                    shell_exec(command: "rm -rf {$destination}/*");
+                    $this->removeDirectory("{$this->home}" . DIRECTORY_SEPARATOR . ".tpi-metadata");
 
                     info(
                         message: "Removed extension line from {$phpIni}\nTHANK YOU FOR USING TURSO libSQL Extension for PHP"
                     );
                 }
-
-=======
-                $escapedModuleFile = str_replace('/', '\/', $this->moduleFile);
-                $phpIni = $iniFileLocation;
-
-                if (empty($phpIni) || !file_exists($phpIni)) {
-                    error(message: "The PHP INI file location is invalid or does not exist.");
-                    exit;
-                }
-
-                $sedCommand = "sudo -S bash -c \"sed -i '/$escapedModuleFile/d' {$phpIni}\" && sudo -k";
-
-                try {
-                    shell_exec($sedCommand);
-                } catch (\Exception $e) {
-                    error(message: "Failed to remove extension line from {$phpIni}. Error: " . $e->getMessage());
-                    exit;
-                }
-
-                $this->removeDirectory("{$this->home}/.tursophpinstaller");
-                $this->removeDirectory($destination);
-
-                info(
-                    message: "Removed extension line from {$phpIni}\nTHANK YOU FOR USING TURSO libSQL Extension for PHP"
-                );
->>>>>>> e289410 (feat: add new token:show command)
             } else {
                 info(message: "Uninstallation cancelled.");
             }
@@ -384,7 +347,7 @@ class Installer
      *
      * @return string|false The trimmed output of the shell command if the extension is installed, false otherwise.
      */
-    private function checkIsAlreadyExists(): string|false
+    public function checkIsAlreadyExists(): string|false
     {
         if ($this->checkIsWindows()) {
             $searchLibsql = shell_exec('php -m | findstr libsql');
@@ -423,8 +386,14 @@ class Installer
      */
     private function checkIsDestinationExists($isUpdateCommand = false): void
     {
+        $metadataFile = "{$this->home}" . DIRECTORY_SEPARATOR . ".tpi-metadata" . DIRECTORY_SEPARATOR . "metadata.json";
+        if (!file_exists($metadataFile)) {
+            $destination = $this->destination;
+        } else {
+            $metadata = json_decode(file_get_contents($metadataFile), true);
+            $destination = $metadata['destination'] ?? $this->destination;
+        }
         $is_dir_exists = false;
-        $destination = $this->destination;
 
         // Normalize the destination path (convert to the right separator for the OS)
         $destination = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $destination);
@@ -523,19 +492,18 @@ class Installer
      */
     private function askWritePermission($update = false): void
     {
-        $isDocker = file_exists('/.dockerenv');
         $moduleFile = $this->moduleFile;
         $phpIni = $this->phpIni;
 
         if ($update === false) {
-            if ($isDocker) {
-                $command = "bash -c 'echo \"$moduleFile\" >> $phpIni'";
-                shell_exec($command);
+            if ($this->checkIsWindows()) {
+                file_put_contents($phpIni, "\n$moduleFile", FILE_APPEND);
             } else {
-                if ($this->checkIsWindows()) {
-                    file_put_contents($phpIni, "\n$moduleFile", FILE_APPEND);
+                $hasSudo = shell_exec('sudo -v');
+                if ($hasSudo) {
+                    $command = "sudo -S bash -c 'echo \"$moduleFile\" >> $phpIni'";
+                    shell_exec($command);
                 } else {
-                    shell_exec("sudo -k");
                     echo "Type your : ";
                     $command = "sudo -S bash -c 'echo \"$moduleFile\" >> $phpIni' && sudo -k";
                     shell_exec($command);
@@ -728,35 +696,21 @@ class Installer
             return $output_file;
         }, 'Downloading the extesion...');
 
-        spin(function () use ($output_file) {
+        spin(function () use ($output_file, $update) {
 
-<<<<<<< HEAD
-            $this->extractAndMoveFiles($output_file);
-=======
-            shell_exec("tar -xzf $output_file");
-
-            $directory = str_replace('.tar.gz', '', $output_file);
-
-            $destination = $this->destination;
-            shell_exec("mv $directory/* {$destination}/");
-            shell_exec("mkdir -p {$this->home}/.tursophpinstaller");
-            touch("{$this->home}/.tursophpinstaller/metadata.json");
-            $metadata = json_encode([
-                'destination' => $destination,
-                'ini_file' => $this->phpIni
-            ]);
-            file_put_contents("{$this->home}/.tursophpinstaller/metadata.json", $metadata);
-
-            shell_exec("rm $output_file");
-            rmdir($directory);
->>>>>>> e289410 (feat: add new token:show command)
+            $metadata = $this->getMetadataFile();
+            $destination = $metadata['destination'] ?? $this->destination;
+            $this->extractAndMoveFiles($output_file, $update);
+            if (!$update) {
+                $this->createMetadataFile();
+            }
 
             $message = <<<SETTING_MESSAGE
             [INFO]
 
             Downloaded release asset to $output_file
             Turso/libSQL Client PHP is downloaded!
-            store at {$this->destination}
+            store at {$destination}
             SETTING_MESSAGE;
             info($message);
             echo "\n\n";
@@ -767,19 +721,52 @@ class Installer
         $this->askWritePermission($update);
     }
 
-    private function extractAndMoveFiles($output_file): void
+    private function createMetadataFile(): void
+    {
+        $homeDir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->destination);
+        $metadataDir = "{$homeDir}" . DIRECTORY_SEPARATOR . ".tpi-metadata";
+        $metadataFile = "{$metadataDir}" . DIRECTORY_SEPARATOR . "metadata.json";
+
+        if (!is_dir($metadataDir)) {
+            mkdir($metadataDir);
+            touch($metadataFile);
+        }
+
+        $metadata = json_encode([
+            'destination' => $this->destination,
+            'ini_file' => $this->phpIni
+        ]);
+        file_put_contents($metadataFile, $metadata);
+    }
+
+    private function getMetadataFile(): array|null
+    {
+        $metadataFile = "{$this->destination}" . DIRECTORY_SEPARATOR . ".tpi-metadata" . DIRECTORY_SEPARATOR . "metadata.json";
+
+        if (!file_exists($metadataFile)) {
+            return null;
+        }
+
+        $metadata = json_decode(file_get_contents($metadataFile), true);
+        return $metadata;
+    }
+
+    private function extractAndMoveFiles(string $output_file, bool $update): void
     {
         // Normalize paths for Windows compatibility
         $output_file = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $output_file);
-        $destination = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->destination);
-
-        $this->extractZipFile($output_file, $destination);
+        if (!$update) {
+            $destination = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->destination);
+        } else {
+            $metadata = $this->getMetadataFile();
+            $destination = $metadata['destination'] ?? $this->destination;
+        }
 
         // Extract the file based on the platform (Windows uses .zip, Unix uses .tar.gz)
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             // For Windows: Use PowerShell to extract a .zip file
             if (pathinfo($output_file, PATHINFO_EXTENSION) === 'zip') {
-                shell_exec("powershell -Command \"Expand-Archive -Path '$output_file' -DestinationPath '$destination'\"");
+                $this->extractZipFile($output_file, $destination);
             } else {
                 error("Unsupported file type for Windows. Only .zip files are supported.");
                 return;
@@ -788,6 +775,10 @@ class Installer
             // For Unix-based systems: Use tar to extract .tar.gz files
             if (pathinfo($output_file, PATHINFO_EXTENSION) === 'gz') {
                 shell_exec("tar -xzf $output_file -C $destination");
+                $directoryName = str_replace('.tar.gz', '', basename($output_file));
+                $outDir = $destination . DIRECTORY_SEPARATOR . $directoryName;
+                shell_exec("mv $outDir/* $destination/");
+                shell_exec("rm -rf $outDir");
             } else {
                 error("Unsupported file type for Unix. Only .tar.gz files are supported.");
                 return;
@@ -835,7 +826,6 @@ class Installer
                 $fileinfo = pathinfo($output_file);
                 $outDir = $destination . DIRECTORY_SEPARATOR . $fileinfo['filename'];
                 $this->moveContentsOneLevelUp($outDir);
-                // Optionally, delete the zip file after extraction
                 rmdir($outDir);
                 unlink($output_file);
                 return true;

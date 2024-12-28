@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use App\Repositories\DatabaseTokenGenerator;
+use App\Repositories\Installer;
 use LaravelZero\Framework\Commands\Command;
 
 class CreateDatabaseToken extends Command
@@ -12,7 +13,7 @@ class CreateDatabaseToken extends Command
      *
      * @var string
      */
-    protected $signature = 'token:create';
+    protected $signature = 'token:create {db-name}';
 
     /**
      * The console command description.
@@ -26,7 +27,12 @@ class CreateDatabaseToken extends Command
      */
     public function handle()
     {
+        if (!(new Installer())->checkIsAlreadyExists()) {
+            $this->error("Turso libSQL Extension for PHP is not installed. Please install it first.");
+            exit;
+        }
         $this->comment("Creating libSQL Server Database token for Local Development...");
-        $this->info((new DatabaseTokenGenerator())->generete()->toJSON(true));
+        $dbName = $this->argument('db-name');
+        $this->info((new DatabaseTokenGenerator())->generete($dbName)->toJSON(true));
     }
 }
