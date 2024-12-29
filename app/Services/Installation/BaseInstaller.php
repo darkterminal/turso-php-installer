@@ -92,6 +92,7 @@ abstract class BaseInstaller implements Installer
 
         $arch = match ($this->arch) {
             'x86_64', 'AMD64' => 'x86_64',
+            'arm64' => 'aarch64',
             default => $this->arch,
         };
 
