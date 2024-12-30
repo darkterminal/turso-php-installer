@@ -2,8 +2,10 @@
 
 namespace App\Commands;
 
-use App\Repositories\Installer;
+use App\Contracts\Installer;
 use LaravelZero\Framework\Commands\Command;
+
+use function Laravel\Prompts\info;
 
 class UninstallTursoExtension extends Command
 {
@@ -24,9 +26,10 @@ class UninstallTursoExtension extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(Installer $installer)
     {
-        $this->comment('Uninstalling Turso libSQL Extension for PHP...');
-        (new Installer())->uninstall();
+        info('Uninstalling Turso libSQL Extension for PHP...');
+        $installer->uninstall();
+        info('  ✨ libSQL Extension for PHP uninstalled');
     }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Commands;
 
-use App\Repositories\Installer;
+use App\Contracts\Installer;
 use LaravelZero\Framework\Commands\Command;
+
+use function Laravel\Prompts\info;
 
 class UpdateTursoExtension extends Command
 {
@@ -24,9 +26,10 @@ class UpdateTursoExtension extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(Installer $installer)
     {
-        $this->comment('Updating Turso libSQL Extension for PHP...');
-        (new Installer())->update();
+        info('Updating Turso libSQL Extension for PHP...');
+        $installer->update();
+        info('  ✨ libSQL Extension for PHP updated');
     }
 }

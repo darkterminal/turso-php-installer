@@ -2,7 +2,7 @@
 
 namespace App\Commands;
 
-use App\Repositories\Installer;
+use App\Services\Installation\BaseInstaller;
 use LaravelZero\Framework\Commands\Command;
 
 class Version extends Command
@@ -26,7 +26,7 @@ class Version extends Command
      */
     public function handle()
     {
-        $this->info("Turso libSQL Installer (version: " . Installer::VERSION . ")");
+        $this->info('Turso libSQL Installer (version: '.BaseInstaller::VERSION.')');
         if (class_exists('LibSQL')) {
             $this->info((new \LibSQL(':memory:'))->version());
         }

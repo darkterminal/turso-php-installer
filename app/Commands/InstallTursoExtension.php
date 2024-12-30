@@ -2,8 +2,10 @@
 
 namespace App\Commands;
 
-use App\Repositories\Installer;
+use App\Contracts\Installer;
 use LaravelZero\Framework\Commands\Command;
+
+use function Laravel\Prompts\info;
 
 class InstallTursoExtension extends Command
 {
@@ -13,11 +15,11 @@ class InstallTursoExtension extends Command
      * @var string
      */
     protected $signature = 'install 
-        {--y|--yes : Skip interactive installation process} 
-        {--php-version= : Define your chosen PHP Version: 8.0, 8.1, 8.2, 8.3 default: Your Current PHP Version}
-        {--php-ini-file= : Define your PHP INI file location: eg: /etc/php/<version>/cli/php.ini default: /etc/php/<version>/cli/php.ini}
-        {--ext-destination= : Define your PHP Extension Destination: eg: /your/custom/extensions/path default: $HOME/.turso-php-installer or %USERPROFILE%\\.turso-php-installer}
-    ';
+        {--unstable : Install the unstable version} 
+        {--php-ini= : Specify the php.ini file}
+        {--php-version= : Specify the PHP version}
+        {--extension-dir= : Specify the PHP extension directory}
+        {--non-thread-safe : Install the non-thread-safe version}';
 
     /**
      * The console command description.
@@ -29,18 +31,26 @@ class InstallTursoExtension extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
-    {
-        $autoConfirm = $this->option('yes');
-        $specifiedVersion = $this->option('php-version');
-        $phpIniFile = $this->option('php-ini-file');
-        $extDestination = $this->option('ext-destination');
+    public function handle(Installer $installer)
+    {        
+        if ($this->option('php-ini')) {
+            $installer->setPhpIni($this->option('php-ini'));
+        }
 
-        (new Installer())->install(
-            $autoConfirm,
-            $specifiedVersion,
-            $phpIniFile,
-            $extDestination
-        );
+        if ($this->option('php-version')) {
+            $installer->setPhpVersion($this->option('php-version'));
+        }
+
+        if ($this->option('extension-dir')) {
+            $installer->setExtensionDir($this->option('extension-dir'));
+        }
+
+        if ($this->option('non-thread-safe')) {
+            $installer->setNonThreadSafe();
+        }
+
+        info('Installing libSQL Extension for PHP...');
+        $installer->install();
+        info('  ✨ libSQL Extension for PHP installed');
     }
 }
