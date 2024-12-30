@@ -26,6 +26,10 @@ abstract class BaseInstaller implements Installer
 
     protected string $home_directory = '';
 
+    protected string $php_ini = '';
+
+    protected bool $unstable = false;
+
     protected string $arch;
 
     protected string $os;
@@ -34,13 +38,15 @@ abstract class BaseInstaller implements Installer
 
     protected string $original_extension_name;
 
+    protected string $custom_extension_directory;
+
+    public function setUnstable(bool $unstable): void
+    {
+        $this->unstable = $unstable;
+    }
+
     public function __construct()
     {
-        $this->php_version = Str::of(PHP_VERSION)
-            ->explode('.')
-            ->slice(0, -1)
-            ->implode('.'); // e.g., 8.0, 8.1
-
         $this->arch = php_uname('m');
         $this->os = strtolower(php_uname('s'));
 
@@ -48,8 +54,39 @@ abstract class BaseInstaller implements Installer
         $this->original_extension_name = 'liblibsql_php.so';
     }
 
+    public function setPhpIni(string $php_ini): void
+    {
+        $this->php_ini = $php_ini;
+    }
+
+    public function setPhpVersion(string $php_version): void
+    {
+        $this->php_version = $php_version;
+    }
+
+    public function getPHPVersion(): string
+    {
+        if ($this->php_version) {
+            return $this->php_version;
+        }
+
+        return $this->php_version = Str::of(PHP_VERSION)
+            ->explode('.')
+            ->slice(0, -1)
+            ->implode('.'); // e.g., 8.0, 8.1
+    }
+
+    public function setExtensionDir(string $extension_dir): void
+    {
+        $this->custom_extension_directory = $extension_dir;
+    }
+
     protected function getPhpIni(): string
     {
+        if ($this->php_ini) {
+            return $this->php_ini;
+        }
+
         $detectedIni = Str::of(shell_exec('php --ini'))
             ->explode("\n")
             ->filter(fn ($line) => str_contains($line, '/php.ini') || str_contains($line, '\php.ini'))
@@ -70,7 +107,11 @@ abstract class BaseInstaller implements Installer
 
     protected function extensionDirectory(): string
     {
-        return collect([$this->home_directory, '.turso-client-php', $this->php_version])
+        if ($this->custom_extension_directory) {
+            return $this->custom_extension_directory;
+        }
+
+        return collect([$this->home_directory, '.turso-client-php', $this->getPHPVersion()])
             ->implode(DIRECTORY_SEPARATOR);
     }
 
@@ -96,7 +137,7 @@ abstract class BaseInstaller implements Installer
             default => $this->arch,
         };
 
-        return collect([$this->php_version, $arch, $os])
+        return collect([$this->getPHPVersion(), $arch, $os])
             ->filter()
             ->implode('-');
     }
@@ -121,13 +162,22 @@ abstract class BaseInstaller implements Installer
         info('  ✅ php.ini updated');
     }
 
+    protected function getRepository()
+    {
+        if ($this->unstable) {
+            return 'https://raw.githubusercontent.com/pandanotabear/turso-client-php/main/release_metadata.json';
+        }
+
+        return self::REPOSITORY;
+    }
+
     protected function downloadExtension(): void
     {
         $path = $this->extensionDirectory();
 
         $request = spin(
             message: 'Getting the latest version of the extension...',
-            callback: fn () => Http::withUserAgent(self::USER_AGENT)->get(self::REPOSITORY)
+            callback: fn () => Http::withUserAgent(self::USER_AGENT)->get($this->getRepository())
         );
 
         $assets = $request->json('assets');
@@ -140,7 +190,7 @@ abstract class BaseInstaller implements Installer
             throw new RuntimeException('The extension for your PHP version is not available. Please open an issue on the repository.');
         }
 
-        info(sprintf('  ✅ Found latest release for %s %s %s', $this->os, $this->arch, $this->php_version));
+        info(sprintf('  ✅ Found latest release for %s %s %s', $this->os, $this->arch, $this->getPHPVersion()));
 
         $asset->download();
 
@@ -225,7 +275,7 @@ abstract class BaseInstaller implements Installer
         ], rows: [[
             $this->os,
             $this->arch,
-            $this->php_version,
+            $this->getPHPVersion(),
             $this->extensionDirectory(),
             $this->getPhpIni(),
         ]]);

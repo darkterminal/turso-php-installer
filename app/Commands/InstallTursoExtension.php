@@ -14,7 +14,10 @@ class InstallTursoExtension extends Command
      *
      * @var string
      */
-    protected $signature = 'install';
+    protected $signature = 'install 
+        {--unstable : Install the unstable version} 
+        {--php-ini= : Specify the php.ini file} {--php-version= : Specify the PHP version}
+        {--extension-dir= : Specify the PHP extension directory}';
 
     /**
      * The console command description.
@@ -28,6 +31,20 @@ class InstallTursoExtension extends Command
      */
     public function handle(Installer $installer)
     {
+        $installer->setUnstable($this->option('unstable'));
+
+        if ($this->option('php-ini')) {
+            $installer->setPhpIni($this->option('php-ini'));
+        }
+
+        if ($this->option('php-version')) {
+            $installer->setPhpVersion($this->option('php-version'));
+        }
+
+        if ($this->option('extension-dir')) {
+            $installer->setExtensionDir($this->option('extension-dir'));
+        }
+
         info('Installing libSQL Extension for PHP...');
         $installer->install();
         info('  ✨ libSQL Extension for PHP installed');
