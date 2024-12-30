@@ -4,6 +4,7 @@ namespace App\ValueObjects;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use PharData;
 use RuntimeException;
 use ZipArchive;
@@ -21,6 +22,8 @@ class Asset
 
     private string $extracted_path;
 
+    public string $temporary_name;
+
     public static function from(array $array)
     {
         $asset = new self;
@@ -28,6 +31,7 @@ class Asset
         $asset->download_url = $array['browser_download_url'];
         $asset->download_path = sys_get_temp_dir();
         $asset->extracted_path = $asset->download_path.DIRECTORY_SEPARATOR.$asset->filename();
+        $asset->temporary_name = Str::random(40);
 
         return $asset;
     }
@@ -37,7 +41,7 @@ class Asset
         $request = spin(
             message: 'Downloading Turso/libSQL Extension for PHP...',
             callback: fn () => Http::retry(3, 100)
-                ->sink($this->download_path.DIRECTORY_SEPARATOR.$this->name)
+                ->sink($this->download_path.DIRECTORY_SEPARATOR.$this->getTempName())
                 ->get($this->download_url)
         );
 
@@ -70,11 +74,19 @@ class Asset
         return preg_replace(['/\.tar\.gz$/', '/\.zip$/'], '', $this->name);
     }
 
+    public function getTempName(): string
+    {
+        return match (true) {
+            str_contains($this->name, '.zip') => $this->temporary_name.'.zip',
+            str_contains($this->name, '.tar.gz') => $this->temporary_name.'.tar.gz',
+        };
+    }
+
     public function getArchiver(): PharData|ZipArchive
     {
         return match (true) {
-            str_contains($this->name, '.zip') => new ZipArchive($this->download_path.DIRECTORY_SEPARATOR.$this->name),
-            str_contains($this->name, '.tar.gz') => new PharData($this->download_path.DIRECTORY_SEPARATOR.$this->name)
+            str_contains($this->name, '.zip') => new ZipArchive($this->download_path.DIRECTORY_SEPARATOR.$this->getTempName()),
+            str_contains($this->name, '.tar.gz') => new PharData($this->download_path.DIRECTORY_SEPARATOR.$this->getTempName()),
         };
     }
 }

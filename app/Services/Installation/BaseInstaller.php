@@ -40,6 +40,8 @@ abstract class BaseInstaller implements Installer
 
     protected string $custom_extension_directory;
 
+    protected bool $non_thread_safe = false;
+
     public function setUnstable(bool $unstable): void
     {
         $this->unstable = $unstable;
@@ -52,6 +54,7 @@ abstract class BaseInstaller implements Installer
 
         $this->extension_name = 'libsql_php.so';
         $this->original_extension_name = 'liblibsql_php.so';
+        $this->custom_extension_directory = '';
     }
 
     public function setPhpIni(string $php_ini): void
@@ -62,6 +65,11 @@ abstract class BaseInstaller implements Installer
     public function setPhpVersion(string $php_version): void
     {
         $this->php_version = $php_version;
+    }
+
+    public function setNonThreadSafe(): void
+    {
+        $this->non_thread_safe = true;
     }
 
     public function getPHPVersion(): string
@@ -111,6 +119,11 @@ abstract class BaseInstaller implements Installer
             return $this->custom_extension_directory;
         }
 
+        if ($this->unstable) {
+            return collect([$this->home_directory, '.turso-client-php', 'unstable', $this->getPHPVersion()])
+                ->implode(DIRECTORY_SEPARATOR);
+        }
+
         return collect([$this->home_directory, '.turso-client-php', $this->getPHPVersion()])
             ->implode(DIRECTORY_SEPARATOR);
     }
@@ -122,7 +135,7 @@ abstract class BaseInstaller implements Installer
         }
     }
 
-    protected function assetVersion(): string
+    protected function assetVersion(bool $shouldIncludeTS): string
     {
         $os = match ($this->os) {
             'darwin' => 'apple-darwin',
@@ -136,6 +149,15 @@ abstract class BaseInstaller implements Installer
             'arm64' => 'aarch64',
             default => $this->arch,
         };
+
+        if ($shouldIncludeTS) {
+
+            $threadSafety = $this->non_thread_safe ? 'nts' : 'ts';
+
+            return collect([$this->getPHPVersion(), $threadSafety, $arch, $os])
+                ->filter()
+                ->implode('-');
+        }
 
         return collect([$this->getPHPVersion(), $arch, $os])
             ->filter()
@@ -180,11 +202,20 @@ abstract class BaseInstaller implements Installer
             callback: fn () => Http::withUserAgent(self::USER_AGENT)->get($this->getRepository())
         );
 
+        [$major, $minor] = str($request->json('name'))
+            ->explode('.')
+            ->filter(fn ($part) => is_numeric($part))
+            ->collect()
+            ->map(fn ($part) => (int) $part)
+            ->flatten();
+
         $assets = $request->json('assets');
 
         $asset = collect($assets)
             ->map(fn ($asset) => Asset::from($asset))
-            ->first(fn (Asset $asset) => Str::of($asset->name)->contains($this->assetVersion()));
+            ->first(function (Asset $asset) use ($major, $minor) {
+                return Str::of($asset->name)->contains($this->assetVersion(shouldIncludeTS: $major === 1 && $minor >= 4));
+            });
 
         if ($asset === null) {
             throw new RuntimeException('The extension for your PHP version is not available. Please open an issue on the repository.');

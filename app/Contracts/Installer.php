@@ -17,4 +17,6 @@ interface Installer
     public function setPhpVersion(string $php_version): void;
 
     public function setExtensionDir(string $extension_dir): void;
+
+    public function setNonThreadSafe(): void;
 }

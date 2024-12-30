@@ -17,7 +17,8 @@ class InstallTursoExtension extends Command
     protected $signature = 'install 
         {--unstable : Install the unstable version} 
         {--php-ini= : Specify the php.ini file} {--php-version= : Specify the PHP version}
-        {--extension-dir= : Specify the PHP extension directory}';
+        {--extension-dir= : Specify the PHP extension directory}
+        {--non-thread-safe : Install the non-thread-safe version}';
 
     /**
      * The console command description.
@@ -43,6 +44,10 @@ class InstallTursoExtension extends Command
 
         if ($this->option('extension-dir')) {
             $installer->setExtensionDir($this->option('extension-dir'));
+        }
+
+        if ($this->option('non-thread-safe')) {
+            $installer->setNonThreadSafe();
         }
 
         info('Installing libSQL Extension for PHP...');
