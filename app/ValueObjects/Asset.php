@@ -82,6 +82,11 @@ class Asset
         };
     }
 
+    public function removeArchive(): void
+    {
+        File::delete($this->download_path.DIRECTORY_SEPARATOR.$this->getTempName());
+    }
+
     public function getArchiver(): PharData|ZipArchive
     {
         return match (true) {
