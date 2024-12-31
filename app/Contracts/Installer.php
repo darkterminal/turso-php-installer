@@ -20,5 +20,5 @@ interface Installer
 
     public function setExtensionDir(string $extension_dir): void;
 
-    public function setNonThreadSafe(): void;
+    public function setThreadSafe(): void;
 }
