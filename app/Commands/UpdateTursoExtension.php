@@ -28,6 +28,11 @@ class UpdateTursoExtension extends Command
      */
     public function handle(Installer $installer)
     {
+        if (!$installer->checkIfAlreadyInstalled()) {
+            info(" Turso libSQL Extension for PHP is not installed. Skipping uninstallation... \n Use the `install` command to install the extension.");
+            return;
+        }
+
         info('Updating Turso libSQL Extension for PHP...');
         $installer->update();
         info('  ✨ libSQL Extension for PHP updated');
