@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS tokens (
     read_only_token TEXT NOT NULL,
     public_key_pem TEXT NOT NULL,
     public_key_base64 TEXT NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    expiration_day INTEGER NOT NULL,
+    created_at TEXT DEFAULT (DATETIME('now', 'localtime')),
+    updated_at TEXT DEFAULT (DATETIME('now', 'localtime'))
 )
