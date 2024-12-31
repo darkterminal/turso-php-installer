@@ -11,9 +11,9 @@ class LinuxInstaller extends BaseInstaller
 
     public function __construct()
     {
+        parent::__construct();
         $this->home_directory = $_SERVER['HOME'];
         $this->is_docker = File::exists('/.dockerenv');
-        parent::__construct();
     }
 
     protected function extensionDirectory(): string
