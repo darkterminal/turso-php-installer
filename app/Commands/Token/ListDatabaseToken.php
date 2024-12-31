@@ -28,10 +28,10 @@ class ListDatabaseToken extends Command
     public function handle(Installer $installer)
     {
         if (!$installer->checkIfAlreadyInstalled()) {
-            $this->error("Turso libSQL Extension for PHP is not installed. Please install it first.");
+            $this->error(" 🚫 Turso libSQL Extension for PHP is not installed. Please install it first.");
             exit;
         }
-        $this->comment("Your database tokens are:");
-        (new DatabaseTokenGenerator())->getTokens();
+        $this->comment(" List all generated database tokens:");
+        (new DatabaseTokenGenerator())->listAllTokens();
     }
 }
