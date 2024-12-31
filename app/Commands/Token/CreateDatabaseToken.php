@@ -13,7 +13,9 @@ class CreateDatabaseToken extends Command
      *
      * @var string
      */
-    protected $signature = 'token:create {db-name}';
+    protected $signature = 'token:create {db-name}
+        {--expire=7 : The number of days until the token expires, default is 7 days}
+    ';
 
     /**
      * The console command description.
@@ -25,15 +27,18 @@ class CreateDatabaseToken extends Command
     /**
      * Execute the console command.
      */
-    public function handle(Installer $installer)
-    {
+    public function handle(
+        Installer $installer,
+        DatabaseTokenGenerator $databaseTokenGenerator
+    ) {
         if (!$installer->checkIfAlreadyInstalled()) {
-            $this->error("Turso libSQL Extension for PHP is not installed. Please install it first.");
+            $this->error(" 🚫 Turso libSQL Extension for PHP is not installed. Please install it first.");
             return;
         }
 
-        $this->comment("Creating libSQL Server Database token for Local Development...");
         $dbName = $this->argument('db-name');
-        $this->info((new DatabaseTokenGenerator())->generete($dbName)->toJSON(true));
+        $expire = (int) $this->option('expire');
+        $databaseTokenGenerator->setTokenExpiration($expire);
+        $databaseTokenGenerator->generete($dbName);
     }
 }
