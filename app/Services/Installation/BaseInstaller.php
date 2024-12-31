@@ -20,12 +20,6 @@ abstract class BaseInstaller implements Installer
 {
     use UseRemember;
     
-    protected const REPOSITORY = 'https://raw.githubusercontent.com/tursodatabase/turso-client-php/main/release_metadata.json';
-    
-    protected const USER_AGENT = 'darkterminal';
-
-    public const VERSION = '2.0.2';
-    
     protected string $arch;
 
     protected string $custom_extension_directory;
@@ -34,7 +28,7 @@ abstract class BaseInstaller implements Installer
 
     protected string $home_directory = '';
 
-    protected bool $non_thread_safe = false;
+    protected bool $thread_safe = false;
 
     protected string $os;
 
@@ -52,8 +46,8 @@ abstract class BaseInstaller implements Installer
 
     public function __construct()
     {
-        $this->arch = php_uname('m');
-        $this->os = collect(explode(' ', strtolower(php_uname('s'))))->first();
+        $this->arch = get_os_arch();
+        $this->os = get_os_name();
 
         $this->original_extension_name = 'liblibsql_php.so';
         $this->extension_name = 'libsql_php.so';
@@ -79,7 +73,7 @@ abstract class BaseInstaller implements Installer
 
         if ($shouldIncludeTS) {
 
-            $threadSafety = $this->non_thread_safe ? 'nts' : 'ts';
+            $threadSafety = $this->thread_safe ? 'ts' : 'nts';
 
             return collect([$this->getPHPVersion(), $threadSafety, $arch, $os])
                 ->filter()
@@ -104,7 +98,7 @@ abstract class BaseInstaller implements Installer
 
         $request = spin(
             message: 'Getting the latest version of the extension...',
-            callback: fn() => Http::withUserAgent(self::USER_AGENT)->get($this->getRepository())
+            callback: fn() => Http::withUserAgent(USER_AGENT)->get($this->getRepository())
         );
 
         [$major, $minor] = str($request->json('name'))
@@ -178,9 +172,9 @@ abstract class BaseInstaller implements Installer
         return $this->unstable;
     }
 
-    protected function getNonThreadSafe(): bool
+    protected function getThreadSafe(): bool
     {
-        return $this->non_thread_safe;
+        return $this->thread_safe;
     }
 
     public function getPHPVersion(): string
@@ -201,22 +195,7 @@ abstract class BaseInstaller implements Installer
             return $this->php_ini;
         }
 
-        $detectedIni = Str::of(shell_exec('php --ini'))
-            ->explode("\n")
-            ->filter(fn($line) => str_contains($line, '/php.ini') || str_contains($line, '\php.ini'))
-            ->first();
-
-        if (blank($detectedIni)) {
-            throw new RuntimeException(
-                "PHP is not installed globally in your environment.\n
-                Turso/libSQL Client PHP attempted to locate a php.ini file but none was found."
-            );
-        }
-
-        return trim(Str::of($detectedIni)
-            ->explode(':')
-            ->filter()
-            ->last());
+        return get_php_ini_file();
     }
 
     protected function getMetadataLocationFile(): string
@@ -227,10 +206,10 @@ abstract class BaseInstaller implements Installer
     protected function getRepository()
     {
         if ($this->unstable) {
-            return 'https://raw.githubusercontent.com/pandanotabear/turso-client-php/main/release_metadata.json';
+            return UNSTABLE_REPOSITORY;
         }
 
-        return self::REPOSITORY;
+        return REPOSITORY;
     }
 
     protected function getExtensionDirToRemember(): string
@@ -316,19 +295,7 @@ abstract class BaseInstaller implements Installer
 
     protected function removingExtensionFromPhpIniWithSudo(): void
     {
-        $this->runSudoCommand("sed -i '/{$this->extension_name}/d' {$this->getPhpIni()}");
-    }
-
-    protected function runSudoCommand(string $command): void
-    {
-        $hasSudo = shell_exec('sudo -v');
-        if ($hasSudo) {
-            $command = "sudo -S bash -c '$command'";
-            shell_exec($command);
-        } else {
-            $command = "sudo -S bash -c '$command' && sudo -k";
-            shell_exec($command);
-        }
+        sudo_shell_exec("sed -i '/{$this->extension_name}/d' {$this->getPhpIni()}");
     }
 
     protected function removeExtensionFiles(): void
@@ -355,9 +322,9 @@ abstract class BaseInstaller implements Installer
         $this->php_version = $php_version;
     }
 
-    public function setNonThreadSafe(): void
+    public function setThreadSafe(): void
     {
-        $this->non_thread_safe = true;
+        $this->thread_safe = true;
     }
 
     public function setExtensionDir(string $extension_dir): void
@@ -399,7 +366,7 @@ abstract class BaseInstaller implements Installer
         $content = $this->getExtensionString();
 
         info(" Updating php.ini file...");
-        $this->runSudoCommand("sed -i '/{$this->extension_name}/d' {$this->getPhpIni()} && echo \"$content\" >> $ini");
+        sudo_shell_exec("sed -i '/{$this->extension_name}/d' {$this->getPhpIni()} && echo \"$content\" >> $ini");
     }
 
     public function update(): void
@@ -412,7 +379,7 @@ abstract class BaseInstaller implements Installer
             $this->setPhpIni($metadata->get('php_ini'));
 
             if ($metadata->get('nts')) {
-                $this->setNonThreadSafe();
+                $this->setThreadSafe();
             }
 
             if (!Str::contains($metadata->get('extension_directory'), 'turso-client-php')) {
