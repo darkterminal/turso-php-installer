@@ -10,7 +10,7 @@ trait UseRemember
     {
         File::put($this->getMetadataLocationFile(), json_encode([
             'version' => $this->getPHPVersion(),
-            'nts' => $this->getNonThreadSafe(),
+            'nts' => $this->getThreadSafe(),
             'stable' => !$this->getUnstable(),
             'extension_directory' => $this->getExtensionDirToRemember(),
             'php_ini' => $this->getPhpIni(),
@@ -21,6 +21,6 @@ trait UseRemember
     abstract public function getPHPVersion(): string;
     abstract protected function getPhpIni(): string;
     abstract protected function getUnstable(): bool;
-    abstract protected function getNonThreadSafe(): bool;
+    abstract protected function getThreadSafe(): bool;
     abstract protected function getExtensionDirToRemember(): string;
 }
