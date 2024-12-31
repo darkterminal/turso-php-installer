@@ -2,12 +2,12 @@
 
 namespace App\ValueObjects;
 
+use App\Handlers\ZipHandler;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use PharData;
 use RuntimeException;
-use ZipArchive;
 
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
@@ -30,7 +30,7 @@ class Asset
         $asset->name = $array['name'];
         $asset->download_url = $array['browser_download_url'];
         $asset->download_path = sys_get_temp_dir();
-        $asset->extracted_path = $asset->download_path.DIRECTORY_SEPARATOR.$asset->filename();
+        $asset->extracted_path = $asset->download_path . DIRECTORY_SEPARATOR . $asset->filename();
         $asset->temporary_name = Str::random(40);
 
         return $asset;
@@ -40,13 +40,13 @@ class Asset
     {
         $request = spin(
             message: 'Downloading Turso/libSQL Extension for PHP...',
-            callback: fn () => Http::retry(3, 100)
-                ->sink($this->download_path.DIRECTORY_SEPARATOR.$this->getTempName())
+            callback: fn() => Http::retry(3, 100)
+                ->sink($this->download_path . DIRECTORY_SEPARATOR . $this->getTempName())
                 ->get($this->download_url)
         );
 
         if ($request->getStatusCode() != 200) {
-            throw new RuntimeException('Unable to download extension:'.$this->name);
+            throw new RuntimeException('Unable to download extension:' . $this->name);
         }
     }
 
@@ -55,17 +55,28 @@ class Asset
         $archiver = $this->getArchiver();
 
         $extractOnlyFiles = collect($only)
-            ->map(fn ($file) => $this->filename().DIRECTORY_SEPARATOR.$file)
+            ->map(fn($file) => $this->filename() . DIRECTORY_SEPARATOR . $file)
             ->toArray();
 
         $archiver->extractTo($this->download_path, $extractOnlyFiles, true);
+        $dir = pathinfo(path: $this->download_path . DIRECTORY_SEPARATOR . $this->getTempName());
 
         foreach ($only as $fileNameToExtract) {
             info(sprintf('  ✅ Extracted %s', $fileNameToExtract));
-            File::move(
-                $this->extracted_path.DIRECTORY_SEPARATOR.$fileNameToExtract,
-                $extractTo.DIRECTORY_SEPARATOR.$fileNameToExtract
-            );
+            if ($archiver instanceof ZipHandler) {
+                $windowsExtractedPath = $this->download_path . DIRECTORY_SEPARATOR . $dir['filename'];
+                if (is_dir($windowsExtractedPath) && file_exists($windowsExtractedPath . DIRECTORY_SEPARATOR . $fileNameToExtract)) {
+                    File::move(
+                        $windowsExtractedPath . DIRECTORY_SEPARATOR . $fileNameToExtract,
+                        $extractTo . DIRECTORY_SEPARATOR . $fileNameToExtract
+                    );
+                }
+            } else {
+                File::move(
+                    $this->extracted_path . DIRECTORY_SEPARATOR . $fileNameToExtract,
+                    $extractTo . DIRECTORY_SEPARATOR . $fileNameToExtract
+                );
+            }
         }
     }
 
@@ -77,21 +88,21 @@ class Asset
     public function getTempName(): string
     {
         return match (true) {
-            str_contains($this->name, '.zip') => $this->temporary_name.'.zip',
-            str_contains($this->name, '.tar.gz') => $this->temporary_name.'.tar.gz',
+            str_contains($this->name, '.zip') => $this->temporary_name . '.zip',
+            str_contains($this->name, '.tar.gz') => $this->temporary_name . '.tar.gz',
         };
     }
 
     public function removeArchive(): void
     {
-        File::delete($this->download_path.DIRECTORY_SEPARATOR.$this->getTempName());
+        File::delete($this->download_path . DIRECTORY_SEPARATOR . $this->getTempName());
     }
 
-    public function getArchiver(): PharData|ZipArchive
+    public function getArchiver(): PharData|ZipHandler
     {
         return match (true) {
-            str_contains($this->name, '.zip') => new ZipArchive($this->download_path.DIRECTORY_SEPARATOR.$this->getTempName()),
-            str_contains($this->name, '.tar.gz') => new PharData($this->download_path.DIRECTORY_SEPARATOR.$this->getTempName()),
+            str_contains($this->name, '.zip') => new ZipHandler($this->download_path . DIRECTORY_SEPARATOR . $this->getTempName()),
+            str_contains($this->name, '.tar.gz') => new PharData($this->download_path . DIRECTORY_SEPARATOR . $this->getTempName()),
         };
     }
 }

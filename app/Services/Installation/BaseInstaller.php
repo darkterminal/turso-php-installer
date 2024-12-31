@@ -53,7 +53,7 @@ abstract class BaseInstaller implements Installer
     public function __construct()
     {
         $this->arch = php_uname('m');
-        $this->os = strtolower(php_uname('s'));
+        $this->os = collect(explode(' ', strtolower(php_uname('s'))))->first();
 
         $this->original_extension_name = 'liblibsql_php.so';
         $this->extension_name = 'libsql_php.so';
@@ -137,14 +137,16 @@ abstract class BaseInstaller implements Installer
             $this->original_stubs_name
         ]);
 
-        File::move(
-            $path . DIRECTORY_SEPARATOR . $this->original_extension_name,
-            $path . DIRECTORY_SEPARATOR . $this->extension_name
-        );
-        File::move(
-            $path . DIRECTORY_SEPARATOR . $this->original_stubs_name,
-            $path . DIRECTORY_SEPARATOR . $this->stubs_name
-        );
+        if ($this->os !== 'windows') {
+            File::move(
+                $path . DIRECTORY_SEPARATOR . $this->original_extension_name,
+                $path . DIRECTORY_SEPARATOR . $this->extension_name
+            );
+            File::move(
+                $path . DIRECTORY_SEPARATOR . $this->original_stubs_name,
+                $path . DIRECTORY_SEPARATOR . $this->stubs_name
+            );
+        }
 
         $asset->removeArchive();
     }
@@ -366,10 +368,11 @@ abstract class BaseInstaller implements Installer
     protected function updatePhpIni(): void
     {
         $ini = $this->getPhpIni();
-        $path = $this->extensionDirectory();
 
         if (File::isWritable($ini)) {
-            spin(function () use ($ini, $path) {
+            $this->removeExtensionFromPhpIni();
+            
+            spin(function () use ($ini) {
                 $contents = LazyCollection::make(function () use ($ini) {
                     $file = fopen($ini, 'r');
                     while (!feof($file)) {
