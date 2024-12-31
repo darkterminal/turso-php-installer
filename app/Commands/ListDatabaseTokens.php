@@ -2,10 +2,9 @@
 
 namespace App\Commands;
 
-use App\Repositories\DatabaseTokenGenerator;
-use App\Repositories\Installer;
-use Illuminate\Console\Scheduling\Schedule;
+use App\Contracts\Installer;
 use LaravelZero\Framework\Commands\Command;
+use App\Repositories\DatabaseTokenGenerator;
 
 class ListDatabaseTokens extends Command
 {
@@ -26,9 +25,9 @@ class ListDatabaseTokens extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(Installer $installer)
     {
-        if (!(new Installer())->checkIsAlreadyExists()) {
+        if (!$installer->checkIfAlreadyInstalled()) {
             $this->error("Turso libSQL Extension for PHP is not installed. Please install it first.");
             exit;
         }
