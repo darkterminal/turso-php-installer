@@ -25,7 +25,7 @@ class CreateDatabaseToken extends Command
     /**
      * Execute the console command.
      */
-    public function handle(DatabaseTokenGenerator $databaseTokenGenerator, Installer $installer)
+    public function handle(Installer $installer)
     {
         if (!$installer->checkIfAlreadyInstalled()) {
             $this->error("Turso libSQL Extension for PHP is not installed. Please install it first.");
