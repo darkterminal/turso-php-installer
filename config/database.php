@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'sql_statements' => database_path('database')
+    'sql_statements' => app_path('database')
 ];
