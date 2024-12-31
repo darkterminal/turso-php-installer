@@ -30,40 +30,36 @@ class ShowDatabaseToken extends Command
     /**
      * Execute the console command.
      */
-    public function handle(Installer $installer)
-    {
+    public function handle(
+        Installer $installer,
+        DatabaseTokenGenerator $databaseTokenGenerator
+    ) {
         if (!$installer->checkIfAlreadyInstalled()) {
-            $this->error("Turso libSQL Extension for PHP is not installed. Please install it first.");
+            $this->error(" 🚫 Turso libSQL Extension for PHP is not installed. Please install it first.");
             exit;
         }
 
         $dbName = $this->argument('db-name');
-        
+
         if ($this->option('fat')) {
-            $this->comment("Your full access token is: \n");
-            $this->info((new DatabaseTokenGenerator())->getToken($dbName, 'full_access_token'));
-            return;
-        } 
-        
-        if ($this->option('roa')) {
-            $this->comment("Your read-only access token is: \n");
-            $this->info((new DatabaseTokenGenerator())->getToken($dbName, 'read_only_token'));
-            return;
-        } 
-        
-        if ($this->option('pkp')) {
-            $this->comment("Your public key pem is: \n");
-            $this->info((new DatabaseTokenGenerator())->getToken($dbName, 'public_key_pem'));
-            return;
-        } 
-        
-        if ($this->option('pkb')) {
-            $this->comment("Your public key base64 is: \n");
-            $this->info((new DatabaseTokenGenerator())->getToken($dbName, 'public_key_base64'));
+            $this->info($databaseTokenGenerator->getToken($dbName, 'full_access_token'));
             return;
         }
 
-        $this->comment("Your database token is: \n");
-        $this->info((new DatabaseTokenGenerator())->getToken($dbName));
+        if ($this->option('roa')) {
+            $this->info($databaseTokenGenerator->getToken($dbName, 'read_only_token'));
+            return;
+        }
+
+        if ($this->option('pkp')) {
+            $this->info($databaseTokenGenerator->getToken($dbName, 'public_key_pem'));
+            return;
+        }
+
+        if ($this->option('pkb')) {
+            $this->info($databaseTokenGenerator->getToken($dbName, 'public_key_base64'));
+            return;
+        }
+        $this->info($databaseTokenGenerator->getToken($dbName));
     }
 }
