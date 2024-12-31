@@ -32,7 +32,12 @@ class InstallTursoExtension extends Command
      * Execute the console command.
      */
     public function handle(Installer $installer)
-    {        
+    {
+        if ($installer->checkIfAlreadyInstalled()) {
+            info(" Turso libSQL Extension for PHP is already installed. Skipping installation... \n Use the `update` command to update the extension.");
+            return;
+        }
+
         if ($this->option('php-ini')) {
             $installer->setPhpIni($this->option('php-ini'));
         }
@@ -47,6 +52,10 @@ class InstallTursoExtension extends Command
 
         if ($this->option('non-thread-safe')) {
             $installer->setNonThreadSafe();
+        }
+
+        if ($this->option('unstable')) {
+            $installer->setUnstable(true);
         }
 
         info('Installing libSQL Extension for PHP...');
