@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Commands;
+namespace App\Commands\Installer;
 
 use App\Services\Installation\BaseInstaller;
 use LaravelZero\Framework\Commands\Command;
 
-class Version extends Command
+class VersionTursoExtension extends Command
 {
     /**
      * The name and signature of the console command.

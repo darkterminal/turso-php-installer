@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Commands;
+namespace App\Commands\Token;
 
-use App\Repositories\DatabaseTokenGenerator;
+use App\Services\DatabaseTokenGenerator;
 use App\Contracts\Installer;
 use LaravelZero\Framework\Commands\Command;
 

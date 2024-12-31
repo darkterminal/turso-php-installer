@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Commands;
+namespace App\Commands\Token;
 
 use App\Contracts\Installer;
 use LaravelZero\Framework\Commands\Command;
-use App\Repositories\DatabaseTokenGenerator;
+use App\Services\DatabaseTokenGenerator;
 
-class ListDatabaseTokens extends Command
+class ListDatabaseToken extends Command
 {
     /**
      * The name and signature of the console command.

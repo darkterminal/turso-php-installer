@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands;
+namespace App\Commands\Installer;
 
 use App\Contracts\Installer;
 use LaravelZero\Framework\Commands\Command;

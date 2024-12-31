@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Services;
 
 use DateTimeImmutable;
 use Lcobucci\JWT\JwtFacade;

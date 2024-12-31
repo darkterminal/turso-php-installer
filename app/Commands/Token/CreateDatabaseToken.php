@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Commands;
+namespace App\Commands\Token;
 
 use App\Contracts\Installer;
-use App\Repositories\DatabaseTokenGenerator;
+use App\Services\DatabaseTokenGenerator;
 use LaravelZero\Framework\Commands\Command;
 
 class CreateDatabaseToken extends Command
