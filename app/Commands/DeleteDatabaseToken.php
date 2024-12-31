@@ -2,9 +2,8 @@
 
 namespace App\Commands;
 
+use App\Contracts\Installer;
 use App\Repositories\DatabaseTokenGenerator;
-use App\Repositories\Installer;
-use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 
 class DeleteDatabaseToken extends Command
@@ -27,11 +26,11 @@ class DeleteDatabaseToken extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(Installer $installer)
     {
-        if (!(new Installer())->checkIsAlreadyExists()) {
+        if (!$installer->checkIfAlreadyInstalled()) {
             $this->error("Turso libSQL Extension for PHP is not installed. Please install it first.");
-            exit(1);
+            return;
         }
 
         $dbName = $this->argument('db-name');
