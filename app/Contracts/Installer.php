@@ -4,6 +4,8 @@ namespace App\Contracts;
 
 interface Installer
 {
+    public function checkIfAlreadyInstalled(): bool;
+    
     public function update(): void;
 
     public function uninstall(): void;
