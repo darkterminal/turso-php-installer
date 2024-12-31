@@ -3,15 +3,16 @@
 namespace App\Services;
 
 use DateTimeImmutable;
+use Illuminate\Support\Carbon;
 use Lcobucci\JWT\JwtFacade;
 use Lcobucci\JWT\Signer\Eddsa;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Token\Builder;
 
-use RuntimeException;
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\table;
+use function Laravel\Prompts\warning;
 
 final class DatabaseTokenGenerator
 {
@@ -21,9 +22,9 @@ final class DatabaseTokenGenerator
     protected ?string $publicKeyPem = null;
     protected ?string $pubKeyBase64 = null;
     protected ?InMemory $key = null;
-    protected ?string $tempDir = null;
+    protected ?string $temp_dir = null;
     protected string $home;
-    protected string|\LibSQL $tokenStore;
+    protected \LibSQL $tokenStore;
 
     protected array $results = [];
 
@@ -34,60 +35,24 @@ final class DatabaseTokenGenerator
      */
     public function __construct()
     {
-        $requiredExtensions = ['openssl', 'sodium'];
+        check_generator_requirements();
 
-        foreach ($requiredExtensions as $ext) {
-            if (!extension_loaded($ext)) {
-                throw new RuntimeException("Error: PHP extension '$ext' is not installed or enabled.");
-            }
+        $this->temp_dir = sys_get_temp_dir();
+
+        if (!is_dir(get_plain_installation_dir())) {
+            mkdir(get_plain_installation_dir());
         }
 
-        $opensslPath = stripos(PHP_OS, 'WIN') === 0 ? shell_exec('where openssl') : shell_exec('which openssl');
-
-        if (!$opensslPath) {
-            throw new RuntimeException("Error: OpenSSL command-line tool is not installed or not in your PATH.");
-        }
-
-        $this->tempDir = sys_get_temp_dir();
-        $this->home = stripos(PHP_OS, 'WIN') === 0 ? getenv('USERPROFILE') : getenv('HOME');
-
-        $this->home = trim($this->home);
-
-        if (!is_dir("{$this->home}" . DIRECTORY_SEPARATOR . ".tpi-metadata")) {
-            mkdir("{$this->home}". DIRECTORY_SEPARATOR .".tpi-metadata");
-        }
-
-        if ($this->checklibSQLAvailability()) {
-            $databaseFileName = "{$this->home}" . DIRECTORY_SEPARATOR . ".tpi-metadata" . DIRECTORY_SEPARATOR . "tokens.db";
-            $this->tokenStore = new \LibSQL($databaseFileName);
-            $this->tokenStore->execute(file_get_contents(config('database.sql_statements') . DIRECTORY_SEPARATOR . 'create_token_table.sql'));
-        } else {
-            $jsonTokenStore = "{$this->home}" . DIRECTORY_SEPARATOR . ".tpi-metadata" . DIRECTORY_SEPARATOR . "tokens.json";
-            if (!file_exists($jsonTokenStore)) {
-                touch($jsonTokenStore);
-            }
-
-            $this->tokenStore = $jsonTokenStore;
-        }
+        $databaseFileName = get_plain_installation_dir() . DS . "tokens.db";
+        $this->tokenStore = new \LibSQL($databaseFileName);
+        $this->tokenStore->execute(sql_file('create_token_table'));
 
         $this->generatePublicAndPrivateKey();
     }
 
-    public function checklibSQLAvailability(): string|false
+    public function setTokenExpiration(int $tokenExpiration): void
     {
-        if ($this->checkIsWindows()) {
-            $searchLibsql = shell_exec('php -m | findstr libsql');
-            return $searchLibsql ? trim($searchLibsql) : false;
-        } else {
-            $searchLibsql = shell_exec('php -m | grep libsql');
-            return $searchLibsql ? trim($searchLibsql) : false;
-        }
-    }
-
-    private function checkIsWindows(): bool
-    {
-        $isWindows = PHP_OS_FAMILY === 'Windows';
-        return $isWindows;
+        $this->tokenExpiration = $tokenExpiration;
     }
 
     /**
@@ -97,18 +62,18 @@ final class DatabaseTokenGenerator
      */
     protected function generatePublicAndPrivateKey()
     {
-        shell_exec("openssl genpkey -algorithm ed25519 -out {$this->tempDir}/jwt_private.pem");
-        shell_exec("openssl pkey -in {$this->tempDir}/jwt_private.pem -outform DER | tail -c 32 > {$this->tempDir}/jwt_private.binary");
-        shell_exec("openssl pkey -in {$this->tempDir}/jwt_private.pem -pubout -out {$this->tempDir}/jwt_public.pem");
+        shell_exec("openssl genpkey -algorithm ed25519 -out {$this->temp_dir}/jwt_private.pem");
+        shell_exec("openssl pkey -in {$this->temp_dir}/jwt_private.pem -outform DER | tail -c 32 > {$this->temp_dir}/jwt_private.binary");
+        shell_exec("openssl pkey -in {$this->temp_dir}/jwt_private.pem -pubout -out {$this->temp_dir}/jwt_public.pem");
 
         $this->privateKey = sodium_crypto_sign_secretkey(
             sodium_crypto_sign_seed_keypair(
-                file_get_contents("{$this->tempDir}/jwt_private.binary")
+                file_get_contents("{$this->temp_dir}/jwt_private.binary")
             )
         );
-        unlink("{$this->tempDir}/jwt_private.binary");
+        unlink("{$this->temp_dir}/jwt_private.binary");
 
-        $this->publicKeyPem = trim(file_get_contents("{$this->tempDir}/jwt_public.pem"));
+        $this->publicKeyPem = trim(file_get_contents("{$this->temp_dir}/jwt_public.pem"));
         $this->pubKeyBase64 = str_replace(["-----BEGIN PUBLIC KEY-----", "-----END PUBLIC KEY-----", "\n", "\r"], '', $this->publicKeyPem);
 
         $this->key = InMemory::base64Encoded(
@@ -123,10 +88,23 @@ final class DatabaseTokenGenerator
      * The tokens are generated using a symmetric signer with a private key.
      * The function returns the current instance with the generated tokens stored in the results array.
      *
-     * @return self
+     * @return void
      */
-    public function generete(string $dbName)
+    public function generete(string $dbName): void
     {
+        // Check if database already exists
+        $exists = $this->tokenStore->query(
+            "SELECT * FROM tokens WHERE db_name = ?",
+            [$dbName]
+        )->fetchArray(\LibSQL::LIBSQL_ASSOC);
+
+        if (!empty($exists)) {
+            error(' 🚫 Oops: Database already exists');
+            exit;
+        }
+
+        warning(" ⌛ Creating libSQL Server Database token for Local Development...");
+
         $tokenExpiration = $this->tokenExpiration;
         $fullAccessToken = (new JwtFacade())->issue(
             new Eddsa(),
@@ -135,6 +113,7 @@ final class DatabaseTokenGenerator
             Builder $builder,
             DateTimeImmutable $issuedAt
         ): Builder => $builder
+                ->identifiedBy($dbName)
                 ->expiresAt($issuedAt->modify("+{$tokenExpiration} days"))
         );
 
@@ -145,6 +124,7 @@ final class DatabaseTokenGenerator
             Builder $builder,
             DateTimeImmutable $issuedAt
         ): Builder => $builder
+                ->identifiedBy($dbName)
                 ->withClaim('a', 'ro')
                 ->expiresAt($issuedAt->modify("+{$tokenExpiration} days"))
         );
@@ -156,47 +136,46 @@ final class DatabaseTokenGenerator
             'read_only_token' => $readOnlyToken->toString(),
             'public_key_pem' => $this->publicKeyPem,
             'public_key_base64' => $this->pubKeyBase64,
+            'expiration_day' => $tokenExpiration,
         ];
 
-        return $this;
+        $this->displayTable();
     }
 
     /**
-     * Converts the generated database token to a JSON string.
-     *
-     * @param bool $pretty_print Whether to pretty-print the JSON output. Defaults to false.
+     * Displays the generated database tokens in a user-friendly format.
+     * 
      * @return void
      */
-    public function toJSON(bool $pretty_print = false)
+    public function displayTable(): void
     {
-        if ($this->tokenStore instanceof \LibSQL) {
-            $this->tokenStore->execute(file_get_contents(config('database.sql_statements') . DIRECTORY_SEPARATOR . 'create_new_token.sql'), array_values($this->results));
-        } else {
-            $tokens = json_decode(file_get_contents($this->tokenStore), true);
-            $tokens[] = [
-                ...$this->results,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
-            file_put_contents($this->tokenStore, json_encode($tokens));
-        }
+        $this->tokenStore->execute(sql_file('create_new_token'), array_values($this->results));
 
-        $results = $pretty_print ? json_encode(
-            $this->results,
-            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-        ) : json_encode($this->results);
-        
         $message = <<<MSG
-[SUCCESS]
-
-Your database token successfully generated, now you can copy-and-paste
-+ full_access_token or read_only_token - in your .env file
-+ public_key_pem - create a file jwt_public.pem in your desire directory and save this value
-And used with Turso DEV CLI, source explantion: https://gist.github.com/darkterminal/c272bf2a572bc5d7378f31cf4aea5f19
--------------------------------------------------------------------------
+ [SUCCESS]
+ 
+ Your database token successfully generated, now you can show the token using the command:
+ 
+ $ turso-php-installer token:show <db_name> --fat | --roa | --pkp | --pkb
+ 
+ where:
+ + db_name - database name
+ + --fat - full access token
+ + --roa - read-only access token
+ + --pkp - public key pem
+ + --pkb - public key base64
+ 
+ Read more: 
+ $ turso-php-installer token:show --help
+ -------------------------------------------------------------------------
+ + full_access_token or read_only_token - in your .env file
+ + public_key_pem - create a file jwt_public.pem in your desire directory and save this value
+ Source Explantion: https://gist.github.com/darkterminal/c272bf2a572bc5d7378f31cf4aea5f19
+ -------------------------------------------------------------------------
 MSG;
         info($message);
-        echo $results . PHP_EOL;
+        info(' List all generated tokens:');
+        $this->listAllTokens();
     }
 
     /**
@@ -206,42 +185,29 @@ MSG;
      *
      * @return void
      */
-    public function getToken(string $db_name, string $key = null)
+    public function getToken(string $db_name, string $key = null): void
     {
-        if ($this->tokenStore instanceof \LibSQL) {
-            $store = $this->tokenStore->query(file_get_contents(config('database.sql_statements') . DIRECTORY_SEPARATOR . 'get_database_token.sql'), [$db_name])->fetchArray(\LibSQL::LIBSQL_ASSOC);
-            $store = (array) collect($store)->first();
-        } else if (file_exists($this->tokenStore)) {
-            $store = json_decode(file_get_contents($this->tokenStore), true);
-            $store = collect($store)->where('db_name', $db_name)->first();
-        } else {
-            error("Not found: your're not generated token yet. Run 'turso-php-install token:create' command first");
-            return;
-        }
+        $store = $this->tokenStore->query(sql_file('get_database_token'), [$db_name])->fetchArray(\LibSQL::LIBSQL_ASSOC);
+        $store = (array) collect($store)->first();
 
         if ($key) {
-            echo collect($store)->get($key) . PHP_EOL;
+            echo collect($store)->get($key);
             return;
         }
-        echo collect($store)->toJson( JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . PHP_EOL;
+        echo collect($store)->toJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        ;
     }
 
-    public function getTokens()
+    public function listAllTokens()
     {
-        if ($this->tokenStore instanceof \LibSQL) {
-            $store = $this->tokenStore->query(file_get_contents(config('database.sql_statements') . DIRECTORY_SEPARATOR . 'get_all_database_token.sql'))->fetchArray(\LibSQL::LIBSQL_ASSOC);
-        } else if (file_exists($this->tokenStore)) {
-            $store = json_decode(file_get_contents($this->tokenStore), true);
-        } else {
-            error("Not found: your're not generated token yet. Run 'turso-php-install token:create' command first");
-            return;
-        }
-        
+        $store = $this->tokenStore->query(sql_file('get_all_database_token'))->fetchArray(\LibSQL::LIBSQL_ASSOC);
         echo table(
-            ['db_name', 'created_at', 'updated_at'],
+            ['db_name', 'expired_at', 'created_at', 'updated_at'],
             collect($store)->map(function ($item) {
+                $date_expiration = Carbon::parse($item['created_at'])->addDays($item['expiration_day']);
                 return [
                     'db_name' => $item['db_name'],
+                    'expired_at' => $date_expiration->format('Y-m-d H:i:s') . ' (' . $date_expiration->ago() . ')',
                     'created_at' => $item['created_at'],
                     'updated_at' => $item['updated_at'],
                 ];
@@ -251,36 +217,30 @@ MSG;
 
     public function deleteToken(string $db_name)
     {
-        if ($this->tokenStore instanceof \LibSQL) {
-            $result = $this->tokenStore->query(file_get_contents(config('database.sql_statements') . DIRECTORY_SEPARATOR . 'check_database_name.sql'), [$db_name])->fetchArray(\LibSQL::LIBSQL_ASSOC);
-            if (empty($result)) {
-                error("Not found: your're not generated token yet. Run 'turso-php-install token:create' command first");
-                exit;
-            }
-            $this->tokenStore->execute(file_get_contents(config('database.sql_statements') . DIRECTORY_SEPARATOR . 'delete_database_token.sql'), [$db_name]);
-        } else if (file_exists($this->tokenStore)) {
-            $tokens = json_decode(file_get_contents($this->tokenStore), true);
-            if (!collect($tokens)->where('db_name', $db_name)->first()) {
-                error("Not found: your're not generated token yet. Run 'turso-php-install token:create' command first");
-                exit;
-            }
-            $tokens = collect($tokens)->filter(function ($item) use ($db_name) {
-                return $item['db_name'] !== $db_name;
-            })->toArray();
-            file_put_contents($this->tokenStore, json_encode($tokens));
+        $result = $this->tokenStore->query(sql_file('check_database_name'), [$db_name])->fetchArray(\LibSQL::LIBSQL_ASSOC);
+        if (empty($result)) {
+            error(" 🚫 Not found: your're not generated token yet. Run 'turso-php-installer token:create' command first");
+            exit;
         }
+        $this->tokenStore->execute(sql_file('delete_database_token'), [$db_name]);
+    }
+
+    public function deleteAllTokens()
+    {
+        $this->tokenStore->execute('DELETE FROM tokens');
+        $this->listAllTokens();
     }
 
     public function __destruct()
     {
-        unlink("{$this->tempDir}/jwt_public.pem");
-        unlink("{$this->tempDir}/jwt_private.pem");
+        unlink("{$this->temp_dir}/jwt_public.pem");
+        unlink("{$this->temp_dir}/jwt_private.pem");
         $this->tokenExpiration = 7;
         $this->privateKey = null;
         $this->publicKeyPem = null;
         $this->pubKeyBase64 = null;
         $this->key = null;
-        $this->tempDir = null;
+        $this->temp_dir = null;
         $this->results = [];
     }
 }
