@@ -4,6 +4,58 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Timezone
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify the default timezone for your application, which
+    | will be used by the PHP date and date-time functions. We have gone
+    | ahead and set this to a sensible default for you.
+    |
+    */
+
+    'timezone' => date_default_timezone_get(),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Metadata File Path
+    |--------------------------------------------------------------------------
+    |
+    | This value is the path to the metadata file used by the application.
+    | It is determined based on the user's operating system and is stored
+    | in the user's home directory, ensuring proper access and storage.
+    |
+    */
+
+    'metadata' => (is_windows() ? getenv('USERPROFILE') : getenv('HOME')) . DS . '.turso-client-php' . DS . 'metadata.json',
+
+    /*
+    |--------------------------------------------------------------------------
+    | SQL Statements Path
+    |--------------------------------------------------------------------------
+    |
+    | This option defines the path where your SQL statement files are stored.
+    | These files can be loaded and executed by the application as needed.
+    | You should ensure this path is correct for your application's needs.
+    |
+    */
+
+    'sql_statements' => app_path('database'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scripts Path
+    |--------------------------------------------------------------------------
+    |
+    | This configuration option specifies the directory that contains your
+    | application's script files. These scripts can be executed to perform
+    | various tasks and should be organized within this directory.
+    |
+    */
+
+    'scripts' => app_path('scripts'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Name
     |--------------------------------------------------------------------------
     |
@@ -13,7 +65,7 @@ return [
     |
     */
 
-    'name' => 'Turso-php-installer',
+    'name' => 'turso-php-installer',
 
     /*
     |--------------------------------------------------------------------------
