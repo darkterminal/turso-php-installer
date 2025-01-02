@@ -3,7 +3,7 @@
 namespace App\Commands\Token;
 
 use App\Contracts\Installer;
-use App\Services\DatabaseTokenGenerator;
+use App\Contracts\DatabaseToken;
 use LaravelZero\Framework\Commands\Command;
 
 class DeleteDatabaseToken extends Command
@@ -28,7 +28,7 @@ class DeleteDatabaseToken extends Command
     /**
      * Execute the console command.
      */
-    public function handle(Installer $installer)
+    public function handle(Installer $installer, DatabaseToken $tokenGenerator)
     {
         if (!$installer->checkIfAlreadyInstalled()) {
             $this->error(" 🚫 Turso libSQL Extension for PHP is not installed. Please install it first.");
@@ -38,7 +38,6 @@ class DeleteDatabaseToken extends Command
         $dbName = $this->argument('db-name');
         $all = $this->option('all');
         $force = $this->option('force');
-        $tokenGenerator = new DatabaseTokenGenerator();
 
         if ($all) {
             if (!$force && !$this->confirm("Are you sure you want to delete ALL database tokens?", true)) {
@@ -64,7 +63,7 @@ class DeleteDatabaseToken extends Command
         return 0;
     }
 
-    private function deleteAllTokens(DatabaseTokenGenerator $tokenGenerator): void
+    private function deleteAllTokens(DatabaseToken $tokenGenerator): void
     {
         $tokenGenerator->deleteAllTokens();
         $this->comment("All database tokens deleted successfully.");
@@ -75,7 +74,7 @@ class DeleteDatabaseToken extends Command
         return $this->confirm("Are you sure you want to delete the database token for database: {$dbName}?", true);
     }
 
-    private function deleteSingleToken(DatabaseTokenGenerator $tokenGenerator, string $dbName): void
+    private function deleteSingleToken(DatabaseToken $tokenGenerator, string $dbName): void
     {
         $tokenGenerator->deleteToken($dbName);
         $this->comment("Database token for database: {$dbName} deleted successfully.");

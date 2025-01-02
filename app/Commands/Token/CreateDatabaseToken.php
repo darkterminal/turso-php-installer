@@ -3,7 +3,7 @@
 namespace App\Commands\Token;
 
 use App\Contracts\Installer;
-use App\Services\DatabaseTokenGenerator;
+use App\Contracts\DatabaseToken;
 use LaravelZero\Framework\Commands\Command;
 
 class CreateDatabaseToken extends Command
@@ -29,7 +29,7 @@ class CreateDatabaseToken extends Command
      */
     public function handle(
         Installer $installer,
-        DatabaseTokenGenerator $databaseTokenGenerator
+        DatabaseToken $databaseTokenGenerator
     ) {
         if (!$installer->checkIfAlreadyInstalled()) {
             $this->error(" 🚫 Turso libSQL Extension for PHP is not installed. Please install it first.");
