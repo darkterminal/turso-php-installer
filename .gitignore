@@ -3,3 +3,7 @@
 /.vscode
 /.vagrant
 .phpunit.result.cache
+
+__pycache__/
+*.py[cod]
+*$py.class
