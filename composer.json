@@ -17,6 +17,7 @@
     ],
     "require": {
         "php": "^8.2.0",
+        "fakerphp/faker": "^1.24",
         "illuminate/http": "^11.5",
         "laravel/prompts": "^0.1.25",
         "lcobucci/jwt": "^5.3",
