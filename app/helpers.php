@@ -67,6 +67,26 @@ function get_current_php_version(): string
 }
 
 /**
+ * Get the full path of the Turso database directory.
+ *
+ * This function returns the path of the Turso database directory.
+ * The Turso database directory is a directory located in the Turso
+ * client PHP installation directory. The directory is used to store
+ * the databases created by the Turso client PHP package.
+ *
+ * @return string The full path of the Turso database directory.
+ */
+function sqld_database_path(): string
+{
+    $ext_dir = get_plain_installation_dir();
+    $db_dir = $ext_dir . DS . 'databases';
+    if (!is_dir($db_dir)) {
+        mkdir($db_dir);
+    }
+    return $db_dir;
+}
+
+/**
  * Get the full path of the versioned installation directory.
  *
  * @param bool $isStable
@@ -74,13 +94,12 @@ function get_current_php_version(): string
  */
 function get_version_installation_dir(bool $isStable = true): string
 {
-    return sprintf(
-        '%s%s.turso-client-php%s%s',
+    return collect([
         get_user_homedir(),
-        DIRECTORY_SEPARATOR,
-        $isStable ? '' : DIRECTORY_SEPARATOR . 'unstable',
-        DIRECTORY_SEPARATOR . get_current_php_version()
-    );
+        'turso-client-php',
+        $isStable ? null : 'unstable',
+        get_current_php_version(),
+    ])->filter()->implode(DS);
 }
 
 /**
@@ -94,7 +113,15 @@ function get_version_installation_dir(bool $isStable = true): string
 
 function get_plain_installation_dir(): string
 {
-    return get_user_homedir() . DS . ".turso-client-php";
+    if (!is_dir(get_user_homedir() . DS . ".config")) {
+        mkdir(get_user_homedir() . DS . ".config");
+    }
+
+    return collect([
+        get_user_homedir(),
+        '.config',
+        'turso-client-php'
+    ])->implode(DS);
 }
 
 /**
@@ -124,7 +151,12 @@ function get_os_arch(): string
  */
 function get_os_name(): string
 {
-    return collect(explode(' ', strtolower(php_uname('s'))))->first();
+    return collect(
+        Str::of(php_uname('s'))
+            ->lower()
+            ->explode('-')
+            ->filter()
+    )->first();
 }
 
 /**
@@ -243,4 +275,13 @@ function get_global_metadata(string $key): string
         throw new RuntimeException("Unknown metadata key: $key");
     }
     return $metadata[$key];
+}
+
+function check_libsql_installed(): bool
+{
+    if (is_windows()) {
+        return !empty(shell_exec('php -m | findstr libsql'));
+    }
+
+    return !empty(shell_exec('php -m | grep libsql'));
 }
