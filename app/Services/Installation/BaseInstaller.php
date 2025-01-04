@@ -87,7 +87,7 @@ abstract class BaseInstaller implements Installer
 
     public function checkIfAlreadyInstalled(): bool
     {
-        return File::exists($this->home_directory . DIRECTORY_SEPARATOR . '.turso-client-php');
+        return File::exists(get_plain_installation_dir());
     }
 
     protected function downloadExtension(): void
@@ -152,11 +152,11 @@ abstract class BaseInstaller implements Installer
         }
 
         if ($this->unstable) {
-            return collect([$this->home_directory, '.turso-client-php', 'unstable', $this->getPHPVersion()])
+            return collect([get_plain_installation_dir(), 'unstable', $this->getPHPVersion()])
                 ->implode(DIRECTORY_SEPARATOR);
         }
 
-        return collect([$this->home_directory, '.turso-client-php', $this->getPHPVersion()])
+        return collect([get_plain_installation_dir(), $this->getPHPVersion()])
             ->implode(DIRECTORY_SEPARATOR);
     }
 
@@ -200,7 +200,7 @@ abstract class BaseInstaller implements Installer
 
     protected function getMetadataLocationFile(): string
     {
-        return collect([$this->home_directory, '.turso-client-php', 'metadata.json'])->implode(DIRECTORY_SEPARATOR);
+        return collect([get_plain_installation_dir(), 'metadata.json'])->implode(DIRECTORY_SEPARATOR);
     }
 
     protected function getRepository()
@@ -215,7 +215,7 @@ abstract class BaseInstaller implements Installer
     protected function getExtensionDirToRemember(): string
     {
         $path = $this->extensionDirectory();
-        return Str::contains($path, 'turso-client-php') ? collect([$this->home_directory, '.turso-client-php'])->implode(DIRECTORY_SEPARATOR) : $path;
+        return Str::contains($path, 'turso-client-php') ? collect([get_plain_installation_dir()])->implode(DIRECTORY_SEPARATOR) : $path;
     }
 
     protected function getExtensionString(): string
