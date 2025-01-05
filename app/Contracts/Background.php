@@ -12,7 +12,7 @@ interface Background
     /**
      * Set the command to be executed.
      *
-     * @param string $command The command to execute.
+     * @param string|callable $command The command to execute.
      * @return static
      */
     public function withCommand($command);

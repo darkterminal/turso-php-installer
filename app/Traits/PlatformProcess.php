@@ -27,33 +27,28 @@ trait PlatformProcess
     /**
      * Builds the platform-specific command to run the process.
      *
-     * @param string $command
+     * @param string|callable $command
      * @param string $stdoutFile
      * @param string $stderrFile
      * @param string|null $input
      * @return string
      */
-    private function buildCommand(string $command, string $stdoutFile, string $stderrFile, ?string $input = null): string
+    private function buildCommand(string|callable $command, string $stdoutFile, string $stderrFile, ?string $input = null): string
     {
-        if ($this->isWindows()) {
-            // Windows command
-            $builtCommand = sprintf('start /B %s > %s 2>%s', $command, $stdoutFile, $stderrFile);
+        $command = match ($this->isWindows()) {
+            true => sprintf('start /B %s > %s 2>%s', $command, $stdoutFile, $stderrFile),
+            false => sprintf('%s > %s 2>%s', $command, $stdoutFile, $stderrFile),
+        };
 
-            if ($input) {
-                throw new \RuntimeException('Input redirection is not supported on Windows in this implementation.');
-            }
-        } else {
-            // Unix-like command
-            $builtCommand = sprintf('%s > %s 2>%s', $command, $stdoutFile, $stderrFile);
-
-            if ($input) {
-                $builtCommand .= ' <<< ' . escapeshellarg($input);
-            }
-
-            $builtCommand .= ' & echo $!';
+        if ($input) {
+            $command .= $this->isWindows() ? '' : ' <<< ' . escapeshellarg($input);
         }
 
-        return $builtCommand;
+        if (!$this->isWindows()) {
+            $command .= ' & echo $!';
+        }
+
+        return $command;
     }
 
     /**

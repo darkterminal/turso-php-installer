@@ -49,18 +49,20 @@ class BackgroundProcess implements Background
     /**
      * Set the command to be executed.
      *
-     * @param string $command
+     * @param string|callable $command The command as a string or a callable returning a string.
      *
      * @return static
      *
-     * @throws \InvalidArgumentException if $command is empty
+     * @throws \InvalidArgumentException if $command is not valid or empty.
      */
     public function withCommand($command): BackgroundProcess
     {
-        $command = (string) $command;
+        if (is_callable($command)) {
+            $command = $command();
+        }
 
-        if (empty($command)) {
-            throw new \InvalidArgumentException('$command cannot be empty');
+        if (!is_string($command) || empty($command)) {
+            throw new \InvalidArgumentException('$command must be a non-empty string or a callable returning a non-empty string');
         }
 
         $this->command = $command;
