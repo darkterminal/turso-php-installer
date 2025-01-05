@@ -285,3 +285,15 @@ function check_libsql_installed(): bool
 
     return !empty(shell_exec('php -m | grep libsql'));
 }
+
+/**
+ * Generates a clickable link for CLI (compatible with ANSI-supported terminals).
+ *
+ * @param string $url  The URL to be linked.
+ * @param string $text The text to display as the clickable link.
+ * @return string      The formatted clickable link.
+ */
+function clickable_link(string $url, string $text): string
+{
+    return "\033]8;;$url\033\\$text\033]8;;\033\\\n";
+}
