@@ -243,6 +243,28 @@ MSG;
     }
 
     /**
+     * Returns the generated database token.
+     *
+     * If $key is specified, returns the value of the given key from the token store. Otherwise, returns the entire token store as a JSON string.
+     *
+     * @param string $db_name The name of the database to get the token for.
+     * @param string|null $key If specified, returns the value of the given key from the token store. Otherwise, returns the entire token store as a JSON string.
+     *
+     * @return string
+     */
+    public function getRawToken(string $db_name, string $key = null): string
+    {
+        $store = $this->tokenStore->query(sql_file('get_database_token'), [$db_name])->fetchArray(\LibSQL::LIBSQL_ASSOC);
+        $store = (array) collect($store)->first();
+
+        if ($key) {
+            return collect($store)->get($key);
+        }
+        return collect($store)->toJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        ;
+    }
+
+    /**
      * Shows all generated database tokens.
      *
      * This method will display a table with the following columns:

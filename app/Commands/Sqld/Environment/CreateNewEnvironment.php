@@ -113,7 +113,7 @@ class CreateNewEnvironment extends Command
                 no: 'No',
                 hint: 'default: No'
             );
-            $this->setVariable('SQLD_NO_WELCOME', $no_welcome);
+            $this->setVariable('SQLD_NO_WELCOME', $no_welcome ? 1 : 0);
         }
 
         $this->info(" Creating environment '$name'...");

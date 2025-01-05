@@ -6,9 +6,13 @@ use App\Contracts\EnvironmentManager;
 use App\Handlers\JsonStorage;
 use App\ValueObjects\EnvironmentObject;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
+use function Laravel\Prompts\select;
 use function Laravel\Prompts\table;
+use function Laravel\Prompts\text;
 
 class Environment implements EnvironmentManager
 {
@@ -45,8 +49,8 @@ class Environment implements EnvironmentManager
         }
 
         $environments = $this->store->load();
-        return $environments->where(function ($item) use ($nameOrId) { 
-            return $item['id'] == $nameOrId || $item['name'] == $nameOrId; 
+        return $environments->where(function ($item) use ($nameOrId) {
+            return $item['id'] == $nameOrId || $item['name'] == $nameOrId;
         })->isNotEmpty();
     }
 
@@ -98,13 +102,27 @@ class Environment implements EnvironmentManager
         );
     }
 
+    public function showRawEnvironment(string $nameOrId): array
+    {
+        $environment = $this->store->load()
+            ->where(function ($item) use ($nameOrId) {
+                return $item['id'] == $nameOrId || $item['name'] == $nameOrId;
+            })->first();
+
+        if (empty($environment)) {
+            throw new \RuntimeException(" 🚫 Environment {$nameOrId} is not found.");
+        }
+
+        return $environment;
+    }
+
     public function showEnvironment(string $nameOrId): void
     {
         $environment = $this->store->load()
             ->where(function ($item) use ($nameOrId) {
                 return $item['id'] == $nameOrId || $item['name'] == $nameOrId;
             })->first();
-        
+
         if (empty($environment)) {
             error(" 🚫 Environment {$nameOrId} is not found.");
             return;
@@ -122,17 +140,106 @@ class Environment implements EnvironmentManager
         );
     }
 
+    public function editEnvironment(string $nameOrId): void
+    {
+        $environment = $this->store->load()
+            ->where(function ($item) use ($nameOrId) {
+                return $item['id'] == $nameOrId || $item['name'] == $nameOrId;
+            })->first();
+
+        if (empty($environment)) {
+            error(" 🚫 Environment {$nameOrId} is not found.");
+            return;
+        }
+
+        $environmentForm = [];
+        $formFields = [
+            'SQLD_DB_PATH' => [
+                'value' => 'SQLD_DB_PATH',
+                'label' => 'Database Path',
+                'hint' => 'default: ' . sqld_database_path() . DS . $environment['name'] . DS . 'data.sqld',
+            ],
+            'SQLD_NODE' => [
+                'value' => 'SQLD_NODE',
+                'label' => 'Select a node',
+                'hint' => 'default: ' . $environment['variables']['SQLD_NODE'],
+            ],
+            'SQLD_HTTP_LISTEN_ADDR' => [
+                'value' => 'SQLD_HTTP_LISTEN_ADDR',
+                'label' => 'HTTP Listen Address',
+                'hint' => 'default: ' . $environment['variables']['SQLD_HTTP_LISTEN_ADDR'],
+            ],
+            'SQLD_GRPC_LISTEN_ADDR' => [
+                'value' => 'SQLD_GRPC_LISTEN_ADDR',
+                'label' => 'GRPC Listen Address',
+                'hint' => 'default: ' . ($environment['variables']['SQLD_GRPC_LISTEN_ADDR'] ?? 'N/A'),
+            ],
+            'SQLD_PRIMARY_GRPC_URL' => [
+                'value' => 'SQLD_PRIMARY_GRPC_URL',
+                'label' => 'Primary gRPC URL',
+                'hint' => 'default: ' . ($environment['variables']['SQLD_PRIMARY_GRPC_URL'] ?? 'N/A'),
+            ],
+            'SQLD_NO_WELCOME' => [
+                'value' => 'SQLD_NO_WELCOME',
+                'label' => 'No Welcome',
+                'hint' => 'default: ' . $environment['variables']['SQLD_NO_WELCOME'] ? 'Yes' : 'No',
+            ],
+        ];
+        
+        foreach ($environment['variables'] as $key => $value) {            
+            $environmentForm[$key] = match (true) {
+                $key === $formFields['SQLD_DB_PATH']['value'] || 
+                $key === $formFields['SQLD_HTTP_LISTEN_ADDR']['value'] || 
+                $key === $formFields['SQLD_GRPC_LISTEN_ADDR']['value'] || 
+                $key === $formFields['SQLD_PRIMARY_GRPC_URL']['value'] => text(
+                    label: $formFields[$key]['label'],
+                    placeholder: $value,
+                    default: $value,
+                    required: true,
+                    hint: $formFields[$key]['hint']
+                ),
+                $key === $formFields['SQLD_NODE']['value'] => select(
+                    label: $formFields[$key]['label'],
+                    options: ['primary', 'replica', 'standalone'],
+                    default: $value,
+                    hint: $formFields[$key]['hint']
+                ),
+                $key === $formFields['SQLD_NO_WELCOME']['value'] => confirm(
+                    label: $formFields[$key]['label'],
+                    default: $value,
+                    hint: $formFields[$key]['hint']
+                ),
+            };
+
+            if (!empty($environment[$key])) {
+                continue;
+            }
+        }
+
+        $environmentForm = collect($environmentForm)
+            ->map(fn($value) => is_bool($value) ? (int) $value : $value)
+            ->toArray();
+
+        $environment['variables'] = $environmentForm;
+
+        $this->store->update('id', $environment['id'], $environment);
+
+        $this->showEnvironment($environment['id']);
+    }
+
     public function deleteEnvironment(string $nameOrId): void
     {
         $environment = $this->store->load()
             ->where(function ($item) use ($nameOrId) {
                 return $item['id'] == $nameOrId || $item['name'] == $nameOrId;
             })->first();
-        
+
         if (empty($environment)) {
             error(" 🚫 Environment {$nameOrId} is not found.");
             return;
         }
+
+        File::deleteDirectory(sqld_database_path() . DS . $environment['name']);
 
         $this->store->delete('id', $environment['id']);
         $this->getEnvironments();
