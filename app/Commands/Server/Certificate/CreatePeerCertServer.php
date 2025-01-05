@@ -29,6 +29,11 @@ class CreatePeerCertServer extends Command
      */
     public function handle(ServerGenerator $server)
     {
+        if (get_os_name() === 'windows') {
+            $this->error('Sorry, sqld or libsql server is not supported for Windows. Try using WSL.');
+            exit;
+        }
+        
         if (!$server->checkRequirement()) {
             $this->error(' ❗ The required Python packages are not installed. Please install them and try again.');
             return;

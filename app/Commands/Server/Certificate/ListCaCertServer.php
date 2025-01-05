@@ -26,6 +26,11 @@ class ListCaCertServer extends Command
      */
     public function handle(ServerGenerator $server)
     {
+        if (get_os_name() === 'windows') {
+            $this->error('Sorry, sqld or libsql server is not supported for Windows. Try using WSL.');
+            exit;
+        }
+        
         $server->listCaCert();
     }
 }

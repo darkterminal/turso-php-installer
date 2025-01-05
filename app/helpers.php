@@ -151,12 +151,14 @@ function get_os_arch(): string
  */
 function get_os_name(): string
 {
-    return collect(
+    $osname = collect(
         Str::of(php_uname('s'))
             ->lower()
             ->explode('-')
             ->filter()
     )->first();
+
+    return str_contains(strtolower($osname),'nt') ? Str::of($osname)->replace('nt', '')->trim() : $osname;
 }
 
 /**

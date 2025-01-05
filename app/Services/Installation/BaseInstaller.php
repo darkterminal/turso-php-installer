@@ -80,6 +80,10 @@ abstract class BaseInstaller implements Installer
                 ->implode('-');
         }
 
+        dd(collect([$this->getPHPVersion(), $arch, $os])
+        ->filter()
+        ->implode('-'));
+
         return collect([$this->getPHPVersion(), $arch, $os])
             ->filter()
             ->implode('-');

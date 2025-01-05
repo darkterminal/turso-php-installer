@@ -36,6 +36,11 @@ class RunSqldServer extends Command
         DatabaseToken $token
         )
     {
+        if (get_os_name() === 'windows') {
+            $this->error('Sorry, sqld or libsql server is not supported for Windows. Try using WSL.');
+            exit;
+        }
+
         $envIdOrName = $this->argument('env-id-or-name');
         $dbName = $this->argument('db-name');
         $daemon = $this->option('daemon');

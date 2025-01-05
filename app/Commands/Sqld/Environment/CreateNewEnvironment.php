@@ -34,6 +34,11 @@ class CreateNewEnvironment extends Command
      */
     public function handle(EnvironmentManager $manager)
     {
+        if (get_os_name() === 'windows') {
+            $this->error('Sorry, sqld or libsql server is not supported for Windows. Try using WSL.');
+            exit;
+        }
+        
         $name = $this->argument('name');
         $variables = $this->option('variables');
         $force = $this->option('force');
