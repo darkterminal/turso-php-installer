@@ -88,7 +88,7 @@ abstract class BaseInstaller implements Installer
     public function checkIfAlreadyInstalled(): bool
     {
         $installation_dir = get_plain_installation_dir();
-        return File::exists($installation_dir);
+        return is_dir($installation_dir);
     }
 
     protected function downloadExtension(): void

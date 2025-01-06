@@ -113,10 +113,6 @@ function get_version_installation_dir(bool $isStable = true): string
 
 function get_plain_installation_dir(): string
 {
-    if (!is_dir(get_user_homedir() . DS . ".config")) {
-        mkdir(get_user_homedir() . DS . ".config");
-    }
-
     return collect([
         get_user_homedir(),
         '.config',

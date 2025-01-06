@@ -8,6 +8,10 @@ trait UseRemember
 {
     public function rememberInstallationDirectory(): void
     {
+        if (!File::exists($this->getMetadataLocationFile())) {
+            touch($this->getMetadataLocationFile());
+        }
+        
         File::put($this->getMetadataLocationFile(), json_encode([
             'version' => $this->getPHPVersion(),
             'nts' => $this->getThreadSafe(),
