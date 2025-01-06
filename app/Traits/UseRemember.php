@@ -8,8 +8,15 @@ trait UseRemember
 {
     public function rememberInstallationDirectory(): void
     {
-        if (!File::exists($this->getMetadataLocationFile())) {
-            touch($this->getMetadataLocationFile());
+        $metadataFile = $this->getMetadataLocationFile();
+        $metadataDir = dirname($metadataFile);
+
+        if (!File::exists($metadataDir)) {
+            File::makeDirectory($metadataDir, 0755, true);
+        }
+
+        if (!File::exists($metadataFile)) {
+            touch($metadataFile);
         }
         
         File::put($this->getMetadataLocationFile(), json_encode([
