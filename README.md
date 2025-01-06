@@ -61,6 +61,7 @@ sqld:env-edit              Edit an existing environment by ID or name
 sqld:env-list              List all created environments
 sqld:env-new               Create new sqld environment, save for future use.
 sqld:env-show              Show detail of environment
+sqld:open-db               Open database using Turso CLI based on environment id or name and database
 sqld:server-run            Run sqld server based on environment id or name
 ```
 
