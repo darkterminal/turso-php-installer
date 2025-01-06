@@ -29,7 +29,16 @@ class Asset
         $asset = new self;
         $asset->name = $array['name'];
         $asset->download_url = $array['browser_download_url'];
-        $asset->download_path = sys_get_temp_dir();
+
+        $tempDir = sys_get_temp_dir();
+        if (File::exists('/home/sail')) {
+            $tempDir = getenv('HOME') . '/.tmp';
+            if (!File::exists($tempDir)) {
+                File::makeDirectory($tempDir, 0755, true);
+            }
+        }
+
+        $asset->download_path = $tempDir;
         $asset->extracted_path = $asset->download_path . DIRECTORY_SEPARATOR . $asset->filename();
         $asset->temporary_name = Str::random(40);
 

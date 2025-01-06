@@ -13,15 +13,10 @@ class LinuxInstaller extends BaseInstaller
     {
         parent::__construct();
         $this->home_directory = $_SERVER['HOME'];
-        $this->is_docker = File::exists('/.dockerenv');
     }
 
     protected function extensionDirectory(): string
     {
-        if ($this->is_docker) {
-            return '/root/.turso-client-php';
-        }
-
         return parent::extensionDirectory();
     }
 }
