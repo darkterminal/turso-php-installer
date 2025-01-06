@@ -35,13 +35,33 @@ export PATH="$HOME/.config/composer/vendor/bin;$PATH"
 ```bash
 USAGE:  <command> [options] [arguments]
 
-install      Install Turso libSQL Extension for PHP
-uninstall    Uninstall Turso libSQL Extension for PHP
-update       Update Turso libSQL Extension for PHP
-version      Display Turso PHP Installer version
+install                    Install Turso libSQL Extension for PHP
+uninstall                  Uninstall Turso libSQL Extension for PHP
+update                     Update Turso libSQL Extension for PHP
+version                    Display Turso PHP Installer version
 
-token:create Create libSQL Server Database token for Local Development
-token:show   Show libSQL Server Database token for Local Development
+token:create               Create libSQL Server Database token for Local Development
+token:delete               Delete a database token
+token:list                 Display all generated database tokens
+token:show                 Show libSQL Server Database token for Local Development
+```
+Unix Only Command
+```bash
+server:ca-cert-create      Generate CA certificate
+server:ca-cert-delete      Delete a CA certificate from the global store location
+server:ca-cert-list        List all generated CA certificates
+server:ca-cert-show        Show raw CA certificate and private key
+server:ca-peer-cert-create Create a peer certificate
+server:cert-store-get      Get the cert store location
+server:cert-store-set      Set/overwrite global certificate store, to use by the server later. Default is same as {installation_dir}/certs
+server:check               Check server requirement, this will check if python3 pip and cyptography lib are installed
+
+sqld:env-delete            Delete an environment by name or ID
+sqld:env-edit              Edit an existing environment by ID or name
+sqld:env-list              List all created environments
+sqld:env-new               Create new sqld environment, save for future use.
+sqld:env-show              Show detail of environment
+sqld:server-run            Run sqld server based on environment id or name
 ```
 
 ## Install Extension
@@ -53,9 +73,30 @@ turso-php-installer install
 ```
 
 **Non Interactive Mode**
+
+**PHP NTS (Non Thread-Safe) Build**
+
+By default the installer will install the **stable** version of libSQL Client from `tursodatabase/turso-client-php` release with NTS (Non Thread-Safe) build version.
 ```bash
-turso-php-installer install -y --php-vesion=8.3 --php-ini-file=/etc/php/<version>/cli/php.ini --ext-destionation=/path/to/your-custom/extensions/directory
+turso-php-installer install -n --php-vesion=8.3 --php-ini=/etc/php/<version>/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
 ```
+
+But, if you want to use the **unstable** version (which is the development) version of libSQL Client, the installer will install from another source `pandanotabear/turso-client-php` release with NTS (Non Thread-Safe) build version. (Btw, Panda is my another pet in GitHub)
+```bash
+turso-php-installer install -n --unstable --php-vesion=8.3 --php-ini=/etc/php/<version>/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
+```
+
+**PHP TS (Thread-Safe) Build**
+
+**Stable** version build - libSQL Client from `tursodatabase/turso-client-php` release with TS (Thread-Safe) build version.
+```bash
+turso-php-installer install -n --thread-safe --php-vesion=8.3 --php-ini=/etc/php/<version>/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
+```
+**Unstable** version build - libSQL Client, the installer will install from another source `pandanotabear/turso-client-php` release with NTS (Non Thread-Safe) build version.
+```bash
+turso-php-installer install -n --unstable --thread-safe --php-vesion=8.3 --php-ini=/etc/php/<version>/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
+```
+
 > See `turso-php-installer install --help`
 
 ## Uninstall Extension
