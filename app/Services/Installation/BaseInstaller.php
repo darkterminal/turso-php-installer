@@ -19,7 +19,7 @@ use function Laravel\Prompts\table;
 abstract class BaseInstaller implements Installer
 {
     use UseRemember;
-    
+
     protected string $arch;
 
     protected string $custom_extension_directory;
@@ -41,7 +41,7 @@ abstract class BaseInstaller implements Installer
     protected string $php_ini = '';
 
     protected string $stubs_name;
-    
+
     protected bool $unstable = false;
 
     public function __construct()
@@ -80,10 +80,6 @@ abstract class BaseInstaller implements Installer
                 ->implode('-');
         }
 
-        dd(collect([$this->getPHPVersion(), $arch, $os])
-        ->filter()
-        ->implode('-'));
-
         return collect([$this->getPHPVersion(), $arch, $os])
             ->filter()
             ->implode('-');
@@ -91,7 +87,8 @@ abstract class BaseInstaller implements Installer
 
     public function checkIfAlreadyInstalled(): bool
     {
-        return File::exists(get_plain_installation_dir());
+        $installation_dir = get_plain_installation_dir();
+        return File::exists($installation_dir);
     }
 
     protected function downloadExtension(): void
@@ -105,12 +102,11 @@ abstract class BaseInstaller implements Installer
             callback: fn() => Http::withUserAgent(USER_AGENT)->get($this->getRepository())
         );
 
-        [$major, $minor] = str($request->json('name'))
+        [$major, $minor, $patch] = str($request->json('name'))
+            ->match('/\d+\.\d+\.\d+/')
             ->explode('.')
-            ->filter(fn($part) => is_numeric($part))
-            ->collect()
             ->map(fn($part) => (int) $part)
-            ->flatten();
+            ->toArray();
 
         $assets = $request->json('assets');
 
@@ -342,7 +338,7 @@ abstract class BaseInstaller implements Installer
 
         if (File::isWritable($ini)) {
             $this->removeExtensionFromPhpIni();
-            
+
             spin(function () use ($ini) {
                 $contents = LazyCollection::make(function () use ($ini) {
                     $file = fopen($ini, 'r');

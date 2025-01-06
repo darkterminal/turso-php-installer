@@ -54,11 +54,7 @@ class Asset
     {
         $archiver = $this->getArchiver();
 
-        $extractOnlyFiles = collect($only)
-            ->map(fn($file) => $this->filename() . DIRECTORY_SEPARATOR . $file)
-            ->toArray();
-
-        $archiver->extractTo($this->download_path, $extractOnlyFiles, true);
+        $archiver->extractTo($this->download_path, null, true);
         $dir = pathinfo(path: $this->download_path . DIRECTORY_SEPARATOR . $this->getTempName());
 
         foreach ($only as $fileNameToExtract) {

@@ -15,7 +15,7 @@ trait NonInteractive
     {
         $this->ensureAllowedNamespace();
         
-        if ($this->option('no-interaction') || $this->option('n')) {
+        if ($this->option('no-interaction')) {
 
             if ($this->option('unstable')) {
                 $installer->setUnstable(true);
