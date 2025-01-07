@@ -10,17 +10,19 @@
 
 # Turso PHP Installer
 
-This is the Turso/libSQL Extension for PHP installer script for Linux and MacOS. Make sure you already have PHP minimal version 8.0.
-
-## Not Support yet
-
-- Laravel Herd Dynamic Extension Installation
+This is the Turso/libSQL Extension for PHP installer script for Linux and MacOS. Make sure you already have PHP minimal version 8.3.
 
 ## Installation
 
 ```bash
 composer global require darkterminal/turso-php-installer
 ```
+
+## Laravel Sail
+
+Copy and Paste the stubs from [here](/docs/laravel-sail.md)
+
+----
 
 make sure the installer is available in `PATH` environment variable:
 

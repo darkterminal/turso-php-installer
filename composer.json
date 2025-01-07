@@ -15,6 +15,11 @@
             "role": "Software Freestyle Engineer"
         }
     ],
+    "scripts": {
+        "build:patch": "./build.sh patch",
+        "build:minor": "./build.sh minor",
+        "build:major": "./build.sh major"
+    },
     "require": {
         "php": "^8.2.0",
         "fakerphp/faker": "^1.24",
