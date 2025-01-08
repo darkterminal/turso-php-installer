@@ -47,20 +47,45 @@ fi
 
 # Step 3: Git commit and tag
 git add .
-git commit -m "Build $BUILD_TYPE version $NEW_VERSION"
+git commit -m "release: $BUILD_TYPE version $NEW_VERSION"
 if [[ $? -ne 0 ]]; then
   echo "Error: Git commit failed."
   exit 1
 fi
 
 # Step 4: Create a new tag
-git tag "$NEW_VERSION" -m "Build $BUILD_TYPE version $NEW_VERSION"
+git tag "$NEW_VERSION" -m "Release $BUILD_TYPE version $NEW_VERSION"
 if [[ $? -ne 0 ]]; then
   echo "Error: Git tag creation failed."
   exit 1
 fi
 
-# Step 5: Push changes to remote
+# Step 5: Update CHANGELOG.md
+PREVIOUS_TAG=$(git tag --sort=-version:refname | sed -n 2p)  # Get the second latest tag
+if [[ -z "$PREVIOUS_TAG" ]]; then
+  PREVIOUS_TAG="HEAD"  # Use HEAD if no previous tag exists
+fi
+
+echo "Generating changelog from $PREVIOUS_TAG to $NEW_VERSION"
+
+# Extract commit logs and format them
+CHANGELOG_ENTRIES=$(git log "$PREVIOUS_TAG".."$NEW_VERSION" --pretty=format:"- %s [%an]")
+
+# Add new entries to CHANGELOG.md
+echo -e "## [$NEW_VERSION] - $(date +"%Y-%m-%d")\n\n$CHANGELOG_ENTRIES\n\n$(cat CHANGELOG.md)" > CHANGELOG.md
+echo "Updated CHANGELOG.md"
+
+# Add CHANGELOG.md to git
+git add CHANGELOG.md
+
+# Commit CHANGELOG.md
+git commit -m "chore: update CHANGELOG.md for $BUILD_TYPE version $NEW_VERSION"
+if [[ $? -ne 0 ]]; then
+  echo "Error: Git commit for CHANGELOG.md failed."
+  exit 1
+fi
+
+# Step 6: Push changes to remote
 git push origin main
 if [[ $? -ne 0 ]]; then
   echo "Error: Git push to main branch failed."
