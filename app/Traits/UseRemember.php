@@ -25,6 +25,7 @@ trait UseRemember
             'stable' => !$this->getUnstable(),
             'extension_directory' => $this->getExtensionDirToRemember(),
             'php_ini' => $this->getPhpIni(),
+            'cert_store_location' => $this->getCertStoreLocation(),
         ]));
     }
 
@@ -34,4 +35,5 @@ trait UseRemember
     abstract protected function getUnstable(): bool;
     abstract protected function getThreadSafe(): bool;
     abstract protected function getExtensionDirToRemember(): string;
+    abstract protected function getCertStoreLocation(): string;
 }

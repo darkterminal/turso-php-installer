@@ -203,6 +203,15 @@ abstract class BaseInstaller implements Installer
         return collect([get_plain_installation_dir(), 'metadata.json'])->implode(DIRECTORY_SEPARATOR);
     }
 
+    protected function getCertStoreLocation(): string
+    {
+        $certDir = $this->getExtensionDirToRemember() . DS . 'certs';
+        if (!File::exists($certDir)) {
+            File::makeDirectory($certDir, 0755, true);
+        }
+        return $certDir;
+    }
+
     protected function getRepository()
     {
         if ($this->unstable) {

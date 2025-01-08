@@ -26,7 +26,7 @@ return [
     |
     */
 
-    'metadata' => (is_windows() ? getenv('USERPROFILE') : getenv('HOME')) . DS . '.turso-client-php' . DS . 'metadata.json',
+    'metadata' => get_plain_installation_dir() . DS . 'metadata.json',
 
     /*
     |--------------------------------------------------------------------------
