@@ -25,7 +25,7 @@ class VersionTursoExtension extends Command
      */
     public function handle()
     {
-        $this->info('Turso libSQL Installer (version: '.VERSION.')');
+        $this->info('Turso libSQL Installer (version: ' . config('app.version') . ')');
         if (class_exists('LibSQL')) {
             $this->info((new \LibSQL(':memory:'))->version());
         }
