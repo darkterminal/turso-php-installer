@@ -125,14 +125,6 @@ class CreateNewEnvironment extends Command
 
         $variablesArray = !empty($variables) ? $this->parseVariables($variables) : $this->getVariables();
 
-        $env_db_path = collect(explode(DS, $variablesArray['SQLD_DB_PATH']))
-            ->slice(0, -1)
-            ->implode(DS);
-
-        if (!is_dir($env_db_path)) {
-            mkdir($env_db_path);
-        }
-
         $manager->createEnvironment($name, $variablesArray);
 
         $this->info(" Environment '$name' created.");
