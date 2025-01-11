@@ -5,12 +5,14 @@ namespace App\Commands\Sqld\Runner;
 use App\Contracts\Background;
 use App\Contracts\DatabaseToken;
 use App\Contracts\EnvironmentManager;
+use App\Traits\Guards\TokenValidatorTrait;
 use Illuminate\Support\Facades\Process;
 use LaravelZero\Framework\Commands\Command;
 use function Laravel\Prompts\table;
 
 class RunSqldServer extends Command
 {
+    use TokenValidatorTrait;
     /**
      * The name and signature of the console command.
      *
@@ -45,6 +47,12 @@ class RunSqldServer extends Command
         $dbName = $this->argument('db-name');
         $daemon = $this->option('daemon');
 
+        if (!$manager->environmentExists($envIdOrName)) {
+            $this->comment(" 🚫 Environment $envIdOrName is not found.\n");
+            echo " You need to create environment first, using 'sqld:env-create' command.\n";
+            exit;
+        }
+
         $result = $manager->showRawEnvironment($envIdOrName);
 
         $dbToken = $token->getRawToken($dbName, "public_key_pem");
@@ -57,10 +65,19 @@ class RunSqldServer extends Command
         $auth_token = $token->getRawToken($dbName, 'full_access_token');
         $open_link = clickable_link("https://sqld-studio.vercel.app?name=$dbName&url=http://$http_listen_addr&authToken=$auth_token", 'Open in SQLD Studio');
 
+        if (!$this->isValidToken($auth_token, $dbName)) {
+            $this->error(" 🚫 The $dbName is incorrect or token is expired");
+            exit;
+        }
+
+        $env_var = collect($result['variables'])->map(function ($value, $key) {
+            return match($key) {
+                'SQLD_NO_WELCOME' => implode('=', [$key, (bool) $value]),
+                default => implode('=', [$key, $value]),
+            };
+        })->implode(' ');
+
         if ($daemon) {
-            $env_var = collect($result['variables'])->map(function ($value, $key) {
-                return $key === 'SQLD_NO_WELCOME' ? implode('=', [$key, (bool) $value]) : implode('=', [$key, $value]);
-            })->implode(' ');
             $pid = $background->withCommand("{$env_var} sqld")
                 ->withStdoutFile(sqld_database_path() . DS . $result['name'] . DS . "sqld-{$result['name']}.log")
                 ->withStderrFile(sqld_database_path() . DS . $result['name'] . DS . "sqld-{$result['name']}-error.log")
@@ -76,7 +93,7 @@ class RunSqldServer extends Command
             );
             $this->info("  ✨ sqld daemon started\n 🌐 $open_link");
         } else {
-            Process::forever()->env($result['variables'])->run('sqld', function (string $type, string $output) use ($open_link) {
+            Process::forever()->run("{$env_var} sqld", function (string $type, string $output) use ($open_link) {
                 echo $output . PHP_EOL;
                 if (str_contains($output, 'SQLite autocheckpoint')) {
                     echo "  ✨ sqld daemon started\n 🌐 $open_link" . PHP_EOL;

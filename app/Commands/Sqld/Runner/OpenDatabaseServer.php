@@ -4,7 +4,6 @@ namespace App\Commands\Sqld\Runner;
 
 use App\Contracts\DatabaseToken;
 use App\Contracts\EnvironmentManager;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Process;
 use LaravelZero\Framework\Commands\Command;
 
@@ -39,6 +38,12 @@ class OpenDatabaseServer extends Command
         $envIdOrName = $this->argument('env-id-or-name');
         $dbName = $this->argument('db-name');
 
+        if (!$manager->environmentExists($envIdOrName)) {
+            $this->comment(" 🚫 Environment $envIdOrName is not found.\n");
+            echo " You need to create environment first, using 'sqld:env-create' command.\n";
+            exit;
+        }
+
         $result = $manager->showRawEnvironment($envIdOrName);
 
         $dbToken = $token->getRawToken($dbName, "public_key_pem");
@@ -49,6 +54,12 @@ class OpenDatabaseServer extends Command
 
         $http_listen_addr = "http://{$result['variables']['SQLD_HTTP_LISTEN_ADDR']}";
         $auth_token = $token->getRawToken($dbName, 'full_access_token');
+        
+        if (!$this->isValidToken($auth_token, $dbName)) {
+            $this->error(" 🚫 The $dbName is incorrect or token is expired");
+            exit;
+        }
+
         Process::forever()->tty()->run("turso db shell $(echo \"$http_listen_addr\"?auth_token=$auth_token)");
     }
 }

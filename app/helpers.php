@@ -295,3 +295,25 @@ function clickable_link(string $url, string $text): string
 {
     return "\033]8;;$url\033\\$text\033]8;;\033\\\n";
 }
+
+/**
+ * Checks whether a given path is an absolute path.
+ *
+ * This function checks whether the given path is an absolute path by
+ * checking if it starts with a forward slash or if it has a drive letter.
+ *
+ * @param string $path The path to check.
+ * @return bool True if the path is an absolute path, false otherwise.
+ */
+function is_absolute_path(string $path): bool
+{
+    if ($path[0] === '/') {
+        return true;
+    }
+    
+    if (preg_match('/^[a-zA-Z]:[\\\\\/]/', $path)) {
+        return true;
+    }
+
+    return false;
+}

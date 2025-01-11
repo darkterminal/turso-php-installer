@@ -4,6 +4,7 @@ namespace App\Services\Sqld;
 
 use App\Contracts\EnvironmentManager;
 use App\Handlers\JsonStorage;
+use App\Services\DatabaseToken\DatabaseTokenGenerator;
 use App\ValueObjects\EnvironmentObject;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
@@ -56,6 +57,20 @@ class Environment implements EnvironmentManager
 
     public function createEnvironment(string $name, array $variables): void
     {
+        $variables = collect($variables)
+            ->mapWithKeys(function ($value, $key) {
+                if ($key === 'SQLD_NO_WELCOME') {
+                    return [$key => (bool) $value];
+                }
+
+                if ($key === 'SQLD_DB_PATH' && !is_absolute_path($value)) {
+                    $value = sqld_database_path() . DS . $value;
+                }
+
+                return [$key => $value];
+            })
+            ->toArray();
+
         if ($this->force) {
             $store = $this->store->load();
             $store = $store->where('name', '!=', $name);
@@ -185,12 +200,12 @@ class Environment implements EnvironmentManager
                 'hint' => 'default: ' . $environment['variables']['SQLD_NO_WELCOME'] ? 'Yes' : 'No',
             ],
         ];
-        
-        foreach ($environment['variables'] as $key => $value) {            
+
+        foreach ($environment['variables'] as $key => $value) {
             $environmentForm[$key] = match (true) {
-                $key === $formFields['SQLD_DB_PATH']['value'] || 
-                $key === $formFields['SQLD_HTTP_LISTEN_ADDR']['value'] || 
-                $key === $formFields['SQLD_GRPC_LISTEN_ADDR']['value'] || 
+                $key === $formFields['SQLD_DB_PATH']['value'] ||
+                $key === $formFields['SQLD_HTTP_LISTEN_ADDR']['value'] ||
+                $key === $formFields['SQLD_GRPC_LISTEN_ADDR']['value'] ||
                 $key === $formFields['SQLD_PRIMARY_GRPC_URL']['value'] => text(
                     label: $formFields[$key]['label'],
                     placeholder: $value,

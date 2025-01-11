@@ -126,15 +126,36 @@ final class DatabaseTokenGenerator implements DatabaseToken
     }
 
     /**
-     * Generates database tokens with full access and read-only permissions.
+     * Checks if a token already exists in the token store for the given database name.
      *
-     * The function creates a full access token and a read-only token, both of which are set to expire after a specified number of days.
-     * The tokens are generated using a symmetric signer with a private key.
-     * The function returns the current instance with the generated tokens stored in the results array.
+     * @param string $dbName The database name to check.
+     *
+     * @return bool True if the token exists, false otherwise.
+     */
+    public function isTokenExists(string $dbName): bool
+    {
+        $exists = $this->tokenStore->query(
+            "SELECT * FROM tokens WHERE db_name = ?",
+            [$dbName]
+        )->fetchArray(\LibSQL::LIBSQL_ASSOC);
+
+        return !empty($exists);
+    }
+    
+    /**
+     * Generates a libSQL Server Database token for Local Development.
+     *
+     * This method will generate a full access and read only token for the given database name.
+     * The expiration time for the token is set by the setTokenExpiration method of this class.
+     * The method will check if the database name already exists in the token store, and if it does,
+     * it will exit with an error message.
+     *
+     * @param string $dbName The database name to generate the token for.
+     * @param bool $displayTable If true, the method will display the generated tokens in a table.
      *
      * @return void
      */
-    public function generete(string $dbName): void
+    public function generete(string $dbName, bool $displayTable = true): void
     {
         // Check if database already exists
         $exists = $this->tokenStore->query(
@@ -183,7 +204,9 @@ final class DatabaseTokenGenerator implements DatabaseToken
             'expiration_day' => $tokenExpiration,
         ];
 
-        $this->displayTable();
+        if ($displayTable) {
+            $this->displayTable();
+        }
     }
 
     /**
