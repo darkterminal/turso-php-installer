@@ -1,3 +1,9 @@
+## [2.0.11] - 2025-01-14
+
+- release: patch version 2.0.11 [Imam Ali Mustofa]
+- feat(repository): change how to handle read release metadata [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 2.0.10 [Imam Ali Mustofa]
+
 ## [2.0.10] - 2025-01-14
 
 - release: patch version 2.0.10 [Imam Ali Mustofa]
