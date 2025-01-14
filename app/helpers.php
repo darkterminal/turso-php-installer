@@ -9,14 +9,14 @@ use Illuminate\Support\Str;
  *
  * @var string
  */
-const UNSTABLE_REPOSITORY = 'https://raw.githubusercontent.com/pandanotabear/turso-client-php/main/release_metadata.json';
+const UNSTABLE_REPOSITORY = 'https://gist.githubusercontent.com/pandanotabear/99c0cc406968b50143539620dac2095e/raw/30bc29d1cf51adced3583cb6bdff8a043231a837/unstable_release_metadata.json';
 
 /**
  * The URL of the stable repository.
  *
  * @var string
  */
-const REPOSITORY = 'https://raw.githubusercontent.com/tursodatabase/turso-client-php/main/release_metadata.json';
+const REPOSITORY = 'https://gist.githubusercontent.com/pandanotabear/99c0cc406968b50143539620dac2095e/raw/30bc29d1cf51adced3583cb6bdff8a043231a837/release_metadata.json';
 
 /**
  * The user agent string sent with requests to the repository.
