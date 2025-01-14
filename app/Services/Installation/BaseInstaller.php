@@ -102,6 +102,8 @@ abstract class BaseInstaller implements Installer
             callback: fn() => Http::withUserAgent(USER_AGENT)->get($this->getRepository())
         );
 
+        info("  Latest version: {$request->json('name')}");
+
         [$major, $minor, $patch] = str($request->json('name'))
             ->match('/\d+\.\d+\.\d+/')
             ->explode('.')
@@ -214,11 +216,12 @@ abstract class BaseInstaller implements Installer
 
     protected function getRepository()
     {
+        $repository = Http::withUserAgent(USER_AGENT)->get(GIST_URL);
         if ($this->unstable) {
-            return UNSTABLE_REPOSITORY;
+            return $repository->json('files')['unstable_release_metadata.json']['raw_url'];
         }
 
-        return REPOSITORY;
+        return $repository->json('files')['release_metadata.json']['raw_url'];
     }
 
     protected function getExtensionDirToRemember(): string

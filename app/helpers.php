@@ -5,18 +5,11 @@ use Faker\Generator;
 use Illuminate\Support\Str;
 
 /**
- * The URL of the unstable repository.
+ * The URL to the gist that contains the extension's metadata.
  *
- * @var string
+ * @link https://gist.github.com/darkterminal/99c0cc406968b50143539620dac2095e
  */
-const UNSTABLE_REPOSITORY = 'https://gist.githubusercontent.com/pandanotabear/99c0cc406968b50143539620dac2095e/raw/30bc29d1cf51adced3583cb6bdff8a043231a837/unstable_release_metadata.json';
-
-/**
- * The URL of the stable repository.
- *
- * @var string
- */
-const REPOSITORY = 'https://gist.githubusercontent.com/pandanotabear/99c0cc406968b50143539620dac2095e/raw/30bc29d1cf51adced3583cb6bdff8a043231a837/release_metadata.json';
+const GIST_URL = 'https://api.github.com/gists/99c0cc406968b50143539620dac2095e';
 
 /**
  * The user agent string sent with requests to the repository.
