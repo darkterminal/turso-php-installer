@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\Installation\Platforms;
+namespace Turso\PHP\Installer\Services\Installation\Platforms;
 
-use App\Services\Installation\BaseInstaller;
+use Turso\PHP\Installer\Services\Installation\BaseInstaller;
 
 class WindowsInstaller extends BaseInstaller
 {

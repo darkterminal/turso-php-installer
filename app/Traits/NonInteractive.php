@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Traits;
+namespace Turso\PHP\Installer\Traits;
 
-use App\Attributes\AllowedNamespace;
-use App\Contracts\Installer;
-use App\Traits\Guards\RestrictedTrait;
+use Turso\PHP\Installer\Attributes\AllowedNamespace;
+use Turso\PHP\Installer\Contracts\Installer;
+use Turso\PHP\Installer\Traits\Guards\RestrictedTrait;
 
-#[AllowedNamespace(namespaces: 'App\Commands\Installer\InstallTursoExtension')]
+#[AllowedNamespace(namespaces: 'Turso\PHP\Installer\Commands\Installer\InstallTursoExtension')]
 trait NonInteractive
 {
     use RestrictedTrait;

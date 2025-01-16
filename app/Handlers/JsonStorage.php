@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Handlers;
+namespace Turso\PHP\Installer\Handlers;
 
 use Illuminate\Support\Collection;
 

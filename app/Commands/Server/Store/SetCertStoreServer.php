@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Commands\Server\Store;
+namespace Turso\PHP\Installer\Commands\Server\Store;
 
-use App\Contracts\ServerGenerator;
+use Turso\PHP\Installer\Contracts\ServerGenerator;
 use LaravelZero\Framework\Commands\Command;
 
 class SetCertStoreServer extends Command

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Sqld;
+namespace Turso\PHP\Installer\Services\Sqld;
 
 class EnvironmentFactory
 {

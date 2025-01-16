@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Commands\Server\Certificate;
+namespace Turso\PHP\Installer\Commands\Server\Certificate;
 
-use App\Contracts\ServerGenerator;
+use Turso\PHP\Installer\Contracts\ServerGenerator;
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 

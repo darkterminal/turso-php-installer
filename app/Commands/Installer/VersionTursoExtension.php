@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Installer;
+namespace Turso\PHP\Installer\Commands\Installer;
 
 use LaravelZero\Framework\Commands\Command;
 

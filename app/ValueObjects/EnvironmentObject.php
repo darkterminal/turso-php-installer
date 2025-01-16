@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ValueObjects;
+namespace Turso\PHP\Installer\ValueObjects;
 
 class EnvironmentObject
 {

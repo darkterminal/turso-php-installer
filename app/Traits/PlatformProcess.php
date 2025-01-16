@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace Turso\PHP\Installer\Traits;
 
 trait PlatformProcess
 {

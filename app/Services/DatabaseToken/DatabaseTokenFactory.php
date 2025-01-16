@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\DatabaseToken;
+namespace Turso\PHP\Installer\Services\DatabaseToken;
 
 /**
  * Class DatabaseTokenFactory.

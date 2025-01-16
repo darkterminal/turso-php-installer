@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Providers;
+namespace Turso\PHP\Installer\Providers;
 
-use App\Contracts\Background;
-use App\Contracts\DatabaseToken;
-use App\Contracts\EnvironmentManager;
-use App\Contracts\Installer;
-use App\Contracts\ServerGenerator;
-use App\Services\Background\BackgroundProcessFactory;
-use App\Services\DatabaseToken\DatabaseTokenFactory;
-use App\Services\Installation\InstallerFactory;
-use App\Services\LibsqlServer\LibsqlServerFactory;
-use App\Services\Sqld\EnvironmentFactory;
+use Turso\PHP\Installer\Contracts\Background;
+use Turso\PHP\Installer\Contracts\DatabaseToken;
+use Turso\PHP\Installer\Contracts\EnvironmentManager;
+use Turso\PHP\Installer\Contracts\Installer;
+use Turso\PHP\Installer\Contracts\ServerGenerator;
+use Turso\PHP\Installer\Services\Background\BackgroundProcessFactory;
+use Turso\PHP\Installer\Services\DatabaseToken\DatabaseTokenFactory;
+use Turso\PHP\Installer\Services\Installation\InstallerFactory;
+use Turso\PHP\Installer\Services\LibsqlServer\LibsqlServerFactory;
+use Turso\PHP\Installer\Services\Sqld\EnvironmentFactory;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider

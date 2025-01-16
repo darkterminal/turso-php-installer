@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Commands\Sqld\Runner;
+namespace Turso\PHP\Installer\Commands\Sqld\Runner;
 
-use App\Contracts\Background;
-use App\Contracts\DatabaseToken;
-use App\Contracts\EnvironmentManager;
-use App\Traits\Guards\TokenValidatorTrait;
+use Turso\PHP\Installer\Contracts\Background;
+use Turso\PHP\Installer\Contracts\DatabaseToken;
+use Turso\PHP\Installer\Contracts\EnvironmentManager;
+use Turso\PHP\Installer\Traits\Guards\TokenValidatorTrait;
 use Illuminate\Support\Facades\Process;
 use LaravelZero\Framework\Commands\Command;
 use function Laravel\Prompts\table;

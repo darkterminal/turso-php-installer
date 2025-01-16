@@ -106,7 +106,7 @@ return [
     */
 
     'providers' => [
-        App\Providers\AppServiceProvider::class,
+        Turso\PHP\Installer\Providers\AppServiceProvider::class,
     ],
 
 ];

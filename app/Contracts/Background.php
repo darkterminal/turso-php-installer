@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Contracts;
+namespace Turso\PHP\Installer\Contracts;
 
 /**
  * Interface Background

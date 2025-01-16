@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Traits\Guards;
+namespace Turso\PHP\Installer\Traits\Guards;
 
-use App\Attributes\AllowedNamespace;
+use Turso\PHP\Installer\Attributes\AllowedNamespace;
 
 trait RestrictedTrait
 {

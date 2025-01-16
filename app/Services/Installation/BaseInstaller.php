@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services\Installation;
+namespace Turso\PHP\Installer\Services\Installation;
 
-use App\Contracts\Installer;
-use App\Traits\UseRemember;
-use App\ValueObjects\Asset;
+use Turso\PHP\Installer\Contracts\Installer;
+use Turso\PHP\Installer\Traits\UseRemember;
+use Turso\PHP\Installer\ValueObjects\Asset;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;

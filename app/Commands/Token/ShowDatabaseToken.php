@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Commands\Token;
+namespace Turso\PHP\Installer\Commands\Token;
 
-use App\Contracts\DatabaseToken;
-use App\Contracts\Installer;
+use Turso\PHP\Installer\Contracts\DatabaseToken;
+use Turso\PHP\Installer\Contracts\Installer;
 use LaravelZero\Framework\Commands\Command;
 
 class ShowDatabaseToken extends Command

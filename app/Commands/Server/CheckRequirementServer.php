@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Commands\Server;
+namespace Turso\PHP\Installer\Commands\Server;
 
-use App\Contracts\ServerGenerator;
+use Turso\PHP\Installer\Contracts\ServerGenerator;
 use LaravelZero\Framework\Commands\Command;
 
 class CheckRequirementServer extends Command

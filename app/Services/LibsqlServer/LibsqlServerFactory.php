@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\LibsqlServer;
+namespace Turso\PHP\Installer\Services\LibsqlServer;
 
 /**
  * Factory class to create an instance of LibsqlServerGenerator.

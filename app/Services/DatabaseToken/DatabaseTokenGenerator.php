@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\DatabaseToken;
+namespace Turso\PHP\Installer\Services\DatabaseToken;
 
-use App\Contracts\DatabaseToken;
+use Turso\PHP\Installer\Contracts\DatabaseToken;
 use DateTimeImmutable;
 use Illuminate\Support\Carbon;
 use Lcobucci\JWT\JwtFacade;

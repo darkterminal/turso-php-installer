@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Services\Sqld;
+namespace Turso\PHP\Installer\Services\Sqld;
 
-use App\Contracts\EnvironmentManager;
-use App\Handlers\JsonStorage;
-use App\Services\DatabaseToken\DatabaseTokenGenerator;
-use App\ValueObjects\EnvironmentObject;
+use Turso\PHP\Installer\Contracts\EnvironmentManager;
+use Turso\PHP\Installer\Handlers\JsonStorage;
+use Turso\PHP\Installer\Services\DatabaseToken\DatabaseTokenGenerator;
+use Turso\PHP\Installer\ValueObjects\EnvironmentObject;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;

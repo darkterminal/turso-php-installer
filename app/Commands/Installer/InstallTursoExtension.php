@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Commands\Installer;
+namespace Turso\PHP\Installer\Commands\Installer;
 
-use App\Contracts\Installer;
-use App\Traits\HasInstallQuestions;
-use App\Traits\NonInteractive;
+use Turso\PHP\Installer\Contracts\Installer;
+use Turso\PHP\Installer\Traits\HasInstallQuestions;
+use Turso\PHP\Installer\Traits\NonInteractive;
 use LaravelZero\Framework\Commands\Command;
 
 use function Laravel\Prompts\confirm;

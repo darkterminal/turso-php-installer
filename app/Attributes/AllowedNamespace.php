@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Attributes;
+namespace Turso\PHP\Installer\Attributes;
 
 use Attribute;
 

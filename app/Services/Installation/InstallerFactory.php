@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services\Installation;
+namespace Turso\PHP\Installer\Services\Installation;
 
-use App\Services\Installation\Platforms\LinuxInstaller;
-use App\Services\Installation\Platforms\MacInstaller;
-use App\Services\Installation\Platforms\WindowsInstaller;
+use Turso\PHP\Installer\Services\Installation\Platforms\LinuxInstaller;
+use Turso\PHP\Installer\Services\Installation\Platforms\MacInstaller;
+use Turso\PHP\Installer\Services\Installation\Platforms\WindowsInstaller;
 
 class InstallerFactory
 {

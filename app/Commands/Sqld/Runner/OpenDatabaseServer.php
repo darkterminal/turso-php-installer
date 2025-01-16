@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Commands\Sqld\Runner;
+namespace Turso\PHP\Installer\Commands\Sqld\Runner;
 
-use App\Contracts\DatabaseToken;
-use App\Contracts\EnvironmentManager;
+use Turso\PHP\Installer\Contracts\DatabaseToken;
+use Turso\PHP\Installer\Contracts\EnvironmentManager;
 use Illuminate\Support\Facades\Process;
 use LaravelZero\Framework\Commands\Command;
 

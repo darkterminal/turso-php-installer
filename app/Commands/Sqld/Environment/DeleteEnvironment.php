@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Commands\Sqld\Environment;
+namespace Turso\PHP\Installer\Commands\Sqld\Environment;
 
-use App\Contracts\EnvironmentManager;
+use Turso\PHP\Installer\Contracts\EnvironmentManager;
 use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 use function Laravel\Prompts\confirm;

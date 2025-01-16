@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Services\Background;
+namespace Turso\PHP\Installer\Services\Background;
 
-use App\Contracts\Background;
-use App\Traits\PlatformProcess;
+use Turso\PHP\Installer\Contracts\Background;
+use Turso\PHP\Installer\Traits\PlatformProcess;
 
 /**
  * Class BackgroundProcess.

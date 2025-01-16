@@ -1,8 +1,8 @@
 <?php
 
-namespace App\ValueObjects;
+namespace Turso\PHP\Installer\ValueObjects;
 
-use App\Handlers\ZipHandler;
+use Turso\PHP\Installer\Handlers\ZipHandler;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;

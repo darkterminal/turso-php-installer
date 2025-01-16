@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\Background;
+namespace Turso\PHP\Installer\Services\Background;
 
-use App\Contracts\Background;
+use Turso\PHP\Installer\Contracts\Background;
 
 /**
  * Factory class to create a new BackgroundProcess instance.

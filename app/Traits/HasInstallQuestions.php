@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Traits;
+namespace Turso\PHP\Installer\Traits;
 
-use App\Attributes\AllowedNamespace;
-use App\Contracts\Installer;
-use App\Traits\Guards\RestrictedTrait;
+use Turso\PHP\Installer\Attributes\AllowedNamespace;
+use Turso\PHP\Installer\Contracts\Installer;
+use Turso\PHP\Installer\Traits\Guards\RestrictedTrait;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
-#[AllowedNamespace(namespaces: 'App\Commands\Installer\InstallTursoExtension')]
+#[AllowedNamespace(namespaces: 'Turso\PHP\Installer\Commands\Installer\InstallTursoExtension')]
 trait HasInstallQuestions
 {
     use RestrictedTrait;

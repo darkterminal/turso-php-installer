@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits\Guards;
+namespace Turso\PHP\Installer\Traits\Guards;
 
 use Illuminate\Support\Carbon;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;

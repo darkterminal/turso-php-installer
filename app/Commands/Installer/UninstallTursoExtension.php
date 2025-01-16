@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Commands\Installer;
+namespace Turso\PHP\Installer\Commands\Installer;
 
-use App\Contracts\Installer;
+use Turso\PHP\Installer\Contracts\Installer;
 use LaravelZero\Framework\Commands\Command;
 
 use function Laravel\Prompts\info;

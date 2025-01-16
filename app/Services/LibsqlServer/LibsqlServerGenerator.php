@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\LibsqlServer;
+namespace Turso\PHP\Installer\Services\LibsqlServer;
 
-use App\Contracts\ServerGenerator;
+use Turso\PHP\Installer\Contracts\ServerGenerator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
