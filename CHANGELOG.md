@@ -1,3 +1,9 @@
+## [2.0.12] - 2025-01-16
+
+- release: patch version 2.0.12 [Imam Ali Mustofa]
+- build(deps): update all dependencies into the latest versions [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 2.0.11 [Imam Ali Mustofa]
+
 ## [2.0.11] - 2025-01-14
 
 - release: patch version 2.0.11 [Imam Ali Mustofa]
