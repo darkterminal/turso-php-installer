@@ -24,7 +24,7 @@
     "php": "^8.2.0",
     "fakerphp/faker": "^1.24",
     "illuminate/http": "^11.5",
-    "laravel/prompts": "^0.1.25",
+    "laravel/prompts": "^0.3.3",
     "lcobucci/jwt": "^5.3",
     "paragonie/sodium_compat": "^2.1"
   },
