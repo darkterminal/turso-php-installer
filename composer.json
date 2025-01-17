@@ -1,71 +1,71 @@
 {
-    "name": "darkterminal/turso-php-installer",
-    "description": "Turso libSQL Extension PHP Installer",
-    "version": "2.0.12",
-    "type": "library",
-    "license": "MIT",
-    "support": {
-        "issues": "https://github.com/darkterminal/turso-php-installer/issues",
-        "source": "https://github.com/darkterminal/turso-php-installer"
+  "name": "darkterminal/turso-php-installer",
+  "description": "Turso libSQL Extension PHP Installer",
+  "version": "2.0.13",
+  "type": "library",
+  "license": "MIT",
+  "support": {
+    "issues": "https://github.com/darkterminal/turso-php-installer/issues",
+    "source": "https://github.com/darkterminal/turso-php-installer"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/darkterminal"
+    }
+  ],
+  "authors": [
+    {
+      "name": "Imam Ali Mustofa",
+      "email": "darkterminal@duck.com",
+      "role": "Software Freestyle Engineer"
+    }
+  ],
+  "scripts": {
+    "build:patch": "./build.sh patch",
+    "build:minor": "./build.sh minor",
+    "build:major": "./build.sh major"
+  },
+  "require": {
+    "php": "^8.2.0",
+    "fakerphp/faker": "^1.24",
+    "illuminate/http": "^11.5",
+    "laravel/prompts": "^0.3.3",
+    "lcobucci/jwt": "^5.3",
+    "paragonie/sodium_compat": "^2.1"
+  },
+  "require-dev": {
+    "laravel-zero/framework": "^11.0.0",
+    "laravel/pint": "^1.15.2",
+    "mockery/mockery": "^1.6.11",
+    "pestphp/pest": "^2.34.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "Turso\\PHP\\Installer\\": "app/",
+      "Database\\Factories\\": "database/factories/",
+      "Database\\Seeders\\": "database/seeders/"
     },
-    "funding": [
-        {
-          "type": "github",
-          "url": "https://github.com/sponsors/darkterminal"
-        }
-    ],
-    "authors": [
-        {
-            "name": "Imam Ali Mustofa",
-            "email": "darkterminal@duck.com",
-            "role": "Software Freestyle Engineer"
-        }
-    ],
-    "scripts": {
-        "build:patch": "./build.sh patch",
-        "build:minor": "./build.sh minor",
-        "build:major": "./build.sh major"
-    },
-    "require": {
-        "php": "^8.2.0",
-        "fakerphp/faker": "^1.24",
-        "illuminate/http": "^11.5",
-        "laravel/prompts": "^0.3.3",
-        "lcobucci/jwt": "^5.3",
-        "paragonie/sodium_compat": "^2.1"
-    },
-    "require-dev": {
-        "laravel-zero/framework": "^11.0.0",
-        "laravel/pint": "^1.15.2",
-        "mockery/mockery": "^1.6.11",
-        "pestphp/pest": "^2.34.7"
-    },
-    "autoload": {
-        "psr-4": {
-            "Turso\\PHP\\Installer\\": "app/",
-            "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
-        },
-        "files": [
-            "app/helpers.php"
-        ]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "config": {
-        "preferred-install": "dist",
-        "sort-packages": true,
-        "optimize-autoloader": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        }
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true,
-    "bin": [
-        "builds/turso-php-installer"
+    "files": [
+      "app/helpers.php"
     ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "bin": [
+    "builds/turso-php-installer"
+  ]
 }
