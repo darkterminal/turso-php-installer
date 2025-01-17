@@ -96,6 +96,18 @@ class RunSqldServer extends Command
                     ]
                 ]
             );
+
+            $daemon_file = get_plain_installation_dir() . DS . 'sqld-daemon-lists.json';
+            if (!file_exists($daemon_file)) {
+                file_put_contents($daemon_file, '[]');
+            }
+            $daemon_lists = json_decode(file_get_contents($daemon_file), true);
+            $daemon_lists[] = [
+                'environment' => $result['name'],
+                'pid' => $pid
+            ];
+            file_put_contents($daemon_file, json_encode($daemon_lists));
+
             $this->info("  ✨ sqld daemon started\n 🌐 $open_link");
         } else {
             Process::forever()->run("{$env_var} sqld", function (string $type, string $output) use ($open_link) {
