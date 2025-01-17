@@ -54,6 +54,11 @@ class RunSqldServer extends Command
         }
 
         $result = $manager->showRawEnvironment($envIdOrName);
+        
+        $isValidDatabaseForEnvironment = $token->isTokenAlreadyUsedByEnvironment($result['token_id']);
+        if (!$isValidDatabaseForEnvironment) {
+            $this->comment(" 🚫 Database $dbName is not found in environment $envIdOrName.\n");
+        }
 
         $dbToken = $token->getRawToken($dbName, "public_key_pem");
         $jwtKeyFile = sys_get_temp_dir() . DS . $dbName . "_jwt_key.pem";

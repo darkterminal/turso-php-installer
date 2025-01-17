@@ -4,7 +4,6 @@ namespace Turso\PHP\Installer\Services\Sqld;
 
 use Turso\PHP\Installer\Contracts\EnvironmentManager;
 use Turso\PHP\Installer\Handlers\JsonStorage;
-use Turso\PHP\Installer\Services\DatabaseToken\DatabaseTokenGenerator;
 use Turso\PHP\Installer\ValueObjects\EnvironmentObject;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
@@ -17,8 +16,6 @@ use function Laravel\Prompts\text;
 
 class Environment implements EnvironmentManager
 {
-    private string $env_dirname = 'sqld-environments';
-    private string $env_dir_location;
     private JsonStorage $store;
     protected bool $force = false;
 
@@ -29,13 +26,7 @@ class Environment implements EnvironmentManager
             exit;
         }
 
-        $this->env_dir_location = get_plain_installation_dir() . DS . $this->env_dirname;
-
-        if (!is_dir($this->env_dir_location)) {
-            mkdir($this->env_dir_location);
-        }
-
-        $this->store = new JsonStorage($this->env_dir_location . DS . "environments.json");
+        $this->store = useJsonStorage();
     }
 
     public function setForce(bool $force): void
@@ -71,6 +62,9 @@ class Environment implements EnvironmentManager
             })
             ->toArray();
 
+        $database_token_id = $variables['DATABASE_TOKEN_ID'];
+        unset($variables['DATABASE_TOKEN_ID']);
+
         if ($this->force) {
             $store = $this->store->load();
             $store = $store->where('name', '!=', $name);
@@ -79,6 +73,7 @@ class Environment implements EnvironmentManager
             $object = EnvironmentObject::fromArray([
                 'id' => uniqid(),
                 'name' => Str::of($name)->lower()->slug('_'),
+                'token_id' => $database_token_id,
                 'variables' => $variables,
                 'created_at' => now(config('app.timezone')),
                 'updated_at' => now(config('app.timezone')),
@@ -91,6 +86,7 @@ class Environment implements EnvironmentManager
         $object = EnvironmentObject::fromArray([
             'id' => uniqid(),
             'name' => Str::of($name)->lower()->slug('_'),
+            'token_id' => $database_token_id,
             'variables' => $variables,
             'created_at' => now(config('app.timezone')),
             'updated_at' => now(config('app.timezone')),
@@ -143,7 +139,9 @@ class Environment implements EnvironmentManager
             return;
         }
 
-        echo " \n  Environment ID: {$environment['id']} \n  Environment Name: {$environment['name']} \n  Environment Variables:\n";
+        $database = $this->getDatabaseTokenById($environment['token_id'], 'db_name');
+
+        echo " \n  Active Database: {$database} \n\n  Environment ID: {$environment['id']} \n  Environment Name: {$environment['name']} \n  Environment Variables:\n";
         table(
             ['key', 'value'],
             collect($environment['variables'])->map(function ($value, $key) {
@@ -153,6 +151,20 @@ class Environment implements EnvironmentManager
                 ];
             })->toArray()
         );
+    }
+
+    private function getDatabaseTokenById(int $id, ?string $key = null): mixed
+    {
+        $tokenStore = useTokenDatabaseStore();
+        
+        if ($key) {
+            $token = $tokenStore->query("SELECT * FROM tokens WHERE id = ?", [$id])->fetchArray(\LibSQL::LIBSQL_ASSOC);
+            $data = collect($token)->first();
+            return $data[$key];
+        }
+
+        $token = $tokenStore->query("SELECT * FROM tokens WHERE id = ?", [$id])->fetchArray(\LibSQL::LIBSQL_ASSOC);
+        return collect($token)->toArray();
     }
 
     public function editEnvironment(string $nameOrId): void

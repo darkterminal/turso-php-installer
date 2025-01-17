@@ -2,6 +2,7 @@
 
 namespace Turso\PHP\Installer\Services\DatabaseToken;
 
+use Illuminate\Support\Collection;
 use Turso\PHP\Installer\Contracts\DatabaseToken;
 use DateTimeImmutable;
 use Illuminate\Support\Carbon;
@@ -10,6 +11,7 @@ use Lcobucci\JWT\Signer\Eddsa;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Token\Builder;
 
+use Turso\PHP\Installer\Services\Sqld\Environment;
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\table;
@@ -18,7 +20,7 @@ use function Laravel\Prompts\warning;
 /**
  * Class DatabaseTokenGenerator
  */
-final class DatabaseTokenGenerator implements DatabaseToken
+class DatabaseTokenGenerator implements DatabaseToken
 {
     /**
      * @var int The default expiration time in days for generated tokens.
@@ -80,9 +82,7 @@ final class DatabaseTokenGenerator implements DatabaseToken
             mkdir(get_plain_installation_dir());
         }
 
-        $databaseFileName = get_plain_installation_dir() . DS . "tokens.db";
-        $this->tokenStore = new \LibSQL($databaseFileName);
-        $this->tokenStore->execute(sql_file('create_token_table'));
+        $this->tokenStore = useTokenDatabaseStore();
 
         $this->generatePublicAndPrivateKey();
     }
@@ -141,7 +141,7 @@ final class DatabaseTokenGenerator implements DatabaseToken
 
         return !empty($exists);
     }
-    
+
     /**
      * Generates a libSQL Server Database token for Local Development.
      *
@@ -313,6 +313,25 @@ MSG;
                 ];
             })->toArray()
         );
+    }
+
+    public function getAllTokens(): Collection
+    {
+        $store = $this->tokenStore->query(sql_file('get_all_database_token'))->fetchArray(\LibSQL::LIBSQL_ASSOC);
+        $data = collect($store);
+        $data = $data->filter(function ($item) {
+            return !$this->isTokenAlreadyUsedByEnvironment($item['id']);
+        });
+        return $data;
+    }
+
+    public function isTokenAlreadyUsedByEnvironment(int $tokenId): bool
+    {
+        $store = useJsonStorage();
+        $environments = $store->load();
+        return $environments->where(function ($item) use ($tokenId) {
+            return $item['token_id'] == $tokenId;
+        })->isNotEmpty();
     }
 
     /**

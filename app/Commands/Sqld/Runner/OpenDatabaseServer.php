@@ -6,9 +6,11 @@ use Turso\PHP\Installer\Contracts\DatabaseToken;
 use Turso\PHP\Installer\Contracts\EnvironmentManager;
 use Illuminate\Support\Facades\Process;
 use LaravelZero\Framework\Commands\Command;
+use Turso\PHP\Installer\Traits\Guards\TokenValidatorTrait;
 
 class OpenDatabaseServer extends Command
 {
+    use TokenValidatorTrait;
     /**
      * The name and signature of the console command.
      *

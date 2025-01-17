@@ -2,6 +2,7 @@
 
 namespace Turso\PHP\Installer\Commands\Sqld\Environment;
 
+use Turso\PHP\Installer\Contracts\DatabaseToken;
 use Turso\PHP\Installer\Contracts\EnvironmentManager;
 use LaravelZero\Framework\Commands\Command;
 use function Laravel\Prompts\confirm;
@@ -32,13 +33,15 @@ class CreateNewEnvironment extends Command
     /**
      * Execute the console command.
      */
-    public function handle(EnvironmentManager $manager)
-    {
+    public function handle(
+        EnvironmentManager $manager,
+        DatabaseToken $databaseToken
+    ) {
         if (get_os_name() === 'windows') {
             $this->error('Sorry, sqld or libsql server is not supported for Windows. Try using WSL.');
             exit;
         }
-        
+
         $name = $this->argument('name');
         $variables = $this->option('variables');
         $force = $this->option('force');
@@ -51,7 +54,23 @@ class CreateNewEnvironment extends Command
         }
 
         if (empty($variables) && !$this->option('no-interaction')) {
-            // Start interactive mode
+            $tokenLists = $databaseToken->getAllTokens();
+            $token_options = collect($tokenLists)->mapWithKeys(function ($token) {
+                return [$token['id'] => $token['db_name']];
+            })->toArray();
+
+            if (empty($token_options)) {
+                $this->warn(" No database tokens found. Please create a database token first.\n\n Run 'turso-php-installer token:create {$name}' command first.");
+                return 1;
+            }
+
+            $token_selected = select(
+                label: 'Select a database token',
+                options: $token_options,
+                hint: 'You should select a database token first before creating an environment'
+            );
+            $this->setVariable('DATABASE_TOKEN_ID', $token_selected);
+
             $db_path_default_value = sqld_database_path() . DS . $name . DS . 'data.sqld';
             $db_path = text(
                 'Database Path',
@@ -64,9 +83,13 @@ class CreateNewEnvironment extends Command
             $node_default_value = 'primary';
             $node = select(
                 'Select a node',
-                ['primary', 'replica', 'standalone'],
+                [
+                    'primary' => 'Primary - Act as a Remote Database and Embedded Replica',
+                    'replica' => 'Replica - Act as a Database Replica',
+                    'standalone' => 'Standalone - Act as Standalone Database without Embedded Replica',
+                ],
                 $node_default_value,
-                hint: "default: $node_default_value"
+                hint: "default: Primary - Act as a Remote Database and Embedded Replica"
             );
             $this->setVariable('SQLD_NODE', $node);
 
@@ -80,24 +103,14 @@ class CreateNewEnvironment extends Command
             $this->setVariable('SQLD_HTTP_LISTEN_ADDR', $http_listen_addr);
 
             if ($node === 'primary') {
-                $allow_replication = confirm(
-                    label: 'Did you want to allow replication?',
-                    default: false,
-                    yes: 'Yes',
-                    no: 'No',
-                    hint: 'default: No'
+                $grpc_listen_addr_default_value = '127.0.0.1:5001';
+                $grpc_listen_addr = text(
+                    label: 'Primary GRPC Listen Address & Port',
+                    placeholder: '127.0.0.1:5001',
+                    default: $grpc_listen_addr_default_value,
+                    hint: "This is the GRPC listen address for the primary node to allow database replication."
                 );
-                // Allow replication and set the GRPC listen address to 127.0.0.1:5001 this URL is to be used by the replica to connect to the primary
-                if ($allow_replication) {
-                    $grpc_listen_addr_default_value = '127.0.0.1:5001';
-                    $grpc_listen_addr = text(
-                        label: 'Primary GRPC Listen Address & Port',
-                        placeholder: '127.0.0.1:5001',
-                        default: $grpc_listen_addr_default_value,
-                        hint: "This is the GRPC listen address for the primary node to allow database replication."
-                    );
-                    $this->setVariable('SQLD_GRPC_LISTEN_ADDR', $grpc_listen_addr);
-                }
+                $this->setVariable('SQLD_GRPC_LISTEN_ADDR', $grpc_listen_addr);
             }
 
             if ($node === 'replica') {

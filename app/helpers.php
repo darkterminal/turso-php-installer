@@ -3,6 +3,7 @@
 use Faker\Factory;
 use Faker\Generator;
 use Illuminate\Support\Str;
+use Turso\PHP\Installer\Handlers\JsonStorage;
 
 /**
  * The URL to the gist that contains the extension's metadata.
@@ -31,6 +32,25 @@ const VERSION = '2.0.3';
  * @var string
  */
 const DS = DIRECTORY_SEPARATOR;
+
+function useTokenDatabaseStore(): \LibSQL
+{
+    $databaseFileName = get_plain_installation_dir() . DS . "tokens.db";
+    $tokenStore = new \LibSQL($databaseFileName);
+    $tokenStore->execute(sql_file('create_token_table'));
+    return $tokenStore;
+}
+
+function useJsonStorage()
+{
+    $env_dir_location = get_plain_installation_dir() . DS . 'sqld-environments';
+
+    if (!is_dir($env_dir_location)) {
+        mkdir($env_dir_location);
+    }
+
+    return new JsonStorage($env_dir_location . DS . "environments.json");
+}
 
 /**
  * Create a new Faker generator instance.
