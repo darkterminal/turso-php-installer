@@ -1,3 +1,14 @@
+## [2.0.13] - 2025-01-17
+
+- release: patch version 2.0.13 [Imam Ali Mustofa]
+- feat(sqld): add daemon list and kill command [Imam Ali Mustofa]
+- feat(fix): adding more validations, and fix grpc address [Imam Ali Mustofa]
+- refactor: change application namespace [Imam Ali Mustofa]
+- Automated Composer update [github-actions[bot]]
+- fix: allow write permission for this job dependency_updater.yml [Imam Ali Mustofa]
+- build(ci): fix git commit action [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 2.0.12 [Imam Ali Mustofa]
+
 ## [2.0.12] - 2025-01-16
 
 - release: patch version 2.0.12 [Imam Ali Mustofa]
