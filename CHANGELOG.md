@@ -1,3 +1,9 @@
+## [2.0.16] - 2025-02-27
+
+- release: patch version 2.0.16 [Imam Ali Mustofa]
+- fix: remove illuminate/http and change to guzzlehttp/guzzle [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 2.0.15 [Imam Ali Mustofa]
+
 ## [2.0.15] - 2025-02-27
 
 - release: patch version 2.0.15 [Imam Ali Mustofa]
