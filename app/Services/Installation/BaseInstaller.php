@@ -3,13 +3,14 @@
 namespace Turso\PHP\Installer\Services\Installation;
 
 use Turso\PHP\Installer\Contracts\Installer;
-use Turso\PHP\Installer\Traits\UseRemember;
 use Turso\PHP\Installer\ValueObjects\Asset;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Http;
+use Turso\PHP\Installer\Traits\UseRemember;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\LazyCollection;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use GuzzleHttp\Client;
 use RuntimeException;
 
 use function Laravel\Prompts\info;
@@ -44,6 +45,8 @@ abstract class BaseInstaller implements Installer
 
     protected bool $unstable = false;
 
+    protected Client $client;
+
     public function __construct()
     {
         $this->arch = get_os_arch();
@@ -54,6 +57,8 @@ abstract class BaseInstaller implements Installer
         $this->original_stubs_name = 'libsql_php_extension.stubs.php';
         $this->stubs_name = 'libsql_php.stubs.php';
         $this->custom_extension_directory = '';
+
+        $this->client = new Client(['headers' => ['User-Agent' => USER_AGENT]]);
     }
 
     protected function assetVersion(bool $shouldIncludeTS): string
@@ -94,23 +99,29 @@ abstract class BaseInstaller implements Installer
     protected function downloadExtension(): void
     {
         $path = $this->extensionDirectory();
-
         $this->rememberInstallationDirectory();
 
         $request = spin(
             message: 'Getting the latest version of the extension...',
-            callback: fn() => Http::withUserAgent(USER_AGENT)->get($this->getRepository())
+            callback: function () {
+                try {
+                    $response = $this->client->get($this->getRepository());
+                    return json_decode($response->getBody(), true);
+                } catch (GuzzleException $e) {
+                    throw new RuntimeException('Failed to fetch release data: ' . $e->getMessage());
+                }
+            }
         );
 
-        info("  Latest version: {$request->json('name')}");
+        info("  Latest version: {$request['name']}");
 
-        [$major, $minor, $patch] = str($request->json('name'))
+        [$major, $minor, $patch] = str($request['name'])
             ->match('/\d+\.\d+\.\d+/')
             ->explode('.')
             ->map(fn($part) => (int) $part)
             ->toArray();
 
-        $assets = $request->json('assets');
+        $assets = $request['assets'];
 
         $asset = collect($assets)
             ->map(fn($asset) => Asset::from($asset))
@@ -125,7 +136,6 @@ abstract class BaseInstaller implements Installer
         info(sprintf('  ✅ Found latest release for %s %s %s', $this->os, $this->arch, $this->getPHPVersion()));
 
         $asset->download();
-
         info('  ✅ Extension downloaded');
 
         $asset->extract($path, [
@@ -216,12 +226,16 @@ abstract class BaseInstaller implements Installer
 
     protected function getRepository()
     {
-        $repository = Http::withUserAgent(USER_AGENT)->get(GIST_URL);
-        if ($this->unstable) {
-            return $repository->json('files')['unstable_release_metadata.json']['raw_url'];
-        }
+        try {
+            $response = $this->client->get(GIST_URL);
+            $data = json_decode($response->getBody(), true);
 
-        return $repository->json('files')['release_metadata.json']['raw_url'];
+            return $this->unstable
+                ? $data['files']['unstable_release_metadata.json']['raw_url']
+                : $data['files']['release_metadata.json']['raw_url'];
+        } catch (GuzzleException $e) {
+            throw new RuntimeException('Failed to fetch repository metadata: ' . $e->getMessage());
+        }
     }
 
     protected function getExtensionDirToRemember(): string

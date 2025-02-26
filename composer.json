@@ -29,7 +29,7 @@
   "require": {
     "php": "^8.2.0",
     "fakerphp/faker": "^1.24",
-    "illuminate/http": "^11.44",
+    "guzzlehttp/guzzle": "^7.9",
     "laravel/prompts": "^0.3.5",
     "lcobucci/jwt": "^5.5",
     "paragonie/sodium_compat": "^2.1"
