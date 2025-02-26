@@ -1,3 +1,8 @@
+## [2.0.14] - 2025-02-27
+
+- release: patch version 2.0.14 [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 2.0.13 [Imam Ali Mustofa]
+
 ## [2.0.13] - 2025-01-17
 
 - release: patch version 2.0.13 [Imam Ali Mustofa]
