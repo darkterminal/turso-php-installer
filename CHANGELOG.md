@@ -1,3 +1,16 @@
+## [2.0.15] - 2025-02-27
+
+- release: patch version 2.0.15 [Imam Ali Mustofa]
+- deps: update all dependencies [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 2.0.14 [Imam Ali Mustofa]
+- release: patch version 2.0.14 [Imam Ali Mustofa]
+- Automated Composer update [github-actions[bot]]
+- Automated Composer update [github-actions[bot]]
+- Automated Composer update [github-actions[bot]]
+- Automated Composer update [github-actions[bot]]
+- Automated Composer update [github-actions[bot]]
+- Automated Composer update [github-actions[bot]]
+
 ## [2.0.14] - 2025-02-27
 
 - release: patch version 2.0.14 [Imam Ali Mustofa]
