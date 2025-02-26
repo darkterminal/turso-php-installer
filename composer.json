@@ -29,16 +29,16 @@
   "require": {
     "php": "^8.2.0",
     "fakerphp/faker": "^1.24",
-    "illuminate/http": "^11.5",
-    "laravel/prompts": "^0.3.3",
-    "lcobucci/jwt": "^5.3",
+    "illuminate/http": "^11.44",
+    "laravel/prompts": "^0.3.5",
+    "lcobucci/jwt": "^5.5",
     "paragonie/sodium_compat": "^2.1"
   },
   "require-dev": {
-    "laravel-zero/framework": "^11.0.0",
-    "laravel/pint": "^1.15.2",
-    "mockery/mockery": "^1.6.11",
-    "pestphp/pest": "^2.34.7"
+    "laravel-zero/framework": "^11.36",
+    "laravel/pint": "^1.21",
+    "mockery/mockery": "^1.6",
+    "pestphp/pest": "^2.36"
   },
   "autoload": {
     "psr-4": {
