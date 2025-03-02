@@ -1,3 +1,14 @@
+## [2.1.0] - 2025-03-03
+
+- release: minor version 2.1.0 [Imam Ali Mustofa]
+- fix: support FrankenPHP php.ini creation cz FrankenPHP docker image is not contain default php.ini file [Imam Ali Mustofa]
+- refactor: change Illuminate\Http to Guzzle\Http and make it stable [Imam Ali Mustofa]
+- feat: remove PHP8.0 and add PHP8.4 support [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 2.0.16 [Imam Ali Mustofa]
+- release: patch version 2.0.16 [Imam Ali Mustofa]
+- fix: remove illuminate/http and change to guzzlehttp/guzzle [Imam Ali Mustofa]
+- Automated Composer update [github-actions[bot]]
+
 ## [2.0.16] - 2025-02-27
 
 - release: patch version 2.0.16 [Imam Ali Mustofa]
