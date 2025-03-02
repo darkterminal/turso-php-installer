@@ -185,10 +185,26 @@ function get_php_ini_file(): string
         ->first();
 
     if (blank($detactedPhpIni)) {
-        throw new RuntimeException(
-            "PHP is not installed globally in your environment.\n
-            Turso/libSQL Client PHP attempted to locate a php.ini file but none was found."
-        );
+        // FrankenPHP: check PHP_INI_DIR and create php.ini files if not present at php --ini command
+        $detectedPhpIni = collect(scandir(getenv('PHP_INI_DIR')))
+            ->filter(fn($file) => in_array($file, ['php.ini-development', 'php.ini-production']))
+            ->map(fn($file) => realpath(getenv('PHP_INI_DIR') . DIRECTORY_SEPARATOR . $file))
+            ->first();
+
+        if (!$detectedPhpIni && is_file($detectedPhpIni)) {
+            throw new RuntimeException(
+                "PHP is not installed globally in your environment.\n
+                Turso/libSQL Client PHP attempted to locate a php.ini file but none was found."
+            );
+        }
+
+        $destination = getenv('PHP_INI_DIR') . DIRECTORY_SEPARATOR . 'php.ini';
+
+        if (!copy($detectedPhpIni, $destination)) {
+            throw new RuntimeException("Failed to copy $detectedPhpIni to $destination");
+        }
+
+        $detactedPhpIni = $destination;
     }
 
     return trim(Str::of($detactedPhpIni)
