@@ -3,11 +3,14 @@
 namespace Turso\PHP\Installer\ValueObjects;
 
 use Turso\PHP\Installer\Handlers\ZipHandler;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Http;
+use GuzzleHttp\HandlerStack;
 use Illuminate\Support\Str;
-use PharData;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Client;
 use RuntimeException;
+use PharData;
 
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
@@ -47,16 +50,42 @@ class Asset
 
     public function download()
     {
-        $request = spin(
-            message: 'Downloading Turso/libSQL Extension for PHP...',
-            callback: fn() => Http::retry(3, 100)
-                ->sink($this->download_path . DIRECTORY_SEPARATOR . $this->getTempName())
-                ->get($this->download_url)
-        );
+        $client = $this->createRetryClient(3, 100);
+        $tempFile = $this->download_path . DIRECTORY_SEPARATOR . $this->getTempName();
 
-        if ($request->getStatusCode() != 200) {
-            throw new RuntimeException('Unable to download extension:' . $this->name);
-        }
+        spin(
+            message: 'Downloading Turso/libSQL Extension for PHP...',
+            callback: function () use ($client, $tempFile) {
+                try {
+                    $response = $client->get($this->download_url, [
+                        'sink' => $tempFile
+                    ]);
+
+                    if ($response->getStatusCode() !== 200) {
+                        throw new RuntimeException('Download failed with status: ' . $response->getStatusCode());
+                    }
+
+                    return $response;
+                } catch (GuzzleException $e) {
+                    throw new RuntimeException('Download error: ' . $e->getMessage());
+                }
+            }
+        );
+    }
+
+    private function createRetryClient(int $maxRetries, int $delayMs): Client
+    {
+        $stack = HandlerStack::create();
+        $stack->push(Middleware::retry(
+            function ($retries, $request, $response, $exception) use ($maxRetries) {
+                return $retries < $maxRetries && ($exception || ($response && $response->getStatusCode() >= 500));
+            },
+            function ($retries) use ($delayMs) {
+                return $delayMs * 1000;
+            }
+        ));
+
+        return new Client(['handler' => $stack]);
     }
 
     public function extract(string $extractTo, array $only = [])
