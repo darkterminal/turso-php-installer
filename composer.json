@@ -31,8 +31,7 @@
     "fakerphp/faker": "^1.24",
     "guzzlehttp/guzzle": "^7.9",
     "laravel/prompts": "^0.3.5",
-    "lcobucci/jwt": "^5.5",
-    "paragonie/sodium_compat": "^2.1"
+    "lcobucci/jwt": "^5.5"
   },
   "require-dev": {
     "laravel-zero/framework": "^11.36",
