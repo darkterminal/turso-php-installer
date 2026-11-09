@@ -82,6 +82,12 @@ class RunSqldServer extends Command
         $result['variables']['SQLD_AUTH_JWT_KEY_FILE'] = $jwtKeyFile;
 
         $http_listen_addr = $result['variables']['SQLD_HTTP_LISTEN_ADDR'];
+
+        if (!empty($result['variables']['SQLD_GRPC_LISTEN_ADDR']) && !empty($result['variables']['SQLD_PRIMARY_GRPC_URL'])) {
+            $this->error(' 🚫 The environment contains both SQLD_GRPC_LISTEN_ADDR and SQLD_PRIMARY_GRPC_URL - sqld rejects that combination (--grpc-listen-addr vs --primary-grpc-url). Edit the environment (`sqld:env-edit`) or recreate it via `sqld:env-new --variables`.');
+            exit(1);
+        }
+
         $auth_token = $token->getRawToken($dbName, 'full_access_token');
         $open_link = clickable_link("https://sqld-studio.vercel.app?name=$dbName&url=http://$http_listen_addr&authToken=$auth_token", 'Open in SQLD Studio');
 

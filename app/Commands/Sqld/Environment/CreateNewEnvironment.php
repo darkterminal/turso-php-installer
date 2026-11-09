@@ -154,6 +154,11 @@ class CreateNewEnvironment extends Command
                 return 1;
             }
 
+            if (isset($parsedVariables['SQLD_GRPC_LISTEN_ADDR'], $parsedVariables['SQLD_PRIMARY_GRPC_URL'])) {
+                $this->error(' 🚫 SQLD_GRPC_LISTEN_ADDR and SQLD_PRIMARY_GRPC_URL are mutually exclusive - sqld runs either a primary node (--grpc-listen-addr) or a replica (--primary-grpc-url), not both.');
+                return 1;
+            }
+
             $variablesArray = $parsedVariables;
         } else {
             $variablesArray = $this->getVariables();
