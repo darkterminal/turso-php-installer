@@ -34,14 +34,20 @@ class KillDaemonRunning extends Command
         $daemon_pid = $this->argument('daemon-pid');
         $daemon_file = get_plain_installation_dir() . DS . 'sqld-daemon-lists.json';
         $daemons = json_decode(file_get_contents($daemon_file), true);
-        
-        if (empty($daemons)) {
+
+        if (empty($daemons) || !is_array($daemons)) {
             $this->comment('No running sqld daemons found');
             exit;
         }
-        
+
         foreach ($daemons as $index => $daemon) {
-            if ($daemon['pid'] == $daemon_pid) {
+            // entries without a usable pid (corrupt or hand-edited file)
+            // are skipped instead of crashing the whole command
+            if (!is_array($daemon) || (int) ($daemon['pid'] ?? 0) < 1) {
+                continue;
+            }
+
+            if ((int) $daemon['pid'] === (int) $daemon_pid) {
                 $this->comment("Killing sqld daemon with pid $daemon_pid");
                 $process = Process::run("kill -9 $daemon_pid");
                 if ($process->successful()) {

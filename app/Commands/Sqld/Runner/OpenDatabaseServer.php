@@ -55,7 +55,15 @@ class OpenDatabaseServer extends Command
         }
 
         $dbToken = $token->getRawToken($dbName, "public_key_pem");
-        $jwtKeyFile = sys_get_temp_dir() . DS . $dbName . "_jwt_key.pem";
+
+        // the signing key lives with the environment's data (install dir),
+        // not in the shared /tmp
+        $dataDirectory = sqld_database_path() . DS . $result['name'];
+        if (!is_dir($dataDirectory)) {
+            mkdir($dataDirectory, 0755, true);
+        }
+
+        $jwtKeyFile = $dataDirectory . DS . "jwt_key.pem";
         file_put_contents($jwtKeyFile, $dbToken);
 
         $result['variables']['SQLD_AUTH_JWT_KEY_FILE'] = $jwtKeyFile;

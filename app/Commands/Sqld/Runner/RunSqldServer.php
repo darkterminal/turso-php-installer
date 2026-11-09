@@ -62,7 +62,21 @@ class RunSqldServer extends Command
         }
 
         $dbToken = $token->getRawToken($dbName, "public_key_pem");
-        $jwtKeyFile = sys_get_temp_dir() . DS . $dbName . "_jwt_key.pem";
+
+        // the signing key lives with the environment's data (install dir),
+        // not in the shared /tmp; the dir is ensured for the database and
+        // the daemon logs before anything writes into it
+        $environmentDataDirectory = sqld_database_path() . DS . $result['name'];
+        if (!is_dir($environmentDataDirectory)) {
+            mkdir($environmentDataDirectory, 0755, true);
+        }
+
+        $databaseDataDirectory = dirname($result['variables']['SQLD_DB_PATH']);
+        if (!is_dir($databaseDataDirectory)) {
+            mkdir($databaseDataDirectory, 0755, true);
+        }
+
+        $jwtKeyFile = $environmentDataDirectory . DS . "jwt_key.pem";
         file_put_contents($jwtKeyFile, $dbToken);
 
         $result['variables']['SQLD_AUTH_JWT_KEY_FILE'] = $jwtKeyFile;

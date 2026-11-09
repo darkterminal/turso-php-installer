@@ -38,12 +38,40 @@ class ListRunningDaemon extends Command
 
         $daemons = json_decode(file_get_contents($daemon_file), true);
 
-        if (empty($daemons)) {
+        if (empty($daemons) || !is_array($daemons)) {
+            $this->comment('No running sqld daemons found');
+            exit;
+        }
+
+        // self-heal: drop entries whose process is long gone; entries
+        // without a usable pid (corrupt or hand-edited file) are skipped
+        // instead of crashing the whole listing
+        $liveDaemons = [];
+        foreach ($daemons as $daemon) {
+            if (!is_array($daemon)) {
+                continue;
+            }
+
+            $pid = (int) ($daemon['pid'] ?? 0);
+            if ($pid < 1) {
+                continue;
+            }
+
+            if (!empty(shell_exec("kill -0 $pid 2>/dev/null && echo 1"))) {
+                $liveDaemons[] = $daemon;
+            }
+        }
+
+        if (count($liveDaemons) !== count($daemons)) {
+            file_put_contents($daemon_file, json_encode($liveDaemons, JSON_PRETTY_PRINT));
+        }
+
+        if (empty($liveDaemons)) {
             $this->comment('No running sqld daemons found');
             exit;
         }
 
         $this->comment('Running sqld daemons:');
-        $this->table(['environment', 'pid'], $daemons);
+        $this->table(['environment', 'pid'], $liveDaemons);
     }
 }
