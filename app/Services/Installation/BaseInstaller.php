@@ -94,7 +94,13 @@ abstract class BaseInstaller implements Installer
     public function checkIfAlreadyInstalled(): bool
     {
         $installation_dir = get_plain_installation_dir();
-        return is_dir($installation_dir);
+
+        // the metadata record is written exactly once per real install
+        // (rememberInstallationDirectory), so directory existence alone is
+        // not a trustworthy signal: other subsystems (token/env stores)
+        // create the same directory at boot on commands used before any
+        // install, which made install claim an extension that was never there
+        return is_dir($installation_dir) && file_exists($this->getMetadataLocationFile());
     }
 
     protected function downloadExtension(): void
@@ -473,5 +479,11 @@ abstract class BaseInstaller implements Installer
         info(sprintf('  ✅ Found php ini at %s', $this->getPhpIni()));
         $this->removeExtensionFromPhpIni();
         $this->removeExtensionFiles();
+
+        // drop the installation record too, otherwise the extension kept
+        // looking installed after an uninstall (metadata.json determined
+        // the install state) and a fresh `install` was skipped forever;
+        // removeExtensionFiles() is done first because it reads this file
+        File::delete($this->getMetadataLocationFile());
     }
 }
