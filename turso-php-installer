@@ -5,6 +5,27 @@ define('LARAVEL_START', microtime(true));
 
 /*
 |--------------------------------------------------------------------------
+| PHP 8.5+ Deprecation Guard
+|--------------------------------------------------------------------------
+|
+| Laravel's bundled database config still reads the deprecated PDO
+| constants (PDO::MYSQL_ATTR_SSL_CA, deprecated since PHP 8.5), which
+| printed deprecation banners plus stack traces on EVERY command boot
+| for users running this CLI under PHP 8.5.
+|
+| Engine-level deprecations are masked for PHP >= 8.5 only; older
+| runtimes keep the stock error reporting.
+|
+| Ref: https://github.com/darkterminal/turso-php-installer/issues/10
+|
+*/
+
+if (PHP_VERSION_ID >= 80500) {
+    error_reporting(E_ALL & ~E_DEPRECATED);
+}
+
+/*
+|--------------------------------------------------------------------------
 | Register The Auto Loader
 |--------------------------------------------------------------------------
 |
