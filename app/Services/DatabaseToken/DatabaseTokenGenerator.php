@@ -75,8 +75,6 @@ class DatabaseTokenGenerator implements DatabaseToken
      */
     public function __construct()
     {
-        check_generator_requirements();
-
         $this->temp_dir = sys_get_temp_dir();
 
         if (!is_dir(get_plain_installation_dir())) {
@@ -84,8 +82,6 @@ class DatabaseTokenGenerator implements DatabaseToken
         }
 
         $this->tokenStore = useTokenDatabaseStore();
-
-        $this->generatePublicAndPrivateKey();
     }
 
     /**
@@ -107,23 +103,37 @@ class DatabaseTokenGenerator implements DatabaseToken
      */
     protected function generatePublicAndPrivateKey()
     {
-        shell_exec("openssl genpkey -algorithm ed25519 -out {$this->temp_dir}/jwt_private.pem");
-        shell_exec("openssl pkey -in {$this->temp_dir}/jwt_private.pem -outform DER | tail -c 32 > {$this->temp_dir}/jwt_private.binary");
-        shell_exec("openssl pkey -in {$this->temp_dir}/jwt_private.pem -pubout -out {$this->temp_dir}/jwt_public.pem");
+        // unique per-run names: parallel runs never collide, a crash leaves
+        // no reusable predictable key file behind
+        $suffix = uniqid();
+        $privatePem = "{$this->temp_dir}/turso-jwt-private-{$suffix}.pem";
+        $privateBinary = "{$this->temp_dir}/turso-jwt-private-{$suffix}.binary";
+        $publicPem = "{$this->temp_dir}/turso-jwt-public-{$suffix}.pem";
+
+        shell_exec("openssl genpkey -algorithm ed25519 -out {$privatePem}");
+        shell_exec("openssl pkey -in {$privatePem} -outform DER | tail -c 32 > {$privateBinary}");
+        shell_exec("openssl pkey -in {$privatePem} -pubout -out {$publicPem}");
+
+        if (!file_exists($privatePem) || !file_exists($privateBinary) || !file_exists($publicPem)) {
+            throw new RuntimeException('Failed to generate the Ed25519 key pair with OpenSSL.');
+        }
 
         $this->privateKey = sodium_crypto_sign_secretkey(
             sodium_crypto_sign_seed_keypair(
-                file_get_contents("{$this->temp_dir}/jwt_private.binary")
+                file_get_contents($privateBinary)
             )
         );
-        unlink("{$this->temp_dir}/jwt_private.binary");
+        unlink($privateBinary);
 
-        $this->publicKeyPem = trim(file_get_contents("{$this->temp_dir}/jwt_public.pem"));
+        $this->publicKeyPem = trim(file_get_contents($publicPem));
         $this->pubKeyBase64 = str_replace(["-----BEGIN PUBLIC KEY-----", "-----END PUBLIC KEY-----", "\n", "\r"], '', $this->publicKeyPem);
 
         $this->key = InMemory::base64Encoded(
             base64_encode($this->privateKey)
         );
+
+        unlink($privatePem);
+        unlink($publicPem);
     }
 
     /**
@@ -170,6 +180,9 @@ class DatabaseTokenGenerator implements DatabaseToken
         }
 
         warning(" ⌛ Creating libSQL Server Database token for Local Development...");
+
+        check_generator_requirements();
+        $this->generatePublicAndPrivateKey();
 
         $tokenExpiration = $this->tokenExpiration;
         $fullAccessToken = (new JwtFacade())->issue(
@@ -391,8 +404,8 @@ MSG;
      */
     public function __destruct()
     {
-        unlink("{$this->temp_dir}/jwt_public.pem");
-        unlink("{$this->temp_dir}/jwt_private.pem");
+        // key material is wiped by generatePublicAndPrivateKey() itself
+        // (unique temp names, unlinked right after use)
         $this->tokenExpiration = 7;
         $this->privateKey = null;
         $this->publicKeyPem = null;
