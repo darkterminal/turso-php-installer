@@ -28,14 +28,45 @@ class LibsqlServerGenerator implements ServerGenerator
      *
      * @return bool True if the packages are installed, false otherwise.
      */
+    /**
+     * The Python interpreter resolved for this process. Modern Linux
+     * distributions no longer ship an unversioned `python` binary, so
+     * `python3` is preferred and `python` remains as fallback for
+     * environments that still provide it.
+     *
+     * @var string|null
+     */
+    private ?string $pythonInterpreter = null;
+
+    /**
+     * The Python interpreter to run the certificate scripts with.
+     */
+    private function pythonInterpreter(): string
+    {
+        if (is_null($this->pythonInterpreter)) {
+            $this->pythonInterpreter = !empty(shell_exec('command -v python3 2>/dev/null'))
+                ? 'python3'
+                : 'python';
+        }
+
+        return $this->pythonInterpreter;
+    }
+
+    /**
+     * Checks that the required Python packages are installed.
+     *
+     * This check is skipped if the command fails to execute.
+     *
+     * @return bool True if the packages are installed, false otherwise.
+     */
     public function checkRequirement(): bool
     {
-        $pythonCommand = Process::run('python --version');
+        $pythonCommand = Process::run($this->pythonInterpreter() . ' --version');
         if (!$pythonCommand->successful()) {
             warning(' ❕ Python is not installed. Please install Python before running this command.');
             return false;
         }
-        $requirementsCommand = Process::run('python ' . config('app.scripts') . DS . 'check_requirement.py');
+        $requirementsCommand = Process::run($this->pythonInterpreter() . ' ' . config('app.scripts') . DS . 'check_requirement.py');
         if (!$requirementsCommand->successful()) {
             warning(' ❕The required [cryptography] library are not installed. Please install the required [cryptography] library before running this command.');
             return false;
@@ -78,7 +109,7 @@ class LibsqlServerGenerator implements ServerGenerator
         //     return false;
         // }
 
-        $command = Process::run('python ' . config('app.scripts') . DS . 'ca_cert_create.py --custom-name ' . $name . ' --days ' . $expiration_days . ' --store-location ' . $store_location);
+        $command = Process::run($this->pythonInterpreter() . ' ' . config('app.scripts') . DS . 'ca_cert_create.py --custom-name ' . $name . ' --days ' . $expiration_days . ' --store-location ' . $store_location);
         return $command->seeInOutput('Stored cert');
     }
 
@@ -120,7 +151,7 @@ class LibsqlServerGenerator implements ServerGenerator
             exit;
         }
 
-        $command = Process::run('python ' . config('app.scripts') . DS . 'peer_cert_create.py --peer-name ' . $defaultPeerName . ' --custom-name ' . $defaultCertFileName . ' --days ' . $expiration_days . ' --store-location ' . $store_location);
+        $command = Process::run($this->pythonInterpreter() . ' ' . config('app.scripts') . DS . 'peer_cert_create.py --peer-name ' . $defaultPeerName . ' --custom-name ' . $defaultCertFileName . ' --days ' . $expiration_days . ' --store-location ' . $store_location);
         return $command->seeInOutput('Stored cert');
     }
 
@@ -149,7 +180,7 @@ class LibsqlServerGenerator implements ServerGenerator
             return;
         }
 
-        $command = Process::run('python ' . config('app.scripts') . DS . 'ca_cert_show.py --store-location ' . $store_location);
+        $command = Process::run($this->pythonInterpreter() . ' ' . config('app.scripts') . DS . 'ca_cert_show.py --store-location ' . $store_location);
         info(" 📝 Details of CA certificate store at $store_location");
         echo $command->output();
     }
@@ -206,7 +237,7 @@ class LibsqlServerGenerator implements ServerGenerator
     {
         $store_location = get_global_metadata('cert_store_location');
 
-        $command = Process::run('python ' . config('app.scripts') . DS . 'ca_cert_list.py --store-location ' . $store_location);
+        $command = Process::run($this->pythonInterpreter() . ' ' . config('app.scripts') . DS . 'ca_cert_list.py --store-location ' . $store_location);
 
         if ($command->successful()) {
             info(" 🗂️ List of CA certificates at $store_location");

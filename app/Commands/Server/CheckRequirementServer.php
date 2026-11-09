@@ -19,7 +19,7 @@ class CheckRequirementServer extends Command
      *
      * @var string
      */
-    protected $description = 'Check server requirement, this will check if python3 pip and cyptography lib are installed';
+    protected $description = 'Check server requirement, this will check if python3 pip and cryptography lib are installed';
 
     /**
      * Execute the console command.
