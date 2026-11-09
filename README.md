@@ -12,7 +12,7 @@
 
 This is the Turso/libSQL Extension for PHP installer script for Linux and MacOS. Make sure you already have PHP minimal version 8.2.
 
-> Release assets of the extension currently cover PHP **8.1–8.4** (NTS and TS builds). PHP **8.5** becomes installable as soon as the next `tursodatabase/turso-client-php` release ships it — the installer always reads the latest release automatically.
+> Release assets of the extension currently cover PHP **8.1–8.5** (NTS and TS builds) — the installer always reads the latest release automatically.
 
 ## Installation
 
@@ -136,13 +136,6 @@ turso-php-installer token:show <db-name>
 This command will show all tokens and secrets of that database. You can also read individual secrets via `turso-php-installer token:show <db-name> --fat | --roa | --pkp | --pkb`
 
 > [See detail explanation](https://gist.github.com/darkterminal/c272bf2a572bc5d7378f31cf4aea5f19)
-
-## Production Installations (beyond this CLI)
-
-The `install` command configures the **CLI** `php.ini` — the convenience path for development machines. A production deployment (php-fpm behind nginx) ships the same `.so` into the PHP extension directory and enables it with a `conf.d` ini drop-in for **both** the served SAPI and the CLI — that is exactly how the production usage proof installs the extension.
-
-* [Production Deployment Guide](https://github.com/tursodatabase/turso-client-php/blob/main/docs/production-deployment.md) — flavors, the outage playbook, durability, concurrency discipline, and upgrade gating
-* [Production Usage Proof (docker compose)](https://github.com/tursodatabase/turso-client-php/tree/main/docker/production-proof) — the runnable claim → assert map those recommendations come from
 
 ## FAQ
 
