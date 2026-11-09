@@ -16,6 +16,7 @@ use RuntimeException;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\table;
+use function Laravel\Prompts\warning;
 
 abstract class BaseInstaller implements Installer
 {
@@ -290,12 +291,35 @@ abstract class BaseInstaller implements Installer
         return collect($metadata);
     }
 
+    /**
+     * Verifies the freshly configured setup actually makes the extension
+     * visible to a NEW php process, loaded with the exact ini that was set.
+     */
+    protected function verifyExtensionEnabled(): void
+    {
+        if (!check_libsql_installed()) {
+            warning(' ⚠ `php -m` does not list libsql yet - check the php.ini target for your SAPI (php-fpm needs its own conf.d drop-in; see the production deployment guide).');
+            return;
+        }
+
+        $version = shell_exec(
+            'php -c ' . escapeshellarg($this->getPhpIni()) . ' -r ' .
+            escapeshellarg('if (class_exists("LibSQL")) { echo (string) (new LibSQL(":memory:"))->version(); }') .
+            ' 2>/dev/null'
+        );
+
+        if ($version) {
+            info('  🏁 ' . trim($version));
+        }
+    }
+
     public function install(): void
     {
         info(sprintf('  ✅ Found php ini at %s', $this->getPhpIni()));
         $this->ensureLibSQLExtensionDirectoryExists();
         $this->downloadExtension();
         $this->updatePhpIni();
+        $this->verifyExtensionEnabled();
         $this->info();
     }
 
@@ -440,6 +464,7 @@ abstract class BaseInstaller implements Installer
         $this->ensureLibSQLExtensionDirectoryExists();
         $this->downloadExtension();
         $this->updatePhpIni();
+        $this->verifyExtensionEnabled();
         $this->info();
     }
 
