@@ -175,6 +175,14 @@ class LibsqlServerGenerator implements ServerGenerator
         $store_location = get_global_metadata('cert_store_location');
 
         if ($raw) {
+            $caCertFile = $store_location . DS . "ca_cert.pem";
+            $caKeyFile = $store_location . DS . "ca_key.pem";
+
+            if (!file_exists($caCertFile) || !file_exists($caKeyFile)) {
+                error(" 🫣 No CA certificate found at: \n Store Location: $store_location \n Run 'server:ca-cert-create' first or pick a store containing a CA pair with `server:cert-store-set`.");
+                exit(1);
+            }
+
             info(" 🗂️ CA certificate store at $store_location");
             echo " 🎖 CA certificate:\n\n";
             echo file_get_contents($store_location . DS . "ca_cert.pem");
