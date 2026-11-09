@@ -1,10 +1,7 @@
 ## [2.2.2] - 2026-11-10
 
-- release: patch version 2.2.2 [Imam Ali Mustofa]
-- chore(deps): sync composer.lock after removing paragonie/sodium_compat (#11) [Imam Ali Mustofa]
-- Remove paragonie/sodium_compat dependency [brendt]
-- docs(changelog): curate the 2.2.1 section (headline the #10 fix, fold release meta) [Imam Ali Mustofa]
-- chore: update CHANGELOG.md for patch version 2.2.1 [Imam Ali Mustofa]
+- chore(deps): drop paragonie/sodium_compat — the CLI's requirement gate hard-requires ext-sodium, so the polyfill was unreachable weight (PR #11) [brendt]
+- chore(deps): sync composer.lock to the slimmed dependency tree; PHAR rebuilds leaner [Imam Ali Mustofa]
 
 ## [2.2.1] - 2026-11-10
 
