@@ -98,10 +98,34 @@ class RunSqldServer extends Command
         })->implode(' ');
 
         if ($daemon) {
+            $errorLogFile = sqld_database_path() . DS . $result['name'] . DS . "sqld-{$result['name']}-error.log";
             $pid = $background->withCommand("{$env_var} sqld")
                 ->withStdoutFile(sqld_database_path() . DS . $result['name'] . DS . "sqld-{$result['name']}.log")
-                ->withStderrFile(sqld_database_path() . DS . $result['name'] . DS . "sqld-{$result['name']}-error.log")
+                ->withStderrFile($errorLogFile)
                 ->run();
+
+            // verify the forked process is actually alive before claiming
+            // success: sqld that receives invalid flags (clap errors, bad
+            // address, missing file) dies right after the shell detaches it
+            $alive = false;
+            for ($attempt = 0; $attempt < 5; $attempt++) {
+                usleep(400000);
+                if (!empty(shell_exec("kill -0 " . escapeshellarg($pid) . " 2>/dev/null && echo 1"))) {
+                    $alive = true;
+                    break;
+                }
+            }
+
+            if (!$alive) {
+                $this->error(" 🚫 The sqld daemon for '{$result['name']}' exited right after starting (pid: {$pid}).");
+                if (file_exists($errorLogFile) && trim($log = file_get_contents($errorLogFile)) !== '') {
+                    $this->line($log);
+                } else {
+                    $this->comment(" Check 'sqld-{$result['name']}-error.log' under " . dirname($errorLogFile) . " for details.");
+                }
+                exit(1);
+            }
+
             table(
                 ['Environment', 'PID'],
                 [
