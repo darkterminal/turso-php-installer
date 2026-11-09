@@ -136,7 +136,28 @@ class CreateNewEnvironment extends Command
 
         $this->info(" Creating environment '$name'...");
 
-        $variablesArray = !empty($variables) ? $this->parseVariables($variables) : $this->getVariables();
+        if (!empty($variables)) {
+            $parsedVariables = $this->parseVariables($variables);
+
+            if ($parsedVariables === false) {
+                $this->error(' 🚫 The --variables value is neither valid JSON nor a valid DSN string (example DSN: DATABASE_TOKEN_ID=1&SQLD_NODE=primary).');
+                return 1;
+            }
+
+            if (!is_array($parsedVariables)) {
+                $this->error(' 🚫 The --variables value must decode to an object/associative mapping.');
+                return 1;
+            }
+
+            if (!isset($parsedVariables['DATABASE_TOKEN_ID'])) {
+                $this->error(' 🚫 The environment variables must include DATABASE_TOKEN_ID (the numeric token id from `token:list`) - sqld:server-run relies on it.');
+                return 1;
+            }
+
+            $variablesArray = $parsedVariables;
+        } else {
+            $variablesArray = $this->getVariables();
+        }
 
         $manager->createEnvironment($name, $variablesArray);
 

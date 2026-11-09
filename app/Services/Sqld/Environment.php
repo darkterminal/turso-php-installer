@@ -236,16 +236,21 @@ class Environment implements EnvironmentManager
                     default: $value,
                     hint: $formFields[$key]['hint']
                 ),
+                // variables unknown to this form (e.g. custom keys passed via
+                // --variables) are preserved untouched instead of crashing
+                default => null,
             };
-
-            if (!empty($environment[$key])) {
-                continue;
-            }
         }
 
         $environmentForm = collect($environmentForm)
+            ->filter(fn($value) => !is_null($value))
             ->map(fn($value) => is_bool($value) ? (int) $value : $value)
             ->toArray();
+
+        // unknown variables keep their stored value
+        foreach ($environment['variables'] as $key => $value) {
+            $environmentForm[$key] ??= $value;
+        }
 
         $environment['variables'] = $environmentForm;
 
