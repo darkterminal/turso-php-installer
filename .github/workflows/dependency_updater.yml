@@ -5,6 +5,7 @@ on:
     - cron: '0 0 * * 1' # Mondays at midnight UTC
     - cron: '0 0 * * 3' # Wednesdays at midnight UTC
     - cron: '0 0 * * 5' # Fridays at midnight UTC
+  workflow_dispatch: # on-demand run from the Actions tab, e.g. for a release-time lock refresh
 
 jobs:
   update:
