@@ -27,7 +27,7 @@ class ListRunningDaemon extends Command
     {
         if (get_os_name() === 'windows') {
             $this->error('Sorry, sqld or libsql server is not supported for Windows. Try using WSL.');
-            exit;
+            exit(1);
         }
 
         $daemon_file = get_plain_installation_dir() . DS . 'sqld-daemon-lists.json';

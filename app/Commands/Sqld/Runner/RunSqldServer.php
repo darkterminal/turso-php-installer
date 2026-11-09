@@ -40,7 +40,7 @@ class RunSqldServer extends Command
     {
         if (get_os_name() === 'windows') {
             $this->error('Sorry, sqld or libsql server is not supported for Windows. Try using WSL.');
-            exit;
+            exit(1);
         }
 
         $envIdOrName = $this->argument('env-id-or-name');
@@ -50,7 +50,7 @@ class RunSqldServer extends Command
         if (!$manager->environmentExists($envIdOrName)) {
             $this->comment(" 🚫 Environment $envIdOrName is not found.\n");
             echo " You need to create environment first, using 'sqld:env-new' command.\n";
-            exit;
+            exit(1);
         }
 
         $result = $manager->showRawEnvironment($envIdOrName);
@@ -58,7 +58,7 @@ class RunSqldServer extends Command
         if (!$token->isTokenExists($dbName)) {
             $this->comment(" 🚫 Database $dbName is not found.\n");
             echo " Run 'turso-php-installer token:create <db-name>' first.\n";
-            exit;
+            exit(1);
         }
 
         $dbToken = $token->getRawToken($dbName, "public_key_pem");
@@ -93,7 +93,7 @@ class RunSqldServer extends Command
 
         if (!$this->isValidToken($auth_token, $dbName)) {
             $this->error(" 🚫 The $dbName is incorrect or token is expired");
-            exit;
+            exit(1);
         }
 
         $env_var = collect($result['variables'])->map(function ($value, $key) {

@@ -31,14 +31,14 @@ class DeleteEnvironment extends Command
     {
         if (get_os_name() === 'windows') {
             $this->error('Sorry, sqld or libsql server is not supported for Windows. Try using WSL.');
-            exit;
+            exit(1);
         }
         
         $name_or_id = $this->argument('name-or-id');
 
         if (!$manager->environmentExists($name_or_id)) {
             error(" 🚫 Environment {$name_or_id} is not found.");
-            return;
+            return 1;
         }
 
         if (confirm("Are you sure you want to delete the environment: {$name_or_id}?", true)) {

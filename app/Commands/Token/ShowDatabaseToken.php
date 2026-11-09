@@ -36,7 +36,7 @@ class ShowDatabaseToken extends Command
     ) {
         if (!$installer->checkIfAlreadyInstalled()) {
             $this->error(" 🚫 Turso libSQL Extension for PHP is not installed. Please install it first.");
-            exit;
+            exit(1);
         }
 
         $dbName = $this->argument('db-name');

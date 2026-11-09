@@ -23,7 +23,7 @@ class Environment implements EnvironmentManager
     {
         if (!check_libsql_installed()) {
             error(" 🚫 Turso libSQL Extension for PHP is not installed. Please install it first.");
-            exit;
+            exit(1);
         }
 
         $this->store = useJsonStorage();
@@ -136,7 +136,7 @@ class Environment implements EnvironmentManager
 
         if (empty($environment)) {
             error(" 🚫 Environment {$nameOrId} is not found.");
-            return;
+            exit(1);
         }
 
         $database = $this->getDatabaseTokenById($environment['token_id'], 'db_name');
@@ -184,7 +184,7 @@ class Environment implements EnvironmentManager
 
         if (empty($environment)) {
             error(" 🚫 Environment {$nameOrId} is not found.");
-            return;
+            exit(1);
         }
 
         $environmentForm = [];
@@ -276,7 +276,7 @@ class Environment implements EnvironmentManager
 
         if (empty($environment)) {
             error(" 🚫 Environment {$nameOrId} is not found.");
-            return;
+            exit(1);
         }
 
         File::deleteDirectory(sqld_database_path() . DS . $environment['name']);

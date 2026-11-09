@@ -143,7 +143,7 @@ class LibsqlServerGenerator implements ServerGenerator
 
         if (!file_exists($store_location . DS . "ca_cert.pem") || !file_exists($store_location . DS . "ca_key.pem")) {
             error(" 🫣  CA certificate not found at: \n Store Location: $store_location \n It's required to generate peer cert.");
-            exit;
+            exit(1);
         }
 
         $defaultPeerName = faker()->domainWord();
@@ -151,7 +151,7 @@ class LibsqlServerGenerator implements ServerGenerator
 
         if (file_exists($store_location . DS . "$defaultCertFileName.pem")) {
             info(" 🫣 Peer certificate already exists at $store_location");
-            exit;
+            exit(1);
         }
 
         $command = Process::run($this->pythonInterpreter() . ' ' . config('app.scripts') . DS . 'peer_cert_create.py --peer-name ' . $defaultPeerName . ' --custom-name ' . $defaultCertFileName . ' --days ' . $expiration_days . ' --store-location ' . $store_location);

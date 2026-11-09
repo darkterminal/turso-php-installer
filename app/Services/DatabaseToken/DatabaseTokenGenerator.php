@@ -176,7 +176,7 @@ class DatabaseTokenGenerator implements DatabaseToken
 
         if (!empty($exists)) {
             error(' 🚫 Oops: Database already exists');
-            exit;
+            exit(1);
         }
 
         warning(" ⌛ Creating libSQL Server Database token for Local Development...");
@@ -376,7 +376,7 @@ MSG;
         $result = $this->tokenStore->query(sql_file('check_database_name'), [$db_name])->fetchArray(\LibSQL::LIBSQL_ASSOC);
         if (empty($result)) {
             error(" 🚫 Not found: you have not generated a token yet. Run 'turso-php-installer token:create <db-name>' command first");
-            exit;
+            exit(1);
         }
         $this->tokenStore->execute(sql_file('delete_database_token'), [$db_name]);
     }

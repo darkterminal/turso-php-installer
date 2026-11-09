@@ -28,7 +28,7 @@ class KillDaemonRunning extends Command
     {
         if (get_os_name() === 'windows') {
             $this->error('Sorry, sqld or libsql server is not supported for Windows. Try using WSL.');
-            exit;
+            exit(1);
         }
         
         $daemon_pid = $this->argument('daemon-pid');
@@ -37,7 +37,7 @@ class KillDaemonRunning extends Command
 
         if (empty($daemons) || !is_array($daemons)) {
             $this->comment('No running sqld daemons found');
-            exit;
+            exit(1);
         }
 
         foreach ($daemons as $index => $daemon) {

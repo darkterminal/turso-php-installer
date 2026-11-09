@@ -30,12 +30,12 @@ class CreateCaCertServer extends Command
     {
         if (get_os_name() === 'windows') {
             $this->error('Sorry, sqld or libsql server is not supported for Windows. Try using WSL.');
-            exit;
+            exit(1);
         }
         
         if (!$server->checkRequirement()) {
             $this->error(' 🚫 The required Python packages are not installed. Please install them and try again.');
-            return;
+            return 1;
         }
 
         if ($server->createCaCert($this->argument('name'), $this->option('expiry'))) {
@@ -43,5 +43,6 @@ class CreateCaCertServer extends Command
             return;
         }
         $this->error("  🙈 CA certificate creation failed");
+        return 1;
     }
 }

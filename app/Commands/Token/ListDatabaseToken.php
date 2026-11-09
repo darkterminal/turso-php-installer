@@ -29,7 +29,7 @@ class ListDatabaseToken extends Command
     {
         if (!$installer->checkIfAlreadyInstalled()) {
             $this->error(" 🚫 Turso libSQL Extension for PHP is not installed. Please install it first.");
-            exit;
+            exit(1);
         }
         $this->comment(" 🗂️ List all generated database tokens:");
         $tokenGenerator->listAllTokens();
