@@ -29,6 +29,10 @@ class CheckRequirementServer extends Command
         $this->info("  Checking server requirement...");
         if ($server->checkRequirement()) {
             $this->info('  ✨ Server requirement met');
+            return;
         }
+
+        $this->error('  🚫 Server requirement not met - the sqld certificate utilities cannot run against this setup.');
+        exit(1);
     }
 }

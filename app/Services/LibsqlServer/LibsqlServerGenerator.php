@@ -68,7 +68,10 @@ class LibsqlServerGenerator implements ServerGenerator
         }
         $requirementsCommand = Process::run($this->pythonInterpreter() . ' ' . config('app.scripts') . DS . 'check_requirement.py');
         if (!$requirementsCommand->successful()) {
-            warning(' ❕The required [cryptography] library are not installed. Please install the required [cryptography] library before running this command.');
+            // the check script prints the missing libraries and hints to
+            // fix them; surface it instead of swallowing the diagnosis
+            echo $requirementsCommand->output() . PHP_EOL;
+            warning(' ❕ The required [cryptography] library is not installed. Install it as suggested above before running this command.');
             return false;
         }
         return true;
