@@ -130,7 +130,30 @@ abstract class BaseInstaller implements Installer
             });
 
         if ($asset === null) {
-            throw new RuntimeException('The extension for your PHP version is not available. Please open an issue on the repository.');
+            $wanted = $this->assetVersion(shouldIncludeTS: $major === 1 && $minor >= 4);
+
+            $coveredVersions = collect($assets)
+                ->map(function (array $candidate): string {
+                    preg_match('/php-([0-9]+\.[0-9]+)/', $candidate['name'], $matches);
+                    return $matches[1] ?? '';
+                })
+                ->filter()
+                ->unique()
+                ->sort(SORT_NATURAL)
+                ->values()
+                ->implode(', ');
+
+            $releaseUrl = $request['html_url'] ?? 'https://github.com/tursodatabase/turso-client-php/releases';
+
+            throw new RuntimeException(sprintf(
+                'No extension asset matching "%s" in the latest release "%s" (assets of that release cover PHP: %s). ' .
+                'Re-run `turso-php-installer update` once a newer extension release ships your PHP version, ' .
+                'or build the extension from source. Release page: %s',
+                $wanted,
+                $request['name'],
+                $coveredVersions,
+                $releaseUrl,
+            ));
         }
 
         info(sprintf('  ✅ Found latest release for %s %s %s', $this->os, $this->arch, $this->getPHPVersion()));

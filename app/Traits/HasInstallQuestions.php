@@ -115,6 +115,7 @@ trait HasInstallQuestions
                 '8.2' => 'PHP 8.2',
                 '8.3' => 'PHP 8.3',
                 '8.4' => 'PHP 8.4',
+                '8.5' => 'PHP 8.5',
             ],
             default: get_current_php_version(),
             hint: "default: " . get_current_php_version() . " follow the current " . get_php_ini_file()
