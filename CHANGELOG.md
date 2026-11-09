@@ -1,10 +1,8 @@
 ## [2.2.1] - 2026-11-10
 
-- release: patch version 2.2.1 [Imam Ali Mustofa]
-- docs(template): replace dead commit-guidelines link with in-line guideline [Imam Ali Mustofa]
+- fix(entry): mask the PHP 8.5 PDO deprecation banners on every boot (fixes #10) [Imam Ali Mustofa]
 - docs(README): drop extension-internal production section; refresh coverage claim to 8.1-8.5 [Imam Ali Mustofa]
-- docs(changelog): curate the 2.2.0 section (fold bot churn, headline the audit fixes) [Imam Ali Mustofa]
-- chore: update CHANGELOG.md for minor version 2.2.0 [Imam Ali Mustofa]
+- docs(template): replace dead commit-guidelines link with in-line guideline [Imam Ali Mustofa]
 
 ## [2.2.0] - 2026-11-09
 
