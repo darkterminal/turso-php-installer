@@ -197,12 +197,12 @@ class Environment implements EnvironmentManager
             'SQLD_NODE' => [
                 'value' => 'SQLD_NODE',
                 'label' => 'Select a node',
-                'hint' => 'default: ' . $environment['variables']['SQLD_NODE'],
+                'hint' => 'default: ' . ($environment['variables']['SQLD_NODE'] ?? 'N/A'),
             ],
             'SQLD_HTTP_LISTEN_ADDR' => [
                 'value' => 'SQLD_HTTP_LISTEN_ADDR',
                 'label' => 'HTTP Listen Address',
-                'hint' => 'default: ' . $environment['variables']['SQLD_HTTP_LISTEN_ADDR'],
+                'hint' => 'default: ' . ($environment['variables']['SQLD_HTTP_LISTEN_ADDR'] ?? 'N/A'),
             ],
             'SQLD_GRPC_LISTEN_ADDR' => [
                 'value' => 'SQLD_GRPC_LISTEN_ADDR',
@@ -217,7 +217,7 @@ class Environment implements EnvironmentManager
             'SQLD_NO_WELCOME' => [
                 'value' => 'SQLD_NO_WELCOME',
                 'label' => 'No Welcome',
-                'hint' => 'default: ' . $environment['variables']['SQLD_NO_WELCOME'] ? 'Yes' : 'No',
+                'hint' => 'default: ' . (!empty($environment['variables']['SQLD_NO_WELCOME']) ? 'Yes' : 'No'),
             ],
         ];
 
