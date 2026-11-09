@@ -76,7 +76,7 @@ trait HasInstallQuestions
                 hint: 'default: ' . get_php_ini_file()
             );
             if (!empty($phpIniField)) {
-                $installer->setPhpIni(get_php_ini_file());
+                $installer->setPhpIni($phpIniField);
             }
         }
 
@@ -99,7 +99,7 @@ trait HasInstallQuestions
                 hint: 'default: ' . get_version_installation_dir($this->usingStableVersion)
             );
             if (!empty($extensionDirField)) {
-                $installer->setExtensionDir(get_version_installation_dir($this->usingStableVersion));
+                $installer->setExtensionDir($extensionDirField);
             }
         }
 
@@ -130,6 +130,8 @@ trait HasInstallQuestions
                 hint: "The current PHP version is " . get_current_php_version() . ", but you selected $choosePhpVersion. default: No"
             );
             if ($overwrite) {
+                $installer->setPhpVersion($choosePhpVersion);
+
                 $replace_current_version = str_replace(
                     get_current_php_version(),
                     $choosePhpVersion,
