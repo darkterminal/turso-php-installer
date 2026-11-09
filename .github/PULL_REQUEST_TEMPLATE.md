@@ -1,7 +1,7 @@
 ## PR Checklist
 Please check if your PR fulfills the following requirements:
 
-- [ ] The commit message follows our guidelines: https://github.com/darkterminal/libsql-extension/blob/main/CONTRIBUTING.md#commit
+- [ ] Commit messages follow conventional-commit style (`feat`, `fix`, `docs`, `chore`, `refactor`, `test`)
 - [ ] Tests for the changes have been added (for bug fixes / features)
 - [ ] Docs have been added / updated (for bug fixes / features)
 
