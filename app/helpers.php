@@ -20,13 +20,6 @@ const GIST_URL = 'https://api.github.com/gists/99c0cc406968b50143539620dac2095e'
 const USER_AGENT = 'darkterminal';
 
 /**
- * The current version of the package.
- *
- * @var string
- */
-const VERSION = '2.0.3';
-
-/**
  * The directory separator.
  *
  * @var string
