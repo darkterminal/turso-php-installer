@@ -156,14 +156,22 @@ class Environment implements EnvironmentManager
     private function getDatabaseTokenById(int $id, ?string $key = null): mixed
     {
         $tokenStore = useTokenDatabaseStore();
-        
+
+        $token = $tokenStore->query("SELECT * FROM tokens WHERE id = ?", [$id])->fetchArray(\LibSQL::LIBSQL_ASSOC);
+
+        // the environment's token may have been deleted meanwhile (token:delete
+        // does not cascade to environments that reference it) - report it
+        // instead of crashing on a null row
+        if (empty($token)) {
+            error(" 🚫 The environment references database token (id: {$id}) which no longer exists in the token store. Re-generate it with `token:create <db-name>` and re-create the environment (`sqld:env-new`), or delete this environment (`sqld:env-delete`).");
+            exit(1);
+        }
+
         if ($key) {
-            $token = $tokenStore->query("SELECT * FROM tokens WHERE id = ?", [$id])->fetchArray(\LibSQL::LIBSQL_ASSOC);
             $data = collect($token)->first();
             return $data[$key];
         }
 
-        $token = $tokenStore->query("SELECT * FROM tokens WHERE id = ?", [$id])->fetchArray(\LibSQL::LIBSQL_ASSOC);
         return collect($token)->toArray();
     }
 
