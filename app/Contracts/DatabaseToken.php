@@ -11,6 +11,7 @@ interface DatabaseToken
     public function displayTable(): void;
     public function getToken(string $db_name, string $key = null): void;
     public function getRawToken(string $db_name, string $key = null): string;
+    public function isTokenExists(string $dbName): bool;
     public function listAllTokens(): void;
     public function getAllTokens(): Collection;
     public function isTokenAlreadyUsedByEnvironment(int $tokenId): bool;

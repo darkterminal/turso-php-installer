@@ -42,11 +42,17 @@ class OpenDatabaseServer extends Command
 
         if (!$manager->environmentExists($envIdOrName)) {
             $this->comment(" 🚫 Environment $envIdOrName is not found.\n");
-            echo " You need to create environment first, using 'sqld:env-create' command.\n";
+            echo " You need to create environment first, using 'sqld:env-new' command.\n";
             exit;
         }
 
         $result = $manager->showRawEnvironment($envIdOrName);
+
+        if (!$token->isTokenExists($dbName)) {
+            $this->comment(" 🚫 Database $dbName is not found.\n");
+            echo " Run 'turso-php-installer token:create <db-name>' first.\n";
+            exit;
+        }
 
         $dbToken = $token->getRawToken($dbName, "public_key_pem");
         $jwtKeyFile = sys_get_temp_dir() . DS . $dbName . "_jwt_key.pem";

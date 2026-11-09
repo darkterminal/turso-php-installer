@@ -10,6 +10,7 @@ use Lcobucci\JWT\JwtFacade;
 use Lcobucci\JWT\Signer\Eddsa;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Token\Builder;
+use RuntimeException;
 
 use Turso\PHP\Installer\Services\Sqld\Environment;
 use function Laravel\Prompts\error;
@@ -254,8 +255,14 @@ MSG;
      */
     public function getToken(string $db_name, string $key = null): void
     {
-        $store = $this->tokenStore->query(sql_file('get_database_token'), [$db_name])->fetchArray(\LibSQL::LIBSQL_ASSOC);
-        $store = (array) collect($store)->first();
+        $rows = $this->tokenStore->query(sql_file('get_database_token'), [$db_name])->fetchArray(\LibSQL::LIBSQL_ASSOC);
+        $first = collect($rows)->first();
+
+        if (empty($first)) {
+            throw new RuntimeException(" 🚫 Database token for '{$db_name}' was not found. Run `turso-php-installer token:create <db-name>` first.");
+        }
+
+        $store = (array) $first;
 
         if ($key) {
             echo collect($store)->get($key);
@@ -277,8 +284,14 @@ MSG;
      */
     public function getRawToken(string $db_name, string $key = null): string
     {
-        $store = $this->tokenStore->query(sql_file('get_database_token'), [$db_name])->fetchArray(\LibSQL::LIBSQL_ASSOC);
-        $store = (array) collect($store)->first();
+        $rows = $this->tokenStore->query(sql_file('get_database_token'), [$db_name])->fetchArray(\LibSQL::LIBSQL_ASSOC);
+        $first = collect($rows)->first();
+
+        if (empty($first)) {
+            throw new RuntimeException(" 🚫 Database token for '{$db_name}' was not found. Run `turso-php-installer token:create <db-name>` first.");
+        }
+
+        $store = (array) $first;
 
         if ($key) {
             return collect($store)->get($key);
@@ -349,7 +362,7 @@ MSG;
     {
         $result = $this->tokenStore->query(sql_file('check_database_name'), [$db_name])->fetchArray(\LibSQL::LIBSQL_ASSOC);
         if (empty($result)) {
-            error(" 🚫 Not found: your're not generated token yet. Run 'turso-php-installer token:create' command first");
+            error(" 🚫 Not found: you have not generated a token yet. Run 'turso-php-installer token:create <db-name>' command first");
             exit;
         }
         $this->tokenStore->execute(sql_file('delete_database_token'), [$db_name]);
