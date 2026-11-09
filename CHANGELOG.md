@@ -1,3 +1,11 @@
+## [2.2.2] - 2026-11-10
+
+- release: patch version 2.2.2 [Imam Ali Mustofa]
+- chore(deps): sync composer.lock after removing paragonie/sodium_compat (#11) [Imam Ali Mustofa]
+- Remove paragonie/sodium_compat dependency [brendt]
+- docs(changelog): curate the 2.2.1 section (headline the #10 fix, fold release meta) [Imam Ali Mustofa]
+- chore: update CHANGELOG.md for patch version 2.2.1 [Imam Ali Mustofa]
+
 ## [2.2.1] - 2026-11-10
 
 - fix(entry): mask the PHP 8.5 PDO deprecation banners on every boot (fixes #10) [Imam Ali Mustofa]
