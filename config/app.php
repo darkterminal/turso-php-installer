@@ -90,9 +90,13 @@ return [
     | services the application utilizes. This can be overridden using
     | the global command line "--env" option when calling commands.
     |
+    | The compiled PHAR runs in production, so Laravel Zero drops the
+    | developer-only commands (app:build, app:install, app:rename, make:*,
+    | test) from the built artifact. Source checkouts keep them for the
+    | maintainers' workflow.
     */
 
-    'env' => 'development',
+    'env' => env('APP_ENV', \Phar::running(false) !== '' ? 'production' : 'development'),
 
     /*
     |--------------------------------------------------------------------------
