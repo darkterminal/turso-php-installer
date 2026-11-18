@@ -6,11 +6,12 @@ use Illuminate\Support\Str;
 use Turso\PHP\Installer\Handlers\JsonStorage;
 
 /**
- * The URL to the gist that contains the extension's metadata.
+ * The API endpoint that returns the latest extension release metadata.
  *
- * @link https://gist.github.com/darkterminal/99c0cc406968b50143539620dac2095e
+ * Release metadata is published as a release asset on GitHub Releases:
+ * https://github.com/tursodatabase/turso-client-php/releases/download/{version}/metadata.json
  */
-const GIST_URL = 'https://api.github.com/gists/99c0cc406968b50143539620dac2095e';
+const RELEASE_METADATA_LATEST_URL = 'https://api.github.com/repos/tursodatabase/turso-client-php/releases/latest';
 
 /**
  * The user agent string sent with requests to the repository.

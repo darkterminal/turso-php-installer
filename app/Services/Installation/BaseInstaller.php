@@ -257,12 +257,14 @@ abstract class BaseInstaller implements Installer
     protected function getRepository()
     {
         try {
-            $response = $this->client->get(GIST_URL);
+            $response = $this->client->get(RELEASE_METADATA_LATEST_URL);
             $data = json_decode($response->getBody(), true);
 
-            return $this->unstable
-                ? $data['files']['unstable_release_metadata.json']['raw_url']
-                : $data['files']['release_metadata.json']['raw_url'];
+            $assetName = $this->unstable
+                ? 'unstable_release_metadata.json'
+                : 'release_metadata.json';
+
+            return 'https://github.com/tursodatabase/turso-client-php/releases/download/' . $data['tag_name'] . '/' . $assetName;
         } catch (GuzzleException $e) {
             throw new RuntimeException('Failed to fetch repository metadata: ' . $e->getMessage());
         }

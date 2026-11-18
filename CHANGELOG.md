@@ -1,3 +1,8 @@
+## [2.2.3] - 2026-11-18
+
+- release: patch version 2.2.3 [Imam Ali Mustofa]
+- feat(installation): consume release metadata from GitHub release asset instead of Gist [Imam Ali Mustofa]
+
 ## [2.2.2] - 2026-11-10
 
 - chore(deps): drop paragonie/sodium_compat — the CLI's requirement gate hard-requires ext-sodium, so the polyfill was unreachable weight (PR #11) [brendt]
