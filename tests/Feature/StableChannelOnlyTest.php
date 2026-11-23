@@ -1,18 +1,11 @@
 <?php
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Turso\PHP\Installer\Services\Installation\Platforms\LinuxInstaller;
 
 class ChannelObservableInstaller extends LinuxInstaller
 {
-    public function useClient(Client $client): void
-    {
-        $this->client = $client;
-    }
-
     public function repositoryUrl(): string
     {
         return $this->getRepository();
@@ -60,14 +53,7 @@ test('the versioned installation directory has no unstable segment', function ()
 test('release metadata always resolves to the stable asset', function () {
     $installer = new ChannelObservableInstaller();
 
-    $client = Mockery::mock(Client::class);
-    $client->shouldReceive('get')->once()->with(RELEASE_METADATA_LATEST_URL)
-        ->andReturn(new Response(200, [], json_encode(['tag_name' => 'v9.9.9'])));
-
-    $installer->useClient($client);
-
-    expect($installer->repositoryUrl())
-        ->toBe('https://github.com/tursodatabase/turso-client-php/releases/download/v9.9.9/release_metadata.json');
+    expect($installer->repositoryUrl())->toBe(RELEASE_METADATA_LATEST_URL);
 });
 
 test('new installation metadata always records the stable channel', function () {

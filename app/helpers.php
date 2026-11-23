@@ -6,10 +6,11 @@ use Illuminate\Support\Str;
 use Turso\PHP\Installer\Handlers\JsonStorage;
 
 /**
- * The API endpoint that returns the latest extension release metadata.
+ * The API endpoint that returns the latest extension release.
  *
- * Release metadata is published as a release asset on GitHub Releases:
- * https://github.com/tursodatabase/turso-client-php/releases/download/{version}/metadata.json
+ * GitHub's releases/latest endpoint already returns the release object the
+ * installer consumes (tag_name, name, html_url and the assets[] list with
+ * browser_download_url), so no separate release-metadata asset is required.
  */
 const RELEASE_METADATA_LATEST_URL = 'https://api.github.com/repos/tursodatabase/turso-client-php/releases/latest';
 

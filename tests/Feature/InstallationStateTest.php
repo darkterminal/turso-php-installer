@@ -97,12 +97,8 @@ test('update restores php.ini and extension directory from metadata before conta
         'cert_store_location' => $this->testHome . '/certs',
     ]));
 
-    $releaseUrl = 'https://github.com/tursodatabase/turso-client-php/releases/download/v9.9.9/release_metadata.json';
-
     $client = Mockery::mock(Client::class);
     $client->shouldReceive('get')->once()->with(RELEASE_METADATA_LATEST_URL)
-        ->andReturn(new Response(200, [], json_encode(['tag_name' => 'v9.9.9'])));
-    $client->shouldReceive('get')->once()->with($releaseUrl)
         ->andReturn(new Response(200, [], json_encode([
             'name' => 'v9.9.9',
             'html_url' => 'https://github.com/tursodatabase/turso-client-php/releases/tag/v9.9.9',
