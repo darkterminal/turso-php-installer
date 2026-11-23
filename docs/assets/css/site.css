@@ -137,8 +137,8 @@ img {
     line-height: 1;
 }
 
-/* The Turso Client PHP ecosystem logo used in the brand mark. It is a coloured
-   PNG with its own background, so dark mode must not invert it. */
+/* The Turso PHP Installer logo used in the brand mark. It is a coloured PNG
+   with its own background, so dark mode must not invert it. */
 .brand__mark img {
     width: 20px;
     height: 20px;
