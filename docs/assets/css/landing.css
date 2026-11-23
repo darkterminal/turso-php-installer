@@ -415,14 +415,39 @@ a:hover {
 }
 
 /* --------------------------------------------------------------------------
-   Hero — split composition, real screenshot, no gradient text
+   Hero — split composition, terminal frame, faint logo watermark behind copy
    -------------------------------------------------------------------------- */
 
 .hero {
+    position: relative;
+    overflow: hidden;
     padding: 88px 0 76px;
+    --hero-mark-opacity: 0.1;
+}
+
+[data-theme="dark"] .hero {
+    --hero-mark-opacity: 0.16;
+}
+
+.hero__watermark {
+    position: absolute;
+    z-index: 0;
+    top: 48%;
+    left: clamp(-260px, calc((100vw - 1200px) / 2 - 210px), -40px);
+    width: clamp(420px, 56vw, 760px);
+    height: auto;
+    transform: translateY(-50%) rotate(-8deg);
+    opacity: var(--hero-mark-opacity);
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-mask-image: radial-gradient(ellipse 62% 62% at 50% 50%, #000 38%, transparent 78%);
+    mask-image: radial-gradient(ellipse 62% 62% at 50% 50%, #000 38%, transparent 78%);
 }
 
 .hero-grid {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
     align-items: center;
@@ -1014,8 +1039,20 @@ a:hover {
         display: inline-grid;
     }
     .hero-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 44px;
+    }
+    .hero__visual {
+        min-width: 0;
+        max-width: 760px;
+    }
+    .shot-frame {
+        min-width: 0;
+    }
+    .hero__watermark {
+        top: 30%;
+        left: -140px;
+        width: 520px;
     }
     .hero h1 {
         max-width: 20ch;
@@ -1042,8 +1079,23 @@ a:hover {
     .container {
         padding: 0 18px;
     }
+    .header-inner {
+        gap: 12px;
+    }
+    .brand__sub {
+        display: none;
+    }
     .hero {
         padding: 56px 0 56px;
+        --hero-mark-opacity: 0.06;
+    }
+    [data-theme="dark"] .hero {
+        --hero-mark-opacity: 0.1;
+    }
+    .hero__watermark {
+        top: 6%;
+        left: -150px;
+        width: 380px;
     }
     .hero h1 {
         font-size: clamp(2.375rem, 10vw, 3rem);
