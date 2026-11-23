@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "32cf5aeab9ce9570eb988609ca192b38",
+    "content-hash": "d8d206884155b4d9270bd9dc37836ec2",
     "packages": [
         {
             "name": "fakerphp/faker",
