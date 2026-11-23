@@ -10,7 +10,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/darkterminal/turso-php-installer?color=fcb61e" alt="MIT License"></a>
   <a href="https://github.com/darkterminal/turso-php-installer/releases"><img src="https://img.shields.io/github/v/release/darkterminal/turso-php-installer?color=fcb61e" alt="Release"></a>
-  <a href="https://github.com/darkterminal/turso-php-installer/releases"><img src="https://img.shields.io/github/downloads/darkterminal/turso-php-installer/total.svg?color=fcb61e" alt="Downloads"></a>
+  <a href="https://packagist.org/packages/darkterminal/turso-php-installer"><img src="https://img.shields.io/packagist/dt/darkterminal/turso-php-installer?color=F05340" alt="Total downloads" /></a>
   <a href="https://github.com/darkterminal/turso-php-installer/graphs/contributors"><img src="https://img.shields.io/github/contributors/darkterminal/turso-php-installer?color=fcb61e" alt="Contributors"></a>
 </p>
 
