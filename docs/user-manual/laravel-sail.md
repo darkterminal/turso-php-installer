@@ -46,51 +46,36 @@ Select your preferred PHP Version in `docker` directory and add this `shell` scr
 #!/usr/bin/env bash
 
 # Filename: run_turso
+#
+# Preflight only. The installer CLI version is pinned by Composer at image
+# build time and the libSQL extension is owned by the image. Nothing is
+# downloaded or updated at boot; a missing extension fails the container.
 
-VERSION_FILE="/home/sail/.cache/turso_version"
-CACHE_DURATION=604800 # 7 days in seconds
+set -euo pipefail
 
-get_latest_version() {
-    curl -s https://api.github.com/repos/darkterminal/turso-php-installer/tags | \
-    grep '"name":' | \
-    head -n 1 | \
-    sed -n 's/.*"name": "\([0-9.]*\)".*/\1/p'
-}
+# Keep this path in sync with the Composer install location in the Dockerfile.
+TURSO_INSTALLER_BIN="/home/sail/.config/composer/vendor/bin/turso-php-installer"
 
-if [ -d "/opt/extensions" ] && [ "$(ls -A /opt/extensions)" ]; then
-    CURRENT_VERSION=$(/home/sail/.config/composer/vendor/bin/turso-php-installer | head -n 2 | sed -n 's/.*turso-php-installer[[:space:]]*\([0-9.]*\).*/\1/p')
-
-    if [ -f "$VERSION_FILE" ]; then
-        FILE_AGE=$(($(date +%s) - $(stat -c %Y "$VERSION_FILE")))
-        if [ "$FILE_AGE" -lt "$CACHE_DURATION" ]; then
-            LATEST_VERSION=$(cat "$VERSION_FILE")
-        else
-            LATEST_VERSION=$(get_latest_version)
-            echo "$LATEST_VERSION" > "$VERSION_FILE"
-        fi
-    else
-        mkdir -p "$(dirname "$VERSION_FILE")"
-        LATEST_VERSION=$(get_latest_version)
-        echo "$LATEST_VERSION" > "$VERSION_FILE"
-    fi
-
-    echo "Turso PHP Installer Current Version: $CURRENT_VERSION"
-    echo "Turso PHP Installer Latest Version: $LATEST_VERSION"
-
-    if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
-        echo "Updating turso-php-installer to the latest version..."
-        /home/sail/.config/composer/vendor/bin/turso-php-installer update
-    else
-        echo "Turso PHP Installer is up to date."
-    fi
-
-    exec "$@"
-else
-    echo "/opt/extensions is empty or does not exist. Running update..."
-    /home/sail/.config/composer/vendor/bin/turso-php-installer update
-    exec "$@"
+if ! php -m | grep -qi '^libsql$'; then
+    echo "libSQL extension is not loaded by the container PHP SAPI." >&2
+    echo "Check the extension= line and the conf.d drop-in for the selected PHP version." >&2
+    exit 1
 fi
+
+# Diagnostic only: never parsed and never used as an update trigger.
+if [ -x "$TURSO_INSTALLER_BIN" ]; then
+    "$TURSO_INSTALLER_BIN" version || true
+fi
+
+echo "libSQL extension is loaded."
+exit 0
 ```
+
+The installer CLI is pinned to a specific version by Composer when the image is
+built. The libSQL extension is installed into the image itself and is not
+mounted from the host. This boot script only verifies that the extension is
+loaded; it does not download, install, or update anything. If the extension is
+missing, the container fails to start instead of continuing in a broken state.
 
 And modify the `Dockerfile`. Make sure to replace `<version>` placeholder in this file.
 ```dockerfile
@@ -216,3 +201,15 @@ Let's sailing!
 sail build --no-cache
 sail up
 ```
+
+## Verify
+
+After the container is up, confirm the extension is loaded by the PHP CLI SAPI:
+
+```bash
+sail exec laravel.test php -m | grep libsql
+```
+
+Other SAPIs in the container (for example php-fpm) read their own `conf.d`
+directories and must be checked separately. The boot preflight above protects
+the CLI SAPI only.
