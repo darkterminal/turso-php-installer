@@ -70,6 +70,8 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Install the stable extension via the installer
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: php turso-php-installer install -n --php-version=8.4
 
       - name: Run helper tests
