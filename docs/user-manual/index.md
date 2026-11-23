@@ -14,7 +14,7 @@ It wraps the release binaries of the [Turso Client PHP](https://github.com/turso
 - Detects the PHP runtime version and picks the right release asset.
 - Downloads the prebuilt extension binary for `nts` or `ts`.
 - Points the installer at your `php.ini` and extension directory via `--php-ini` and `--extension-dir`.
-- Registers nothing by hand — the extension is loaded through the configured PHP runtime.
+- Writes an `extension=` line into the selected `php.ini`; each additional SAPI needs its own `conf.d` drop-in and a separate `php -m` check.
 
 ## Version channels
 
@@ -29,6 +29,9 @@ It wraps the release binaries of the [Turso Client PHP](https://github.com/turso
 - `token:create`, `token:show`, `token:delete`, `token:list`
 - `server:*` CA / peer certificate commands
 - `sqld:*` local sqld environment and daemon commands
+
+`update` refreshes the **libSQL extension**, not the installer CLI. Sail users
+pin the CLI version through the Composer constraint in the Dockerfile.
 
 ## Next steps
 

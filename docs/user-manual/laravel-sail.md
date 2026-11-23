@@ -7,6 +7,18 @@ eyebrow: Guides
 
 ## Laravel Sail Installation
 
+This guide assumes Laravel Sail is already installed in the Laravel app. In the
+examples below, `sail` means `./vendor/bin/sail`; either use that path directly
+or set an alias:
+
+```bash
+alias sail='sh $([ -f sail ] && echo sail || echo vendor/bin/sail)'
+```
+
+`sail artisan sail:publish` publishes the runtime files into the directory under
+`docker/` for your PHP version and rewrites the app's existing `compose.yaml`.
+It does not create the compose file and does not publish the `sail` binary.
+
 ## Publish Sail configuration files
 ```bash
 sail artisan sail:publish
@@ -278,3 +290,19 @@ sail exec laravel.test php -m | grep libsql
 Other SAPIs in the container (for example php-fpm) read their own `conf.d`
 directories and must be checked separately. The boot preflight above protects
 the CLI SAPI only.
+
+## Rollback
+
+To undo the Sail changes, in order:
+
+1. Restore the published `Dockerfile` from `sail artisan sail:publish`. This
+   drops the Turso-added version ARG, Composer pin, extension install, extra
+   `COPY` lines and custom entrypoint.
+2. Remove `PHP_VERSION` from `build.args` in `compose.yaml`.
+3. Remove `run_turso` and `sail-entrypoint` from the runtime directory under
+   `docker/`.
+4. Rebuild with `sail build --no-cache` and restart with `sail up`.
+5. If the extension was also installed on the host, run
+   `turso-php-installer uninstall` there.
+
+The extension lives inside the image, so no host binary directory needs deleting.

@@ -11,6 +11,9 @@ turso-php-installer update
 
 The update command refreshes the installed extension from the latest release of the configured source.
 
+> This updates the **libSQL extension**, not the installer CLI. Sail users pin
+> the CLI version through the Composer constraint in the Dockerfile.
+
 ## Next steps
 
 - [Install](/user-manual/install/)
