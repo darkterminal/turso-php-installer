@@ -34,6 +34,7 @@ Arti status: **BELUM MULAI** → **SEDANG JALAN** → **SELESAI**. Jika terhalan
 | [003](003-upstream-runtime-alignment.md) | Selaraskan Dockerfile dan compose dengan Sail 8.5; ekstensi di dalam image | Build mengikuti Sail masa kini, versi CLI tetap, tidak ada mount biner dari host | P1 | SELESAI | 002 |
 | [004](004-stub-ci-gates.md) | Jadikan pemeriksaan stub dan tautan sebagai bagian CI | Placeholder yang belum diganti dan tautan mati terdeteksi sebelum rilis | P2 | SELESAI | 003 |
 | [005](005-public-docs-sweep.md) | Rapikan dokumentasi publik: tautan, nama file, versi PHP, verifikasi, rollback | Pembaca baru tidak lagi menemui 404, nama file lama, atau janji yang menyesatkan | P2 | SELESAI | 004 |
+| [006](006-local-development-helpers.md) | Uji ulang helper lokal (`token:*`, `server:*`, `sqld:*`) dan dokumentasikan lengkap | Perintah pengembangan lokal teruji dan punya referensi lengkap: opsi, default, prasyarat, dan mode gagal | P1 | BELUM MULAI | 001, #30, #32 |
 
 ---
 
@@ -41,7 +42,10 @@ Arti status: **BELUM MULAI** → **SEDANG JALAN** → **SELESAI**. Jika terhalan
 
 ```
 001  →  002  →  003  →  004  →  005
+001  →  006   (setelah #30 dan #32 masuk)
 ```
+
+`006` berada di luar lingkup Sail: ia menguji dan mendokumentasikan helper pengembangan lokal. Ditambahkan setelah drop PHP 8.1 (#30) dan drop kanal unstable (#32) mengubah perilaku install/update yang dipakai bersama oleh helper tersebut.
 
 `002` harus mendahului `003`: menyalin Dockerfile Sail terbaru sebelum memutuskan siapa yang mengelola upgrade hanya akan memindahkan bug lama ke template baru. `004` dan `005` bisa dikerjakan bersamaan setelah `003`, tetapi tetap lebih aman berurutan.
 
