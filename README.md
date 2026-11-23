@@ -94,7 +94,9 @@ Full documentation is published on GitHub Pages: **<https://darkterminal.github.
 - [Install](https://darkterminal.github.io/turso-php-installer/user-manual/install/)
 - [Update](https://darkterminal.github.io/turso-php-installer/user-manual/update/)
 - [Uninstall](https://darkterminal.github.io/turso-php-installer/user-manual/uninstall/)
-- [Tokens and local development](https://darkterminal.github.io/turso-php-installer/user-manual/tokens/)
+- [Tokens & local development](https://darkterminal.github.io/turso-php-installer/user-manual/tokens/)
+- [Server certificates](https://darkterminal.github.io/turso-php-installer/user-manual/server-certificates/)
+- [sqld local environments](https://darkterminal.github.io/turso-php-installer/user-manual/sqld/)
 - [Laravel Sail guide](https://darkterminal.github.io/turso-php-installer/user-manual/laravel-sail/)
 
 Canonical Sail stubs live in [`stubs/sail/`](stubs/sail/README.md).

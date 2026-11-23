@@ -39,4 +39,9 @@ pin the CLI version through the Composer constraint in the Dockerfile.
 
 - [Getting started](/user-manual/getting-started/)
 - [Install](/user-manual/install/)
+- [Update](/user-manual/update/)
+- [Uninstall](/user-manual/uninstall/)
+- [Tokens & local development](/user-manual/tokens/)
+- [Server certificates](/user-manual/server-certificates/)
+- [sqld local environments](/user-manual/sqld/)
 - [Laravel Sail](/user-manual/laravel-sail/)

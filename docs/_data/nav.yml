@@ -16,6 +16,12 @@
 - title: Tokens & local development
   url: /user-manual/tokens/
   section: Local development
+- title: Server certificates
+  url: /user-manual/server-certificates/
+  section: Local development
+- title: sqld local environments
+  url: /user-manual/sqld/
+  section: Local development
 - title: Laravel Sail
   url: /user-manual/laravel-sail/
   section: Guides

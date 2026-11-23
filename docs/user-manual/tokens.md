@@ -5,58 +5,64 @@ section: Local development
 eyebrow: Local development
 ---
 
-## Create a database token
+Local development helpers live under the `token:*` namespace. They issue short-lived database tokens that the local `sqld` server uses to authenticate database traffic.
+
+## Prerequisites
+
+- The `turso-php-installer` CLI running on PHP 8.2 or newer.
+- The stable libSQL PHP extension installed for the running PHP version — the token store is a real `\LibSQL` database, so the extension must be present before any token command runs.
+
+## Commands
+
+### Create a database token
 
 ```bash
-turso-php-installer token:create <db-name>
+turso-php-installer token:create <db-name> [--expire=7]
 ```
 
-## Show a database token
+Creates a token for the given database name.
+
+- `--expire` — number of days until the token expires. Default: `7`.
+
+The command fails if a token for the same database name already exists.
+
+### Show a database token
 
 ```bash
-turso-php-installer token:show <db-name>
+turso-php-installer token:show <db-name> [--fat|--roa|--pkp|--pkb]
 ```
 
-Add `--fat`, `--roa`, `--pkp` or `--pkb` to read an individual token secret.
+Prints one of the token secrets:
 
-## Delete a database token
+- `--fat` — full access token.
+- `--roa` — read-only access token.
+- `--pkp` — public key PEM.
+- `--pkb` — public key base64.
+
+### Delete a database token
 
 ```bash
-turso-php-installer token:delete <db-name>
+turso-php-installer token:delete <db-name> [--all] [--f|force]
 ```
 
-## List all tokens
+Deletes the token for a database, or all tokens when `--all` is passed. `--f|force` skips the confirmation prompt.
+
+### List all tokens
 
 ```bash
 turso-php-installer token:list
 ```
 
-## Server commands
+Lists database names with expiration, creation and update timestamps.
 
-```bash
-turso-php-installer server:check
-turso-php-installer server:ca-cert-create
-turso-php-installer server:ca-cert-delete
-turso-php-installer server:ca-cert-list
-turso-php-installer server:ca-cert-show
-turso-php-installer server:ca-peer-cert-create
-turso-php-installer server:ca-peer-cert-delete
-turso-php-installer server:ca-peer-cert-list
-turso-php-installer server:ca-peer-cert-show
-turso-php-installer server:cert-store-get
-turso-php-installer server:cert-store-set [path]
-```
+## Token lifetime and storage
 
-## sqld commands
+- Default token lifetime is 7 days; override per token with `--expire`.
+- Tokens are stored in the installer's token database (a `\LibSQL` database file inside the install directory).
+- The full access token is what the local server presents to the database; the read-only token is the safe default for scripts.
 
-```bash
-turso-php-installer sqld:env-new <name>
-turso-php-installer sqld:env-list
-turso-php-installer sqld:env-show <name-or-id>
-turso-php-installer sqld:env-edit <env-id-or-name>
-turso-php-installer sqld:env-delete <name-or-id>
-turso-php-installer sqld:server-run <env-id-or-name> <db-name>
-turso-php-installer sqld:open-db <env-id-or-name> <db-name>
-turso-php-installer sqld:daemon-list
-turso-php-installer sqld:daemon-kill <daemon-pid>
-```
+## Failure modes
+
+- No installation record → `token:*` commands exit with an error telling the user to install the extension first.
+
+Observed during plan 006: create → list → show → delete round-trips against the real token store all passed, and both JWTs (full and read-only) verified against the stored Ed25519 public key.
