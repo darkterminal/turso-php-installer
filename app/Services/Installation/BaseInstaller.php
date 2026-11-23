@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use GuzzleHttp\Client;
+use InvalidArgumentException;
 use RuntimeException;
 
 use function Laravel\Prompts\info;
@@ -228,7 +229,7 @@ abstract class BaseInstaller implements Installer
         return $this->php_version = Str::of(PHP_VERSION)
             ->explode('.')
             ->slice(0, -1)
-            ->implode('.'); // e.g., 8.0, 8.1
+            ->implode('.'); // e.g., 8.2, 8.3
     }
 
     protected function getPhpIni(): string
@@ -400,6 +401,20 @@ abstract class BaseInstaller implements Installer
 
     public function setPhpVersion(string $php_version): void
     {
+        if (!in_array($php_version, SUPPORTED_PHP_VERSIONS, true)) {
+            $message = sprintf(
+                'PHP %s is not a supported install target. Supported versions: %s.',
+                $php_version,
+                implode(', ', SUPPORTED_PHP_VERSIONS),
+            );
+
+            if ($php_version === '8.1') {
+                $message .= ' PHP 8.1 support was dropped.';
+            }
+
+            throw new InvalidArgumentException($message);
+        }
+
         $this->php_version = $php_version;
     }
 
