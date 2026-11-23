@@ -26,6 +26,16 @@ STUB_NAMES = (
 
 PLACEHOLDER = re.compile(r"<[A-Za-z_][A-Za-z0-9_-]*>")
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+IMAGE_SRC = re.compile(r"<img[^>]+src=[\"']([^\"']+)[\"']")
+
+# Naming/URL leftovers from earlier project identities. They have appeared in
+# JavaScript, CSS comments and SVG labels — not only in Markdown — so the scan
+# below covers every text asset in docs/, not just the Markdown pages.
+STALE_TOKENS = (
+    "mylibsqladmin",
+    "tursodatabase/turso-php-installer",
+)
+TEXT_SUFFIXES = {".css", ".html", ".js", ".md", ".svg", ".txt", ".yml"}
 
 
 def fail(messages: list[str]) -> None:
@@ -90,6 +100,24 @@ def check_placeholders() -> None:
             if PLACEHOLDER.search(line) or "/etc/php/8.3/" in line:
                 problems.append(f"{path.relative_to(ROOT)}:{number}: unresolved placeholder or hardcoded PHP path: {line.strip()}")
 
+    public_files = [
+        ROOT / "README.md",
+        *sorted(
+            p
+            for p in (ROOT / "docs").rglob("*")
+            if p.is_file() and p.suffix.lower() in TEXT_SUFFIXES
+        ),
+        *sorted(p for p in (ROOT / "stubs").rglob("*") if p.is_file()),
+    ]
+    for path in public_files:
+        for number, line in enumerate(path.read_text().splitlines(), 1):
+            lowered = line.lower()
+            for token in STALE_TOKENS:
+                if token in lowered:
+                    problems.append(
+                        f"{path.relative_to(ROOT)}:{number}: stale reference ({token}): {line.strip()}"
+                    )
+
     if problems:
         fail(problems)
     print("OK: placeholders")
@@ -118,8 +146,27 @@ def resolve_link(linker: Path, target: str) -> bool:
     return any(candidate.is_file() for candidate in candidates)
 
 
+def resolve_image(linker: Path, target: str) -> bool:
+    if target.startswith(("http://", "https://", "data:")) or not target:
+        return True
+
+    # Jekyll templates resolve baseurl at render time; strip it for the
+    # offline check and resolve the remainder from the docs root.
+    if "{{ site.baseurl }}" in target:
+        relative = target.replace("{{ site.baseurl }}", "").lstrip("/")
+        base = ROOT / "docs"
+    else:
+        relative = target
+        base = linker.parent
+
+    return (base / relative.split("#", 1)[0]).is_file()
+
+
 def check_links() -> None:
-    files = [ROOT / "README.md", *sorted((ROOT / "docs").rglob("*.md"))]
+    files = [
+        ROOT / "README.md",
+        *sorted(p for p in (ROOT / "docs").rglob("*") if p.is_file() and p.suffix.lower() in {".html", ".md"}),
+    ]
     problems: list[str] = []
 
     for path in files:
@@ -127,6 +174,9 @@ def check_links() -> None:
             for target in MARKDOWN_LINK.findall(line):
                 if not resolve_link(path, target):
                     problems.append(f"{path.relative_to(ROOT)}:{number}: unresolved link: {target}")
+            for target in IMAGE_SRC.findall(line):
+                if not resolve_image(path, target):
+                    problems.append(f"{path.relative_to(ROOT)}:{number}: unresolved image: {target}")
 
     if problems:
         fail(problems)

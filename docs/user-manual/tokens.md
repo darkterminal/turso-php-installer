@@ -17,7 +17,7 @@ turso-php-installer token:create <db-name>
 turso-php-installer token:show <db-name>
 ```
 
-Add `--fat`, `--roa` or `--pkb` to read individual token secrets.
+Add `--fat`, `--roa`, `--pkp` or `--pkb` to read an individual token secret.
 
 ## Delete a database token
 
@@ -43,8 +43,8 @@ turso-php-installer server:ca-peer-cert-create
 turso-php-installer server:ca-peer-cert-delete
 turso-php-installer server:ca-peer-cert-list
 turso-php-installer server:ca-peer-cert-show
-turso-php-installer server:ca-peer-cert-store-get
-turso-php-installer server:ca-peer-cert-store-set
+turso-php-installer server:cert-store-get
+turso-php-installer server:cert-store-set [path]
 ```
 
 ## sqld commands
@@ -52,11 +52,11 @@ turso-php-installer server:ca-peer-cert-store-set
 ```bash
 turso-php-installer sqld:env-new <name>
 turso-php-installer sqld:env-list
-turso-php-installer sqld:env-show <id-or-name>
-turso-php-installer sqld:env-edit <id-or-name>
-turso-php-installer sqld:env-delete <id-or-name>
-turso-php-installer sqld:server-run <id-or-name>
-turso-php-installer sqld:open-db <id-or-name>
+turso-php-installer sqld:env-show <name-or-id>
+turso-php-installer sqld:env-edit <env-id-or-name>
+turso-php-installer sqld:env-delete <name-or-id>
+turso-php-installer sqld:server-run <env-id-or-name> <db-name>
+turso-php-installer sqld:open-db <env-id-or-name> <db-name>
 turso-php-installer sqld:daemon-list
-turso-php-installer sqld:daemon-kill
+turso-php-installer sqld:daemon-kill <daemon-pid>
 ```
