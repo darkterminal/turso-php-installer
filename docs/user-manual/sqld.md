@@ -12,6 +12,8 @@ The `sqld:*` namespace manages local database environments and the `sqld` daemon
 - The stable libSQL PHP extension installed for the running PHP version.
 - The `sqld` and `turso` binaries on `PATH` for daemon and shell commands.
 - A database token created via `token:create` before an environment can reference a database.
+- A controlling terminal for `sqld:open-db`; the command allocates a TTY and has no non-interactive mode.
+- Linux or macOS, or Windows through WSL. The `sqld:*` commands do not run on native Windows.
 
 ## Commands
 
@@ -51,7 +53,7 @@ turso-php-installer sqld:server-run <env-id-or-name> <db-name> [--d|daemon]
 turso-php-installer sqld:open-db <env-id-or-name> <db-name>
 ```
 
-Runs `turso db shell` against the local server. Requires an interactive TTY.
+Runs `turso db shell` against the local server. The command allocates a TTY, so it needs a controlling terminal: it works from an interactive shell but not in CI jobs, cron, or containers started without one (for example `docker exec` without `-t`). There is no non-interactive mode.
 
 ### Daemon lifecycle
 
@@ -70,7 +72,9 @@ turso-php-installer sqld:daemon-kill <daemon-pid>
 
 ## Failure modes
 
-- Missing `SQLD_DB_PATH` in a manually created environment → the server runner fails during startup instead of validating the environment first.
+- Missing `SQLD_DB_PATH` in a manually created environment → `sqld:server-run` rejects it before starting sqld, with an error naming the variable and pointing to `sqld:env-new` or `sqld:env-edit`.
+- `sqld:open-db` in a non-interactive runner → the shell cannot attach because there is no controlling TTY.
+- Any `sqld:*` command on native Windows → exits early with a message directing the user to WSL.
 - Both `SQLD_GRPC_LISTEN_ADDR` and `SQLD_PRIMARY_GRPC_URL` set → rejected with a mutual-exclusion error.
 - Daemon exits immediately after start → the CLI reports the exit and prints the daemon error log.
 
