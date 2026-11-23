@@ -1,8 +1,8 @@
-/* MylibSQLAdmin landing page — progressive enhancement only. */
+/* Turso PHP Installer landing page — progressive enhancement only. */
 (function () {
     "use strict";
 
-    var REPO = "darkterminal/mylibsqladmin";
+    var REPO = "darkterminal/turso-php-installer";
 
     /* ----------------------------------------------------------- theme */
     // Same storage key and attribute as the user manual, so a toggle here

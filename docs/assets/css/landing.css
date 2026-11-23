@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MylibSQLAdmin — landing page styles
+   Turso PHP Installer — landing page styles
    Self-contained companion to assets/css/site.css (the user manual).
    Same token names, same accent, same radius language — no CDN, no build step.
    ========================================================================== */
@@ -308,14 +308,13 @@ a:hover {
     line-height: 1;
 }
 
-/* The exact AppLogoIcon the application renders in its header. The asset is
-   black; invert it in dark mode to match the app's text-white variant. */
+/* The Turso Client PHP ecosystem logo used in the brand mark. It is a coloured
+   PNG with its own background, so dark mode must not invert it. */
 .brand__mark img {
-    width: 18px;
+    width: 20px;
     height: 20px;
-}
-[data-theme="dark"] .brand__mark img {
-    filter: invert(1);
+    border-radius: 4px;
+    object-fit: contain;
 }
 .brand__tag {
     margin-left: 4px;

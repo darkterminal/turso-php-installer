@@ -1,4 +1,4 @@
-/* MylibSQLAdmin docs — progressive enhancement only. */
+/* Turso PHP Installer docs — progressive enhancement only. */
 
 (function () {
     'use strict';

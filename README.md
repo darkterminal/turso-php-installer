@@ -1,11 +1,5 @@
 <p align="center">
-  <a href="https://discord.gg/turso">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://i.imgur.com/UhuW3zm.png">
-      <source media="(prefers-color-scheme: light)" srcset="https://i.imgur.com/vljWbfr.png">
-      <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="https://i.imgur.com/vGCC0I4.png">
-    </picture>
-  </a>
+  <img src="art/turso-php-installer-banner.png" alt="Turso PHP Installer — LibSQL extension installer for PHP" width="100%" />
 </p>
 
 # Turso PHP Installer
@@ -124,6 +118,10 @@ turso-php-installer uninstall
 ```bash
 turso-php-installer update
 ```
+
+This updates the **libSQL extension**, not the installer CLI. The CLI version is
+managed by Composer; Sail users pin it through the Composer constraint in the
+Dockerfile.
 
 ## Using Local LibSQL for Development
 
