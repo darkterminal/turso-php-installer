@@ -378,6 +378,26 @@ function is_absolute_path(string $path): bool
 }
 
 /**
+ * Headers for GitHub API requests.
+ *
+ * An optional token raises the unauthenticated rate limit from 60 to 5000
+ * requests per hour, which matters on shared CI runners. GH_TOKEN wins over
+ * GITHUB_TOKEN; both are optional so ordinary users keep the current behaviour.
+ */
+function github_api_headers(): array
+{
+    $headers = ['User-Agent' => USER_AGENT];
+
+    $token = trim((string) (getenv('GH_TOKEN') ?: getenv('GITHUB_TOKEN') ?: ''));
+
+    if ($token !== '') {
+        $headers['Authorization'] = 'Bearer ' . $token;
+    }
+
+    return $headers;
+}
+
+/**
  * Resolve the installer version from composer.json.
  *
  * build.sh bumps the composer.json version before building and box.json ships

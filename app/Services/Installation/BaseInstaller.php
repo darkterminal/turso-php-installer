@@ -58,7 +58,7 @@ abstract class BaseInstaller implements Installer
         $this->stubs_name = 'libsql_php.stubs.php';
         $this->custom_extension_directory = '';
 
-        $this->client = new Client(['headers' => ['User-Agent' => USER_AGENT]]);
+        $this->client = new Client(['headers' => github_api_headers()]);
     }
 
     protected function assetVersion(bool $shouldIncludeTS): string
