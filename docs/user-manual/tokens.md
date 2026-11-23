@@ -53,7 +53,7 @@ Deletes the token for a database, or all tokens when `--all` is passed. `--f|for
 turso-php-installer token:list
 ```
 
-Lists database names with expiration, creation and update timestamps.
+Lists tokens with their numeric `id`, database name, expiration, creation and update timestamps. The numeric id is the value to use as `DATABASE_TOKEN_ID` when creating a sqld environment.
 
 ## Token lifetime and storage
 
