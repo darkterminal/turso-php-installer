@@ -21,7 +21,7 @@
 **turso-php-installer** downloads the prebuilt [libSQL extension](https://github.com/tursodatabase/turso-client-php) for your PHP runtime and wires it into `php.ini`. It also ships local development helpers: database tokens, server certificates and local `sqld` environments.
 
 - Installs the NTS or TS build matching your PHP version
-- Stable channel from `tursodatabase/turso-client-php`, unstable from `pandanotabear/turso-client-php`
+- Stable releases only, from `tursodatabase/turso-client-php`
 - Interactive and non-interactive modes
 - Laravel Sail stubs with a fail-hard extension preflight
 
@@ -88,14 +88,14 @@ Other commands: `uninstall`, `update` (extension only, not the CLI), `version`, 
 
 ## Documentation
 
-Full documentation is published on GitHub Pages: **<https://tursodatabase.github.io/turso-php-installer/>**
+Full documentation is published on GitHub Pages: **<https://darkterminal.github.io/turso-php-installer/>**
 
-- [Getting started](https://tursodatabase.github.io/turso-php-installer/user-manual/getting-started/)
-- [Install](https://tursodatabase.github.io/turso-php-installer/user-manual/install/)
-- [Update](https://tursodatabase.github.io/turso-php-installer/user-manual/update/)
-- [Uninstall](https://tursodatabase.github.io/turso-php-installer/user-manual/uninstall/)
-- [Tokens and local development](https://tursodatabase.github.io/turso-php-installer/user-manual/tokens/)
-- [Laravel Sail guide](https://tursodatabase.github.io/turso-php-installer/user-manual/laravel-sail/)
+- [Getting started](https://darkterminal.github.io/turso-php-installer/user-manual/getting-started/)
+- [Install](https://darkterminal.github.io/turso-php-installer/user-manual/install/)
+- [Update](https://darkterminal.github.io/turso-php-installer/user-manual/update/)
+- [Uninstall](https://darkterminal.github.io/turso-php-installer/user-manual/uninstall/)
+- [Tokens and local development](https://darkterminal.github.io/turso-php-installer/user-manual/tokens/)
+- [Laravel Sail guide](https://darkterminal.github.io/turso-php-installer/user-manual/laravel-sail/)
 
 Canonical Sail stubs live in [`stubs/sail/`](stubs/sail/README.md).
 

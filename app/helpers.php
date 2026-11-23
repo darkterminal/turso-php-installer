@@ -121,15 +121,15 @@ function sqld_database_path(): string
 /**
  * Get the full path of the versioned installation directory.
  *
- * @param bool $isStable
+ * Only the stable channel exists, so there is no channel segment in the path.
+ *
  * @return string
  */
-function get_version_installation_dir(bool $isStable = true): string
+function get_version_installation_dir(): string
 {
     return collect([
         get_user_homedir(),
         'turso-client-php',
-        $isStable ? null : 'unstable',
         get_current_php_version(),
     ])->filter()->implode(DS);
 }

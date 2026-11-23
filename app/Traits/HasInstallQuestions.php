@@ -14,34 +14,19 @@ trait HasInstallQuestions
 {
     use RestrictedTrait;
 
-    private bool $usingStableVersion;
-
     public function askQuestions(Installer $installer): void
     {
         $this->ensureAllowedNamespace();
 
-        $this->isUsingStableVersion($installer)
-            ->isUsingThreadSafeVersion($installer)
+        // Only the stable release channel is offered; the unstable channel was
+        // removed, so there is no channel question to ask.
+        $this->isUsingThreadSafeVersion($installer)
             ->isUsingPhpIni($installer)
             ->isUsingCustomExtensionDir($installer)
             ->isUsingPhpVersion($installer);
 
         $installer->install();
         exit;
-    }
-
-    private function isUsingStableVersion(Installer $installer): self
-    {
-        $this->usingStableVersion = confirm(
-            label: 'Install the stable or unstable version of the extension?',
-            default: true,
-            yes: 'Stable',
-            no: 'Unstable',
-            hint: 'Stable = Production, Unstable = Development, default: Stable'
-        );
-        $installer->setUnstable(!$this->usingStableVersion);
-
-        return $this;
     }
 
     private function isUsingThreadSafeVersion(Installer $installer): self
@@ -90,13 +75,13 @@ trait HasInstallQuestions
             default: false,
             yes: 'Yes',
             no: 'No',
-            hint: 'default: No, using ' . get_version_installation_dir($this->usingStableVersion)
+            hint: 'default: No, using ' . get_version_installation_dir()
         );
         if ($usingCustomExtensionDir) {
             $extensionDirField = text(
                 label: 'Enter the path to the PHP extension directory',
                 placeholder: '/path/to/your/extensions/directory',
-                hint: 'default: ' . get_version_installation_dir($this->usingStableVersion)
+                hint: 'default: ' . get_version_installation_dir()
             );
             if (!empty($extensionDirField)) {
                 $installer->setExtensionDir($extensionDirField);
@@ -136,7 +121,7 @@ trait HasInstallQuestions
                 $replace_php_version_extension_dir = str_replace(
                     get_current_php_version(),
                     $choosePhpVersion,
-                    get_version_installation_dir($this->usingStableVersion)
+                    get_version_installation_dir()
                 );
 
                 $installer->setPhpIni($replace_current_version);

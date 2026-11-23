@@ -45,8 +45,6 @@ abstract class BaseInstaller implements Installer
 
     protected string $stubs_name;
 
-    protected bool $unstable = false;
-
     protected Client $client;
 
     public function __construct()
@@ -194,11 +192,6 @@ abstract class BaseInstaller implements Installer
             return $this->custom_extension_directory;
         }
 
-        if ($this->unstable) {
-            return collect([get_plain_installation_dir(), 'unstable', $this->getPHPVersion()])
-                ->implode(DIRECTORY_SEPARATOR);
-        }
-
         return collect([get_plain_installation_dir(), $this->getPHPVersion()])
             ->implode(DIRECTORY_SEPARATOR);
     }
@@ -208,11 +201,6 @@ abstract class BaseInstaller implements Installer
         if (!File::exists($this->extensionDirectory())) {
             File::makeDirectory($this->extensionDirectory(), 0755, true);
         }
-    }
-
-    protected function getUnstable(): bool
-    {
-        return $this->unstable;
     }
 
     protected function getThreadSafe(): bool
@@ -261,11 +249,8 @@ abstract class BaseInstaller implements Installer
             $response = $this->client->get(RELEASE_METADATA_LATEST_URL);
             $data = json_decode($response->getBody(), true);
 
-            $assetName = $this->unstable
-                ? 'unstable_release_metadata.json'
-                : 'release_metadata.json';
-
-            return 'https://github.com/tursodatabase/turso-client-php/releases/download/' . $data['tag_name'] . '/' . $assetName;
+            // Stable channel only: the unstable metadata asset switch was removed.
+            return 'https://github.com/tursodatabase/turso-client-php/releases/download/' . $data['tag_name'] . '/release_metadata.json';
         } catch (GuzzleException $e) {
             throw new RuntimeException('Failed to fetch repository metadata: ' . $e->getMessage());
         }
@@ -389,11 +374,6 @@ abstract class BaseInstaller implements Installer
         info('  ✅ libsql extension removed');
     }
 
-    public function setUnstable(bool $unstable): void
-    {
-        $this->unstable = $unstable;
-    }
-
     public function setPhpIni(string $php_ini): void
     {
         $this->php_ini = $php_ini;
@@ -470,7 +450,12 @@ abstract class BaseInstaller implements Installer
         if (File::exists($this->getMetadataLocationFile())) {
             $metadata = $this->getMetadata();
 
-            $this->setUnstable(!$metadata->get('stable'));
+            if ($metadata->get('stable') === false) {
+                throw new RuntimeException(
+                    'This installation was created from the unstable channel, which is no longer supported. ' .
+                    'Run `turso-php-installer uninstall`, then `turso-php-installer install` to move to the stable release.'
+                );
+            }
 
             $this->setPhpIni($metadata->get('php_ini'));
 

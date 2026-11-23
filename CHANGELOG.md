@@ -1,5 +1,6 @@
 ## [Unreleased]
 
+- feat(installation): drop the unstable channel — `--unstable` removed, stable releases only, legacy unstable installs must be reinstalled (#32) [Imam Ali Mustofa]
 - feat(installation): drop PHP 8.1 as an install target — single supported-version list, picker rebuilt from it, `--php-version=8.1` rejected with an actionable error (#30) [Imam Ali Mustofa]
 - docs(README): rewrite in the turso-client-php layout without emoji, link the GitHub Pages documentation (#30) [Imam Ali Mustofa]
 
