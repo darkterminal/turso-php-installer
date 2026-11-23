@@ -10,9 +10,16 @@
 
 # Turso PHP Installer
 
-This is the Turso/libSQL Extension for PHP installer script for Linux and MacOS. Make sure you already have PHP minimal version 8.2.
+This is the Turso/libSQL Extension for PHP installer script for Linux and macOS.
 
-> Release assets of the extension currently cover PHP **8.1–8.5** (NTS and TS builds) — the installer always reads the latest release automatically.
+| Item | Requirement |
+|---|---|
+| PHP needed to **run the installer CLI** | 8.2 or newer (`composer.json` requires `^8.2.0`) |
+| PHP versions with **prebuilt extension assets** | 8.1, 8.2, 8.3, 8.4, 8.5 (NTS and TS) |
+| How the installer selects an asset | Reads the latest GitHub release metadata and matches the target PHP version |
+
+Choosing 8.1 as the install target requires running the CLI itself on PHP 8.2+
+(for example, via a different PHP binary or another machine).
 
 ## Installation
 
@@ -85,23 +92,23 @@ turso-php-installer install
 
 By default the installer will install the **stable** version of libSQL Client from `tursodatabase/turso-client-php` release with NTS (Non Thread-Safe) build version.
 ```bash
-turso-php-installer install -n --php-version=8.3 --php-ini=/etc/php/<version>/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
+turso-php-installer install -n --php-version=8.3 --php-ini=/etc/php/8.3/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
 ```
 
 But, if you want to use the **unstable** version (which is the development) version of libSQL Client, the installer will install from another source `pandanotabear/turso-client-php` release with NTS (Non Thread-Safe) build version. (Btw, Panda is my another pet in GitHub)
 ```bash
-turso-php-installer install -n --unstable --php-version=8.3 --php-ini=/etc/php/<version>/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
+turso-php-installer install -n --unstable --php-version=8.3 --php-ini=/etc/php/8.3/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
 ```
 
 **PHP TS (Thread-Safe) Build**
 
 **Stable** version build - libSQL Client from `tursodatabase/turso-client-php` release with TS (Thread-Safe) build version.
 ```bash
-turso-php-installer install -n --thread-safe --php-version=8.3 --php-ini=/etc/php/<version>/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
+turso-php-installer install -n --thread-safe --php-version=8.3 --php-ini=/etc/php/8.3/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
 ```
 **Unstable** version build - libSQL Client, the installer will install from another source `pandanotabear/turso-client-php` release with TS (Thread-Safe) build version.
 ```bash
-turso-php-installer install -n --unstable --thread-safe --php-version=8.3 --php-ini=/etc/php/<version>/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
+turso-php-installer install -n --unstable --thread-safe --php-version=8.3 --php-ini=/etc/php/8.3/cli/php.ini --extension-dir=/path/to/your-custom/extensions/directory
 ```
 
 > See `turso-php-installer install --help`

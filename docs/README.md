@@ -28,7 +28,7 @@ turso-php-installer install --php-version=8.3
 
 ## Requirements
 
-- PHP >= 8.2 (release assets cover PHP 8.1–8.5, NTS and TS builds)
+- PHP >= 8.2 to **run the CLI** (`composer.json` requires `^8.2.0`); extension assets cover PHP 8.1, 8.2, 8.3, 8.4 and 8.5 (NTS and TS). Installing for 8.1 requires running the CLI itself on PHP 8.2+
 - Composer
 - Linux / macOS host (Windows: manual release download or WSL)
 
@@ -49,4 +49,6 @@ See [Laravel Sail guide](user-manual/laravel-sail.md).
 ```bash
 composer install
 vendor/bin/pest
+bash -n stubs/sail/run_turso stubs/sail/sail-entrypoint
+python3 scripts/check_docs.py
 ```
