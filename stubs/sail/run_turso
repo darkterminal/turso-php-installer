@@ -11,7 +11,7 @@ set -euo pipefail
 # Keep this path in sync with the Composer install location in the Dockerfile.
 TURSO_INSTALLER_BIN="/home/sail/.config/composer/vendor/bin/turso-php-installer"
 
-if ! php -m | grep -qi '^libsql$'; then
+if ! php -m | grep -qi '^libsql'; then
     echo "libSQL extension is not loaded by the container PHP SAPI." >&2
     echo "Check the extension= line and the conf.d drop-in for the selected PHP version." >&2
     exit 1
