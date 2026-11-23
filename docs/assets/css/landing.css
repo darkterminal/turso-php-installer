@@ -39,24 +39,26 @@
     --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
         "Liberation Mono", monospace;
 
-    --bg: #fafafa;
-    --surface: #ffffff;
-    --surface-2: #f4f4f5;
-    --surface-3: #ececef;
-    --border: #e4e4e7;
-    --border-strong: #d4d4d8;
-    --text: #18181b;
-    --muted: #52525b;
-    --faint: #71717a;
-    --accent: #2563eb;
-    --accent-soft: rgba(37, 99, 235, 0.08);
-    --accent-border: rgba(37, 99, 235, 0.32);
-    /* The product's primary button is near-black in light, near-white in
-       dark. The CTA follows the app rather than shouting in accent blue. */
-    --ink: #18181b;
-    --on-ink: #fafafa;
-    --shadow: 0 1px 2px rgba(9, 9, 11, 0.05),
-        0 20px 44px -26px rgba(9, 9, 11, 0.3);
+    /* Palette sampled from docs/images/turso-php-installer-logo.png:
+       amber tile #FCB61E, warm ink #17130C, engraving cream #FAF1E4. */
+    --bg: #fcf8f0;
+    --surface: #fffdf8;
+    --surface-2: #f5eddd;
+    --surface-3: #efe4cf;
+    --border: #e5d9c3;
+    --border-strong: #d6c6a8;
+    --text: #17130c;
+    --muted: #5c5344;
+    --faint: #6b6050;
+    --accent: #8a5a00;
+    --accent-soft: rgba(252, 182, 30, 0.16);
+    --accent-border: rgba(138, 90, 0, 0.32);
+    /* The primary button stays near-black in light and near-white in dark;
+       the amber accent is carried by links, marks and highlights. */
+    --ink: #17130c;
+    --on-ink: #fcf8f0;
+    --shadow: 0 1px 2px rgba(23, 19, 12, 0.05),
+        0 20px 44px -26px rgba(23, 19, 12, 0.3);
 
     --header-h: 64px;
     --radius-sm: 6px;
@@ -65,20 +67,20 @@
 }
 
 [data-theme="dark"] {
-    --bg: #09090b;
-    --surface: #101013;
-    --surface-2: #18181b;
-    --surface-3: #202024;
-    --border: #232327;
-    --border-strong: #303036;
-    --text: #ededf0;
-    --muted: #a1a1aa;
-    --faint: #8b8b93;
-    --accent: #60a5fa;
-    --accent-soft: rgba(96, 165, 250, 0.1);
-    --accent-border: rgba(96, 165, 250, 0.35);
-    --ink: #ededf0;
-    --on-ink: #09090b;
+    --bg: #0d0b08;
+    --surface: #15120c;
+    --surface-2: #1d1811;
+    --surface-3: #262017;
+    --border: #2b241a;
+    --border-strong: #3a3123;
+    --text: #faf1e4;
+    --muted: #c4b79f;
+    --faint: #9a8d77;
+    --accent: #fcb61e;
+    --accent-soft: rgba(252, 182, 30, 0.12);
+    --accent-border: rgba(252, 182, 30, 0.35);
+    --ink: #faf1e4;
+    --on-ink: #0d0b08;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.5),
         0 26px 64px -34px rgba(0, 0, 0, 0.9);
 }
