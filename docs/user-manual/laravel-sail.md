@@ -44,6 +44,13 @@ Select your preferred PHP version in the `docker` directory and add the shell
 scripts below inside that runtime directory. `PHP_VERSION` is the single version
 switch: it is set in the compose `build.args` and every snippet follows it.
 
+Canonical copies of the four Turso-authored files live in
+[`stubs/sail/`](https://github.com/darkterminal/turso-php-installer/tree/main/stubs/sail).
+The other three files used by the build — `start-container`, `supervisord.conf`
+and `php.ini` — are created by `sail artisan sail:publish` from the selected PHP
+runtime directory; they are not stored in this repository.
+
+<!-- BEGIN STUB: run_turso -->
 ```bash
 #!/usr/bin/env bash
 
@@ -72,6 +79,7 @@ fi
 echo "libSQL extension is loaded."
 exit 0
 ```
+<!-- END STUB: run_turso -->
 
 The installer CLI is pinned to a specific version by Composer when the image is
 built. The libSQL extension is installed into the image itself and is not
@@ -79,10 +87,11 @@ mounted from the host. This boot script only verifies that the extension is
 loaded; it does not download, install, or update anything. If the extension is
 missing, the container fails to start instead of continuing in a broken state.
 
-Replace the published `Dockerfile` in `docker/<php>/` with this one. `php.ini`
+Replace the published `Dockerfile` in the selected runtime directory with this one. `php.ini`
 comes from `sail artisan sail:publish`; the extension lives in `/opt/extensions`
 inside the image.
 
+<!-- BEGIN STUB: Dockerfile.fragment -->
 ```dockerfile
 FROM ubuntu:24.04
 
@@ -198,16 +207,19 @@ EXPOSE 80/tcp
 
 ENTRYPOINT ["/usr/local/bin/sail-entrypoint"]
 ```
+<!-- END STUB: Dockerfile.fragment -->
 
 Create one more small script beside the Dockerfile. It runs the preflight first,
 then hands arguments back to upstream's `start-container` unchanged.
 
+<!-- BEGIN STUB: sail-entrypoint -->
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
 /usr/local/bin/run_turso
 exec /usr/local/bin/start-container "$@"
 ```
+<!-- END STUB: sail-entrypoint -->
 
 Filename: `sail-entrypoint`.
 
@@ -215,6 +227,7 @@ Now edit the `compose.yaml` your Laravel app already has — `sail:publish`
 rewrites that file, it does not create a new one. Set `PHP_VERSION` in
 `build.args`; it drives both the context path and the Dockerfile ARG.
 
+<!-- BEGIN STUB: compose.fragment.yaml -->
 ```yml
 services:
     laravel.test:
@@ -244,6 +257,7 @@ networks:
     sail:
         driver: bridge
 ```
+<!-- END STUB: compose.fragment.yaml -->
 
 ## Build
 
