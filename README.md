@@ -94,6 +94,7 @@ Full documentation is published on GitHub Pages: **<https://darkterminal.github.
 - [Install](https://darkterminal.github.io/turso-php-installer/user-manual/install/)
 - [Update](https://darkterminal.github.io/turso-php-installer/user-manual/update/)
 - [Uninstall](https://darkterminal.github.io/turso-php-installer/user-manual/uninstall/)
+- [Local development workflow](https://darkterminal.github.io/turso-php-installer/user-manual/local-development-workflow/)
 - [Tokens & local development](https://darkterminal.github.io/turso-php-installer/user-manual/tokens/)
 - [Server certificates](https://darkterminal.github.io/turso-php-installer/user-manual/server-certificates/)
 - [sqld local environments](https://darkterminal.github.io/turso-php-installer/user-manual/sqld/)

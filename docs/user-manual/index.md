@@ -35,12 +35,20 @@ installation created from it must be uninstalled and reinstalled from stable.
 `update` refreshes the **libSQL extension**, not the installer CLI. Sail users
 pin the CLI version through the Composer constraint in the Dockerfile.
 
+## Local development workflow
+
+For a complete session — token, optional certificates, sqld environment, server,
+shell and cleanup — follow the
+[Local development workflow](/user-manual/local-development-workflow/). It shows
+the order of commands and links to each namespace reference.
+
 ## Next steps
 
 - [Getting started](/user-manual/getting-started/)
 - [Install](/user-manual/install/)
 - [Update](/user-manual/update/)
 - [Uninstall](/user-manual/uninstall/)
+- [Local development workflow](/user-manual/local-development-workflow/)
 - [Tokens & local development](/user-manual/tokens/)
 - [Server certificates](/user-manual/server-certificates/)
 - [sqld local environments](/user-manual/sqld/)

@@ -13,6 +13,9 @@
 - title: Update
   url: /user-manual/update/
   section: Guide
+- title: Local development workflow
+  url: /user-manual/local-development-workflow/
+  section: Local development
 - title: Tokens & local development
   url: /user-manual/tokens/
   section: Local development

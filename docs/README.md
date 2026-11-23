@@ -13,8 +13,8 @@ turso-php-installer install --php-version=8.3
 
 ## Where the documentation lives
 
-- [Landing page](https://tursodatabase.github.io/turso-php-installer/)
-- [User manual](https://tursodatabase.github.io/turso-php-installer/user-manual/)
+- [Landing page](https://darkterminal.github.io/turso-php-installer/)
+- [User manual](https://darkterminal.github.io/turso-php-installer/user-manual/)
 - Source: [`turso-client-php`](https://github.com/tursodatabase/turso-client-php)
 
 ## Support this Project
