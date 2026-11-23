@@ -20,5 +20,5 @@ test('the version command succeeds and prints the installer banner', function ()
     $exit = Artisan::call('version');
 
     expect($exit)->toBe(0)
-        ->and(Artisan::output())->toContain('Turso libSQL Installer (version:');
+        ->and(Artisan::output())->toMatch('/Turso libSQL Installer \(version: \d+\.\d+\.\d+\)/');
 });
