@@ -105,7 +105,6 @@ abstract class BaseInstaller implements Installer
     protected function downloadExtension(): void
     {
         $path = $this->extensionDirectory();
-        $this->rememberInstallationDirectory();
 
         $request = spin(
             message: 'Getting the latest version of the extension...',
@@ -184,6 +183,11 @@ abstract class BaseInstaller implements Installer
         }
 
         $asset->removeArchive();
+
+        // Only record the installation once the extension has actually been
+        // downloaded and extracted — a failed download must not leave a
+        // metadata.json behind that marks the install as present.
+        $this->rememberInstallationDirectory();
     }
 
     protected function extensionDirectory(): string
