@@ -63,6 +63,13 @@ class RunSqldServer extends Command
 
         $dbToken = $token->getRawToken($dbName, "public_key_pem");
 
+        // Fail fast on an incomplete environment instead of crashing deep in
+        // the runner with an undefined-key error.
+        if (empty($result['variables']['SQLD_DB_PATH'])) {
+            $this->error(' 🚫 The environment is missing the required variable SQLD_DB_PATH. Recreate it with `sqld:env-new` or edit it via `sqld:env-edit`.');
+            exit(1);
+        }
+
         // the signing key lives with the environment's data (install dir),
         // not in the shared /tmp; the dir is ensured for the database and
         // the daemon logs before anything writes into it
