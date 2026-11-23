@@ -1,0 +1,43 @@
+name: Docs checks
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "README.md"
+      - "stubs/**"
+      - "scripts/check_docs.py"
+      - ".github/workflows/docs-checks.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "README.md"
+      - "stubs/**"
+      - "scripts/check_docs.py"
+      - ".github/workflows/docs-checks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Lint Sail shell stubs
+        run: bash -n stubs/sail/run_turso stubs/sail/sail-entrypoint
+
+      - name: Check stubs, placeholders and documentation links
+        run: python3 scripts/check_docs.py

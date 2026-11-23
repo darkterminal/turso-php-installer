@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# Filename: run_turso
+#
+# Preflight only. The installer CLI version is pinned by Composer at image
+# build time and the libSQL extension is owned by the image. Nothing is
+# downloaded or updated at boot; a missing extension fails the container.
+
+set -euo pipefail
+
+# Keep this path in sync with the Composer install location in the Dockerfile.
+TURSO_INSTALLER_BIN="/home/sail/.config/composer/vendor/bin/turso-php-installer"
+
+if ! php -m | grep -qi '^libsql$'; then
+    echo "libSQL extension is not loaded by the container PHP SAPI." >&2
+    echo "Check the extension= line and the conf.d drop-in for the selected PHP version." >&2
+    exit 1
+fi
+
+# Diagnostic only: never parsed and never used as an update trigger.
+if [ -x "$TURSO_INSTALLER_BIN" ]; then
+    "$TURSO_INSTALLER_BIN" version || true
+fi
+
+echo "libSQL extension is loaded."
+exit 0

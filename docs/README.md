@@ -42,7 +42,7 @@ turso-php-installer install
 
 ## Laravel Sail
 
-See [Laravel Sail guide](/docs/laravel-sail.md).
+See [Laravel Sail guide](user-manual/laravel-sail.md).
 
 ## Development
 

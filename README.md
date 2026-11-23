@@ -22,7 +22,7 @@ composer global require darkterminal/turso-php-installer
 
 ## Laravel Sail
 
-Copy and Paste the stubs from [here](/docs/laravel-sail.md)
+Copy and Paste the stubs from [here](docs/user-manual/laravel-sail.md)
 
 ----
 
