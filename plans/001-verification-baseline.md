@@ -211,6 +211,11 @@ contains a SemVer-shaped token. **Do not assert a specific version number** —
 the checkout deliberately has a stale baked PHAR version (2.2.2) versus tag
 2.2.3; asserting either would make the test break on the next release.
 
+Also accept the literal token `unreleased`: `actions/checkout` defaults to a
+shallow clone, so `git describe --tags --abbrev=0` fails in CI and Laravel Zero
+falls back to `unreleased` (confirmed by a red CI run during implementation).
+The pattern is therefore `(?:\d+\.\d+\.\d+|unreleased)`.
+
 **Verify**: `vendor/bin/pest --colors=never --filter="version command"` → pass.
 
 ## Test plan
