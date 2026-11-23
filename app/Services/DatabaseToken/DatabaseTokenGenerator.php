@@ -317,6 +317,7 @@ MSG;
      * Shows all generated database tokens.
      *
      * This method will display a table with the following columns:
+     *  - id: The numeric token id used by sqld environments (DATABASE_TOKEN_ID).
      *  - db_name: The name of the database.
      *  - expired_at: The date and time the token will expire. Also shows the time difference between now and expiration date.
      *  - created_at: The date and time the token was created.
@@ -328,10 +329,11 @@ MSG;
     {
         $store = $this->tokenStore->query(sql_file('get_all_database_token'))->fetchArray(\LibSQL::LIBSQL_ASSOC);
         echo table(
-            ['db_name', 'expired_at', 'created_at', 'updated_at'],
+            ['id', 'db_name', 'expired_at', 'created_at', 'updated_at'],
             collect($store)->map(function ($item) {
                 $date_expiration = Carbon::parse($item['created_at'])->setTimezone(config('app.timezone'))->addDays($item['expiration_day']);
                 return [
+                    'id' => (int) $item['id'],
                     'db_name' => $item['db_name'],
                     'expired_at' => $date_expiration->format('Y-m-d H:i:s') . ' (' . $date_expiration->diffForHumans() . ')',
                     'created_at' => $item['created_at'],
