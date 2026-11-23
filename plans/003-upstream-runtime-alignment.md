@@ -341,9 +341,11 @@ Stop and report back (do not improvise) if:
 ## Maintenance notes
 
 - This stub intentionally rewrites the whole upstream Dockerfile, so it will
-  drift again. Plan 004 mitigates that with real stub files plus a CI check that
-  re-fetches upstream and diffs the non-Turso lines. Until plan 004 lands, a
-  maintainer should re-run step 1 before each release.
+  drift again. Plan 004 put the four Turso-owned files in `stubs/sail/` and added
+  a CI check for stub/doc drift, placeholders and local links — it does **not**
+  re-fetch upstream or diff upstream-owned lines. A maintainer must still re-run
+  step 1 before each release. Adding an upstream drift check to CI would be a
+  separate change.
 - The `PHP_VERSION` ARG is a deliberate deviation from upstream (which encodes
   the version in the runtime directory name). If upstream switches to its own
   version ARG, drop ours and use theirs — but keep the single-source-of-truth
