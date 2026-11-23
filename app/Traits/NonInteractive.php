@@ -17,10 +17,6 @@ trait NonInteractive
         
         if ($this->option('no-interaction')) {
 
-            if ($this->option('unstable')) {
-                $installer->setUnstable(true);
-            }
-
             if ($this->option('thread-safe')) {
                 $installer->setThreadSafe();
             }

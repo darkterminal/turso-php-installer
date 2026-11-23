@@ -19,7 +19,6 @@ class InstallTursoExtension extends Command
      * @var string
      */
     protected $signature = 'install 
-        {--unstable : Install the unstable version from development repository} 
         {--thread-safe : Install the Thread Safe (TS) version}
         {--php-ini= : Specify the php.ini file}
         {--php-version= : Specify the PHP version}

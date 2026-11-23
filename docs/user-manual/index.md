@@ -7,7 +7,7 @@ eyebrow: Product guide
 
 The **Turso PHP Installer** is the Composer package and console CLI that installs the **LibSQL PHP extension** for your PHP application.
 
-It wraps the release binaries of the [Turso Client PHP](https://github.com/tursodatabase/turso-client-php) project — or the unstable line published under `pandanotabear/turso-client-php` — and wires the correct NTS/TS build into your PHP runtime.
+It wraps the stable release binaries of the [Turso Client PHP](https://github.com/tursodatabase/turso-client-php) project and wires the correct NTS/TS build into your PHP runtime.
 
 ## What the installer does
 
@@ -16,12 +16,14 @@ It wraps the release binaries of the [Turso Client PHP](https://github.com/turso
 - Points the installer at your `php.ini` and extension directory via `--php-ini` and `--extension-dir`.
 - Writes an `extension=` line into the selected `php.ini`; each additional SAPI needs its own `conf.d` drop-in and a separate `php -m` check.
 
-## Version channels
+## Release channel
 
 | Channel | Source | Use |
 |---|---|---|
-| Stable | `tursodatabase/turso-client-php` releases | Production / default |
-| Unstable | `pandanotabear/turso-client-php` releases | Development builds |
+| Stable | `tursodatabase/turso-client-php` releases | The only channel the installer offers |
+
+The unstable channel was removed. `--unstable` is no longer an option, and an
+installation created from it must be uninstalled and reinstalled from stable.
 
 ## Command surface
 

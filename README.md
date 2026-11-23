@@ -21,7 +21,7 @@
 **turso-php-installer** downloads the prebuilt [libSQL extension](https://github.com/tursodatabase/turso-client-php) for your PHP runtime and wires it into `php.ini`. It also ships local development helpers: database tokens, server certificates and local `sqld` environments.
 
 - Installs the NTS or TS build matching your PHP version
-- Stable channel from `tursodatabase/turso-client-php`, unstable from `pandanotabear/turso-client-php`
+- Stable releases only, from `tursodatabase/turso-client-php`
 - Interactive and non-interactive modes
 - Laravel Sail stubs with a fail-hard extension preflight
 
