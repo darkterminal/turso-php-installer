@@ -31,7 +31,7 @@ Arti status: **BELUM MULAI** → **SEDANG JALAN** → **SELESAI**. Jika terhalan
 |----|---------------------|----------------------|-----------|--------|---------------|
 | [001](001-verification-baseline.md) | Pasang gerbang tes otomatis dan uji perilaku instalasi | Perubahan pada Sail tidak lagi lolos diam-diam; ada perintah tes satu langkah | P1 | SELESAI | — |
 | [002](002-sail-preflight.md) | Ganti pengecekan versi yang salah dengan pemeriksaan ekstensi yang gagal keras | Container tidak lagi menyala dalam keadaan ekstensi hilang; tidak ada unduhan tiap boot | P1 | SELESAI | 001 |
-| [003](003-upstream-runtime-alignment.md) | Selaraskan Dockerfile dan compose dengan Sail 8.5; ekstensi di dalam image | Build mengikuti Sail masa kini, versi CLI tetap, tidak ada mount biner dari host | P1 | BELUM MULAI | 002 |
+| [003](003-upstream-runtime-alignment.md) | Selaraskan Dockerfile dan compose dengan Sail 8.5; ekstensi di dalam image | Build mengikuti Sail masa kini, versi CLI tetap, tidak ada mount biner dari host | P1 | SELESAI | 002 |
 | [004](004-stub-ci-gates.md) | Jadikan pemeriksaan stub dan tautan sebagai bagian CI | Placeholder yang belum diganti dan tautan mati terdeteksi sebelum rilis | P2 | BELUM MULAI | 003 |
 | [005](005-public-docs-sweep.md) | Rapikan dokumentasi publik: tautan, nama file, versi PHP, verifikasi, rollback | Pembaca baru tidak lagi menemui 404, nama file lama, atau janji yang menyesatkan | P2 | BELUM MULAI | 004 |
 
