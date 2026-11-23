@@ -27,6 +27,31 @@ const USER_AGENT = 'darkterminal';
  */
 const DS = DIRECTORY_SEPARATOR;
 
+/**
+ * PHP versions the installer will target.
+ *
+ * Single source of truth for the interactive picker and for validating
+ * --php-version. PHP 8.1 was dropped: the CLI itself requires ^8.2.0 and the
+ * installer no longer offers or accepts 8.1 as an install target.
+ */
+const SUPPORTED_PHP_VERSIONS = ['8.2', '8.3', '8.4', '8.5'];
+
+/**
+ * Select options for the interactive PHP version picker, keyed by version.
+ *
+ * @return array<string, string>
+ */
+function php_version_options(): array
+{
+    $options = [];
+
+    foreach (SUPPORTED_PHP_VERSIONS as $version) {
+        $options[$version] = 'PHP ' . $version;
+    }
+
+    return $options;
+}
+
 function useTokenDatabaseStore(): \LibSQL
 {
     $databaseFileName = get_plain_installation_dir() . DS . "tokens.db";

@@ -7,9 +7,9 @@ eyebrow: First run
 
 ## Requirements
 
-- PHP >= 8.2 to **run the installer CLI** (`composer.json` requires `^8.2.0`); extension assets cover PHP 8.1, 8.2, 8.3, 8.4 and 8.5 (NTS and TS). To install for PHP 8.1, run the CLI itself on PHP 8.2+
+- PHP >= 8.2 to **run the installer CLI** (`composer.json` requires `^8.2.0`); install targets are PHP 8.2, 8.3, 8.4 and 8.5 (NTS and TS). PHP 8.1 support was dropped
 - Composer
-- Linux / macOS host (Windows: see the [FAQ in the repository README](https://github.com/darkterminal/turso-php-installer#faq) — manual release download or WSL)
+- Linux / macOS host. On Windows, use WSL or download the extension binary manually from the [Turso Client PHP releases](https://github.com/tursodatabase/turso-client-php/releases)
 
 ## 1. Install the installer
 

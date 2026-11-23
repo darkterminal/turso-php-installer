@@ -1,4 +1,4 @@
-# 📚 Turso PHP Installer Documentation
+# Turso PHP Installer Documentation
 
 The **Turso PHP Installer** is the Composer package and Laravel Zero CLI that installs the **LibSQL PHP extension** for PHP applications.
 
@@ -28,7 +28,7 @@ turso-php-installer install --php-version=8.3
 
 ## Requirements
 
-- PHP >= 8.2 to **run the CLI** (`composer.json` requires `^8.2.0`); extension assets cover PHP 8.1, 8.2, 8.3, 8.4 and 8.5 (NTS and TS). Installing for 8.1 requires running the CLI itself on PHP 8.2+
+- PHP >= 8.2 to **run the CLI** (`composer.json` requires `^8.2.0`); install targets are PHP 8.2, 8.3, 8.4 and 8.5 (NTS and TS). PHP 8.1 support was dropped
 - Composer
 - Linux / macOS host (Windows: manual release download or WSL)
 
