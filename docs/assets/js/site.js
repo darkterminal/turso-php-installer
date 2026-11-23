@@ -13,14 +13,8 @@
         button.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
     }
 
-    function syncFavicon() {
-        var isDark = root.getAttribute('data-theme') === 'dark';
-        var icon = document.getElementById('site-favicon');
-        var shortcut = document.querySelector('link[rel="shortcut icon"]');
-        var base = root.getAttribute('data-baseurl') || '';
-        if (icon) icon.href = isDark ? base + '/favicon-dark-32.png' : base + '/favicon-light-32.png';
-        if (shortcut) shortcut.href = isDark ? base + '/favicon-dark.ico' : base + '/favicon-light.ico';
-    }
+    /* The favicon is a single coloured logo mark, so it does not change with
+       the page theme. */
 
     document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
         button.addEventListener('click', function () {
@@ -28,12 +22,10 @@
             root.setAttribute('data-theme', next);
             try { localStorage.setItem('docs-theme', next); } catch (e) { /* private mode */ }
             syncThemeButton();
-            syncFavicon();
         });
     });
 
     syncThemeButton();
-    syncFavicon();
 
     /* -------------------------------------------------------------- sidebar */
     var sidebar = document.querySelector('[data-sidebar]');

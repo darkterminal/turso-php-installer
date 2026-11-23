@@ -18,11 +18,8 @@
                 theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
             );
         }
-        var icon = document.getElementById("site-favicon");
-        var shortcut = document.querySelector('link[rel="shortcut icon"]');
-        var base = root.getAttribute("data-baseurl") || "";
-        if (icon) icon.href = theme === "dark" ? base + "/favicon-dark-32.png" : base + "/favicon-light-32.png";
-        if (shortcut) shortcut.href = theme === "dark" ? base + "/favicon-dark.ico" : base + "/favicon-light.ico";
+        /* The favicon is a single coloured logo mark; it does not change with
+           the page theme. */
     }
 
     if (toggle) {

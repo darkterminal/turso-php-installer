@@ -27,6 +27,8 @@ STUB_NAMES = (
 PLACEHOLDER = re.compile(r"<[A-Za-z_][A-Za-z0-9_-]*>")
 MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 IMAGE_SRC = re.compile(r"<img[^>]+src=[\"']([^\"']+)[\"']")
+LINK_TAG = re.compile(r"<link\b[^>]*>")
+HTML_ATTR = re.compile(r"([\w-]+)=(?:\"([^\"]*)\"|'([^']*)')")
 
 # Naming/URL leftovers from earlier project identities. They have appeared in
 # JavaScript, CSS comments and SVG labels — not only in Markdown — so the scan
@@ -150,10 +152,15 @@ def resolve_image(linker: Path, target: str) -> bool:
     if target.startswith(("http://", "https://", "data:")) or not target:
         return True
 
-    # Jekyll templates resolve baseurl at render time; strip it for the
-    # offline check and resolve the remainder from the docs root.
-    if "{{ site.baseurl }}" in target:
-        relative = target.replace("{{ site.baseurl }}", "").lstrip("/")
+    # Jekyll resolves URLs at render time. Both forms used by this site —
+    # {{ site.baseurl }}/path and {{ '/path' | relative_url }} — address the
+    # docs root, so strip the template and resolve from there.
+    if "{{" in target:
+        quoted = re.search(r"['\"]([^'\"]+)['\"]", target)
+        if quoted:
+            relative = quoted.group(1).lstrip("/")
+        else:
+            relative = target.replace("{{ site.baseurl }}", "").lstrip("/")
         base = ROOT / "docs"
     else:
         relative = target
@@ -177,6 +184,16 @@ def check_links() -> None:
             for target in IMAGE_SRC.findall(line):
                 if not resolve_image(path, target):
                     problems.append(f"{path.relative_to(ROOT)}:{number}: unresolved image: {target}")
+            for tag in LINK_TAG.findall(line):
+                attrs = {
+                    name: double or single
+                    for name, double, single in HTML_ATTR.findall(tag)
+                }
+                if "icon" in attrs.get("rel", "") and attrs.get("href"):
+                    if not resolve_image(path, attrs["href"]):
+                        problems.append(
+                            f"{path.relative_to(ROOT)}:{number}: unresolved icon: {attrs['href']}"
+                        )
 
     if problems:
         fail(problems)

@@ -9,19 +9,23 @@
     --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
         "Liberation Mono", monospace;
 
-    --bg: #fafafa;
-    --bg-elevated: #ffffff;
-    --bg-subtle: #f4f4f5;
-    --border: #e4e4e7;
-    --border-strong: #d4d4d8;
-    --text: #18181b;
-    --text-muted: #52525b;
-    --text-faint: #71717a;
-    --accent: #2563eb;
-    --accent-soft: rgba(37, 99, 235, 0.08);
-    --accent-border: rgba(37, 99, 235, 0.35);
-    --code-bg: #f4f4f5;
-    --shadow: 0 1px 2px rgba(9, 9, 11, 0.06), 0 8px 24px -12px rgba(9, 9, 11, 0.18);
+    /* Palette sampled from docs/images/turso-php-installer-logo.png:
+       amber tile #FCB61E, warm ink #17130C, engraving cream #FAF1E4.
+       Light mode uses cream surfaces and a deep amber accent that keeps
+       WCAG AA contrast; the bright logo amber is reserved for dark mode. */
+    --bg: #fcf8f0;
+    --bg-elevated: #fffdf8;
+    --bg-subtle: #f5eddd;
+    --border: #e5d9c3;
+    --border-strong: #d6c6a8;
+    --text: #17130c;
+    --text-muted: #5c5344;
+    --text-faint: #6b6050;
+    --accent: #8a5a00;
+    --accent-soft: rgba(252, 182, 30, 0.16);
+    --accent-border: rgba(138, 90, 0, 0.35);
+    --code-bg: #f5eddd;
+    --shadow: 0 1px 2px rgba(23, 19, 12, 0.06), 0 8px 24px -12px rgba(23, 19, 12, 0.18);
 
     --header-h: 64px;
     --sidebar-w: 268px;
@@ -30,18 +34,18 @@
 }
 
 [data-theme="dark"] {
-    --bg: #09090b;
-    --bg-elevated: #101013;
-    --bg-subtle: #18181b;
-    --border: #232327;
-    --border-strong: #303036;
-    --text: #ededf0;
-    --text-muted: #a1a1aa;
-    --text-faint: #8b8b93;
-    --accent: #60a5fa;
-    --accent-soft: rgba(96, 165, 250, 0.1);
-    --accent-border: rgba(96, 165, 250, 0.35);
-    --code-bg: #17171b;
+    --bg: #0d0b08;
+    --bg-elevated: #15120c;
+    --bg-subtle: #1d1811;
+    --border: #2b241a;
+    --border-strong: #3a3123;
+    --text: #faf1e4;
+    --text-muted: #c4b79f;
+    --text-faint: #9a8d77;
+    --accent: #fcb61e;
+    --accent-soft: rgba(252, 182, 30, 0.12);
+    --accent-border: rgba(252, 182, 30, 0.35);
+    --code-bg: #1a150e;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 16px 40px -20px rgba(0, 0, 0, 0.8);
 }
 
@@ -610,19 +614,19 @@ img {
 }
 
 .callout--warn {
-    border-left-color: #d97706;
+    border-left-color: #b45309;
 }
 
 .callout--warn .callout__title {
-    color: #d97706;
+    color: #b45309;
 }
 
 [data-theme="dark"] .callout--warn {
-    border-left-color: #fbbf24;
+    border-left-color: #f59e0b;
 }
 
 [data-theme="dark"] .callout--warn .callout__title {
-    color: #fbbf24;
+    color: #f59e0b;
 }
 
 .callout--danger {
@@ -631,6 +635,14 @@ img {
 
 .callout--danger .callout__title {
     color: #dc2626;
+}
+
+[data-theme="dark"] .callout--danger {
+    border-left-color: #f87171;
+}
+
+[data-theme="dark"] .callout--danger .callout__title {
+    color: #f87171;
 }
 
 /* Role cards */
@@ -957,7 +969,7 @@ img {
 .highlight .c,
 .highlight .c1,
 .highlight .cm {
-    color: #71717a;
+    color: var(--text-faint);
 }
 
 .highlight .k,
@@ -974,12 +986,12 @@ img {
 
 .highlight .mi,
 .highlight .mf {
-    color: #fbbf24;
+    color: #fcb61e;
 }
 
 .highlight .na,
 .highlight .nv {
-    color: #60a5fa;
+    color: #e8927c;
 }
 
 [data-theme="light"] .highlight .k,
@@ -996,10 +1008,10 @@ img {
 
 [data-theme="light"] .highlight .mi,
 [data-theme="light"] .highlight .mf {
-    color: #b45309;
+    color: #8a5a00;
 }
 
 [data-theme="light"] .highlight .na,
 [data-theme="light"] .highlight .nv {
-    color: #1d4ed8;
+    color: #b4432c;
 }
