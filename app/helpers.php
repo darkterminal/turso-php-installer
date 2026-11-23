@@ -376,3 +376,31 @@ function is_absolute_path(string $path): bool
 
     return false;
 }
+
+/**
+ * Resolve the installer version from composer.json.
+ *
+ * build.sh bumps the composer.json version before building and box.json ships
+ * that file inside the PHAR, so it is the authoritative source. The git tag
+ * is only a fallback: distributed artifacts have no .git directory, and the
+ * nearest reachable tag in a checkout can lag behind the package version.
+ */
+function installer_version(): string
+{
+    $path = base_path('composer.json');
+
+    if (is_file($path)) {
+        $composer = json_decode(file_get_contents($path), true);
+
+        if (
+            is_array($composer)
+            && isset($composer['version'])
+            && is_string($composer['version'])
+            && $composer['version'] !== ''
+        ) {
+            return $composer['version'];
+        }
+    }
+
+    return app('git.version');
+}
