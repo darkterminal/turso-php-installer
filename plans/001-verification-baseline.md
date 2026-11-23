@@ -61,10 +61,12 @@ command will turn red. This plan builds the safety net first.
   subclass or reflection; no container binding exists.
 - `app/ValueObjects/Asset.php:36-44` — `from()` picks a `getenv('HOME') . '/.tmp'`
   temp dir when `/home/sail` exists, otherwise `sys_get_temp_dir()`.
-- `composer validate --strict --no-check-publish` currently reports: valid, but
-  "The lock file is not up to date with the latest changes in composer.json".
-  It also warns the `version` field is present — **do not remove that field**,
-  `build.sh:21` reads `.version` from composer.json to compute release versions.
+- `composer validate --strict --no-check-publish --no-check-version` currently
+  reports: valid, but "The lock file is not up to date with the latest changes
+  in composer.json". `--no-check-version` is required because the repo keeps a
+  `version` field in composer.json, and `--strict` turns that warning into exit
+  code 1; **do not remove that field**, `build.sh:21` reads `.version` from
+  composer.json to compute release versions.
 
 Repo conventions to honor:
 - Commit messages are conventional: `fix(docs): …`, `docs: …`, `chore: …`,
@@ -77,7 +79,7 @@ Repo conventions to honor:
 |---------|---------|---------------------|
 | Install deps | `composer install` | exit 0 |
 | Tests | `vendor/bin/pest --colors=never` | all pass |
-| Composer sanity | `composer validate --strict --no-check-publish` | "valid", no lock-file error |
+| Composer sanity | `composer validate --strict --no-check-publish --no-check-version` | "valid", no lock-file error |
 | Git state | `git status --short -b` | only in-scope files changed |
 
 **Do NOT use `vendor/bin/pint --test` as a gate.** Verified on 2026-11-23: it
@@ -122,7 +124,7 @@ of scope. Pint may be mentioned in docs as optional, never as a required check.
 
 Run `composer update --lock --no-install --no-interaction`.
 
-**Verify**: `composer validate --strict --no-check-publish` → output contains
+**Verify**: `composer validate --strict --no-check-publish --no-check-version` → output contains
 "valid" and no longer contains "The lock file is not up to date". The remaining
 "version field is present" warning is acceptable and expected. `git diff --stat
 composer.lock` should show a small metadata/hash change, not a mass upgrade.
@@ -139,7 +141,7 @@ Create `.github/workflows/tests.yml` matching the existing style (PHP 8.3 in
 `shivammathur/setup-php@v2` with `php-version: '8.3'` and `coverage: none`,
 `composer install --no-interaction --prefer-dist`, then
 `vendor/bin/pest --colors=never`. Optionally add
-`composer validate --strict --no-check-publish` as a second check; both must be
+`composer validate --strict --no-check-publish --no-check-version` as a second check; both must be
 non-blocking only if they are already non-blocking locally — they are not, so
 make both blocking.
 
@@ -224,7 +226,7 @@ the checkout deliberately has a stale baked PHAR version (2.2.2) versus tag
 ## Done criteria
 
 - [ ] `composer update --lock --no-install --no-interaction` run; `composer
-      validate --strict --no-check-publish` reports "valid" with no lock error
+      validate --strict --no-check-publish --no-check-version` reports "valid" with no lock error
 - [ ] `.github/workflows/tests.yml` exists and runs Pest + Composer validation
       on push/PR to `main`
 - [ ] `vendor/bin/pest --colors=never` exits 0 with the original 2 tests plus

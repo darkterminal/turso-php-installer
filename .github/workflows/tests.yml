@@ -44,7 +44,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Validate composer metadata
-        run: composer validate --strict --no-check-publish
+        run: composer validate --strict --no-check-publish --no-check-version
 
       - name: Run tests
         run: vendor/bin/pest --colors=never
