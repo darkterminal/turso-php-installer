@@ -1,0 +1,33 @@
+title: Turso PHP Installer
+tagline: The LibSQL PHP extension installer
+description: >-
+  Turso PHP Installer is the Composer package and Laravel Zero CLI that
+  installs the native LibSQL PHP extension — open flags, fetch modes,
+  transactions and offline writes for PHP applications.
+url: https://tursodatabase.github.io
+baseurl: /turso-php-installer
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+permalink: pretty
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - .jekyll-cache
+  - _site
+
+defaults:
+  - scope:
+      path: "user-manual"
+    values:
+      layout: manual

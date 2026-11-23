@@ -1,0 +1,21 @@
+- title: Overview
+  url: /user-manual/
+  section: Introduction
+- title: Getting started
+  url: /user-manual/getting-started/
+  section: Introduction
+- title: Install
+  url: /user-manual/install/
+  section: Guide
+- title: Uninstall
+  url: /user-manual/uninstall/
+  section: Guide
+- title: Update
+  url: /user-manual/update/
+  section: Guide
+- title: Tokens & local development
+  url: /user-manual/tokens/
+  section: Local development
+- title: Laravel Sail
+  url: /user-manual/laravel-sail/
+  section: Guides

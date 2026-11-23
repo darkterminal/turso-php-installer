@@ -1,4 +1,11 @@
-# Laravel Sail Installation
+---
+title: Laravel Sail
+description: Install the LibSQL PHP extension inside a Laravel Sail container with the Turso PHP Installer.
+section: Guides
+eyebrow: Guides
+---
+
+## Laravel Sail Installation
 
 ## Publish Sail configuration files
 ```bash
