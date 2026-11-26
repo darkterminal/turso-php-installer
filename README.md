@@ -1,4 +1,10 @@
 <p align="center">
+  <a href="https://discord.gg/9eAaMnJtfY">
+    <img src="art/support-my-work-banner.png" alt="Support my work - Turso PHP Ecosystem" width="1000">
+  </a>
+</p>
+
+<p align="center">
   <img alt="Turso PHP Installer" src="art/turso-php-installer-banner.png" width="800">
 </p>
 
